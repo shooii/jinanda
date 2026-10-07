@@ -8,6 +8,14 @@
   src: url("./assets/LingoPodsSans.woff2") format("woff2");
 }
 
+@font-face {
+  font-family: "Manrope";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("./assets/LingoPodsSans.woff2") format("woff2");
+}
+
 :root {
   --ink: oklch(0.18 0.03 258);
   --muted: oklch(0.52 0.025 258);
@@ -76,18 +84,18 @@ button {
   height: 2.125rem;
   display: grid;
   place-items: center;
-  border-radius: 0.7rem;
+  border-radius: var(--radius-md);
   color: var(--navy);
   background: var(--lime);
-  font-family: "Manrope", sans-serif;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
   font-weight: 800;
   transform: none;
 }
 
 .wordmark,
 .story-brand {
-  font-family: "Manrope", sans-serif;
-  font-size: 1.06rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-lg);
   font-weight: 800;
   letter-spacing: -0.03em;
 }
@@ -101,7 +109,7 @@ button {
   border: 1px solid var(--line);
   border-radius: 999rem;
   background: var(--surface);
-  font-size: 0.78rem;
+  font-size: var(--fs-sm);
   font-weight: 700;
   cursor: pointer;
 }
@@ -123,7 +131,7 @@ button {
   margin: 0 0.9rem;
   padding: 1.7rem 1.25rem 1.15rem;
   overflow: hidden;
-  border-radius: 2rem;
+  border-radius: var(--radius-xl);
   color: var(--surface);
   background:
     radial-gradient(circle at 94% 5%, oklch(0.43 0.09 251) 0%, transparent 38%),
@@ -141,8 +149,8 @@ button {
   align-items: center;
   gap: 0.35rem;
   color: var(--soft-muted);
-  font-family: "Manrope", sans-serif;
-  font-size: 0.64rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-xs);
   font-weight: 800;
   letter-spacing: 0.11em;
 }
@@ -160,7 +168,7 @@ button {
 
 .hero-copy h1 {
   margin: 0.8rem 0 0.75rem;
-  font-family: "Manrope", sans-serif;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
   font-size: clamp(2rem, 9vw, 2.65rem);
   line-height: 1.02;
   letter-spacing: -0.06em;
@@ -169,7 +177,7 @@ button {
 .hero-copy p {
   margin: 0;
   color: oklch(0.82 0.025 258);
-  font-size: 0.83rem;
+  font-size: var(--fs-sm);
   line-height: 1.5;
 }
 
@@ -198,7 +206,7 @@ button {
   top: 2.7rem;
   width: 1.2rem;
   height: 4.4rem;
-  border-radius: 0 0 1rem 1rem;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   background: linear-gradient(90deg, oklch(0.67 0.03 258), oklch(0.94 0.01 258));
 }
 
@@ -244,7 +252,7 @@ button {
   height: 0.7rem;
   border: 0.12rem solid var(--lime);
   border-bottom: 0;
-  border-radius: 1rem 1rem 0 0;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
 .signal-two {
@@ -266,7 +274,7 @@ button {
   margin-top: 2rem;
   padding: 0.8rem;
   border: 0;
-  border-radius: 1.2rem;
+  border-radius: var(--radius-lg);
   color: var(--ink);
   background: var(--lime);
   text-align: left;
@@ -294,13 +302,13 @@ button {
 }
 
 .start-button strong {
-  font-family: "Manrope", sans-serif;
-  font-size: 0.94rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-md);
 }
 
 .start-button small {
   margin-top: 0.18rem;
-  font-size: 0.7rem;
+  font-size: var(--fs-xs);
   opacity: 0.68;
 }
 
@@ -320,8 +328,8 @@ button {
 .empty-view h2,
 .membership-sheet h2 {
   margin: 0.2rem 0 0;
-  font-family: "Manrope", sans-serif;
-  font-size: 1.25rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-xl);
   letter-spacing: -0.04em;
 }
 
@@ -330,7 +338,7 @@ button {
   border: 0;
   color: var(--muted);
   background: transparent;
-  font-size: 0.77rem;
+  font-size: var(--fs-sm);
   font-weight: 700;
   cursor: pointer;
 }
@@ -359,7 +367,7 @@ button {
   position: relative;
   padding: 0.85rem;
   border: 1px solid var(--line);
-  border-radius: 1.25rem;
+  border-radius: var(--radius-lg);
   background: var(--surface);
   text-align: left;
   cursor: pointer;
@@ -378,7 +386,7 @@ button {
   display: grid;
   place-items: center;
   margin-bottom: auto;
-  border-radius: 0.85rem;
+  border-radius: var(--radius-md);
   color: var(--navy);
   background: var(--surface-soft);
 }
@@ -393,14 +401,14 @@ button {
 }
 
 .mode-card strong {
-  font-family: "Manrope", sans-serif;
-  font-size: 0.86rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-sm);
 }
 
 .mode-card small {
   margin-top: 0.16rem;
   color: var(--muted);
-  font-size: 0.66rem;
+  font-size: var(--fs-xs);
 }
 
 .new-tag {
@@ -411,8 +419,8 @@ button {
   border-radius: 999rem;
   color: var(--navy);
   background: var(--lime);
-  font-family: "Manrope", sans-serif;
-  font-size: 0.52rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-2xs);
   font-weight: 800;
 }
 
@@ -431,7 +439,7 @@ button {
   max-height: 91dvh;
   padding: 1rem 1rem 1.5rem;
   overflow-y: auto;
-  border-radius: 2rem 2rem 0 0;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   background: var(--paper);
   animation: editor-rise 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -463,23 +471,23 @@ button {
 }
 
 .editor-header strong {
-  font-family: "Manrope", "PingFang SC", sans-serif;
-  font-size: 0.95rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-md);
 }
 
 .editor-header small {
   margin-top: 0.15rem;
   color: var(--muted);
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
 }
 
 .editor-save {
   padding: 0.55rem 0.8rem;
   border: 0;
-  border-radius: 0.7rem;
+  border-radius: var(--radius-md);
   color: var(--surface);
   background: var(--navy);
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
   font-weight: 700;
 }
 
@@ -490,10 +498,10 @@ button {
   gap: 0.45rem;
   margin: 1rem 0;
   padding: 0.65rem 0.75rem;
-  border-radius: 0.8rem;
+  border-radius: var(--radius-md);
   color: var(--navy-light);
   background: var(--lime-soft);
-  font-size: 0.62rem;
+  font-size: var(--fs-xs);
 }
 
 .editor-hint svg {
@@ -501,7 +509,7 @@ button {
 }
 
 .editor-hint b {
-  font-family: "Manrope", sans-serif;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
 .editor-section {
@@ -516,8 +524,8 @@ button {
 }
 
 .editor-section-title > span {
-  font-family: "Manrope", "PingFang SC", sans-serif;
-  font-size: 0.72rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-xs);
   font-weight: 800;
 }
 
@@ -527,7 +535,7 @@ button {
   border: 0;
   color: var(--muted);
   background: transparent;
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
 }
 
 .shortcut-list {
@@ -543,7 +551,7 @@ button {
   gap: 0.6rem;
   padding: 0.55rem 0.65rem;
   border: 1px solid var(--line);
-  border-radius: 0.95rem;
+  border-radius: var(--radius-md);
   background: var(--surface);
 }
 
@@ -556,7 +564,7 @@ button {
   height: 2.5rem;
   display: grid;
   place-items: center;
-  border-radius: 0.75rem;
+  border-radius: var(--radius-md);
   color: var(--navy);
   background: var(--lime-soft);
 }
@@ -567,13 +575,13 @@ button {
 }
 
 .edit-row-copy strong {
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
 }
 
 .edit-row-copy small {
   margin-top: 0.15rem;
   color: var(--muted);
-  font-size: 0.55rem;
+  font-size: var(--fs-2xs);
 }
 
 .order-actions {
@@ -637,9 +645,9 @@ button {
   gap: 0.35rem;
   padding: 1rem;
   border: 1px dashed var(--line);
-  border-radius: 0.9rem;
+  border-radius: var(--radius-md);
   color: var(--muted);
-  font-size: 0.62rem;
+  font-size: var(--fs-xs);
 }
 
 .saved-toast {
@@ -655,7 +663,7 @@ button {
   color: var(--surface);
   background: var(--navy);
   box-shadow: var(--shadow);
-  font-size: 0.65rem;
+  font-size: var(--fs-xs);
   transform: translateX(-50%);
   animation: toast-in 220ms ease-out;
 }
@@ -670,7 +678,7 @@ button {
   gap: 0.8rem;
   margin: 1.6rem 1rem 0;
   padding: 1.05rem;
-  border-radius: 1.4rem;
+  border-radius: var(--radius-lg);
   color: var(--surface);
   background: var(--navy);
 }
@@ -680,7 +688,7 @@ button {
   height: 2.65rem;
   display: grid;
   place-items: center;
-  border-radius: 0.85rem;
+  border-radius: var(--radius-md);
   color: var(--navy);
   background: var(--lime);
 }
@@ -691,15 +699,15 @@ button {
 
 .pro-card h3 {
   margin: 0.35rem 0;
-  font-family: "Manrope", sans-serif;
-  font-size: 0.94rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-md);
   letter-spacing: -0.03em;
 }
 
 .pro-card p {
   margin: 0;
   color: oklch(0.77 0.026 258);
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
   line-height: 1.45;
 }
 
@@ -708,7 +716,7 @@ button {
   gap: 0.6rem;
   margin-top: 0.8rem;
   color: oklch(0.74 0.024 258);
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
 }
 
 .pro-meta span {
@@ -731,7 +739,7 @@ button {
 }
 
 .recent-section .section-heading h2 {
-  font-size: 1.05rem;
+  font-size: var(--fs-lg);
 }
 
 .recent-row {
@@ -752,7 +760,7 @@ button {
   height: 2.5rem;
   display: grid;
   place-items: center;
-  border-radius: 0.75rem;
+  border-radius: var(--radius-md);
   background: var(--surface-soft);
 }
 
@@ -762,13 +770,13 @@ button {
 }
 
 .recent-row strong {
-  font-size: 0.82rem;
+  font-size: var(--fs-sm);
 }
 
 .recent-row small {
   margin-top: 0.22rem;
   color: var(--muted);
-  font-size: 0.61rem;
+  font-size: var(--fs-xs);
 }
 
 .summary-badge {
@@ -776,7 +784,7 @@ button {
   border-radius: 999rem;
   color: var(--navy-light);
   background: var(--lime-soft);
-  font-size: 0.55rem;
+  font-size: var(--fs-2xs);
   font-weight: 700;
 }
 
@@ -791,7 +799,7 @@ button {
   grid-template-columns: repeat(4, 1fr);
   padding: 0.42rem;
   border: 1px solid oklch(1 0 0 / 0.65);
-  border-radius: 1.6rem;
+  border-radius: var(--radius-xl);
   background: oklch(1 0 0 / 0.9);
   box-shadow: 0 0.5rem 2rem oklch(0.2 0.03 258 / 0.12);
   backdrop-filter: blur(1.2rem);
@@ -804,14 +812,14 @@ button {
   justify-content: center;
   gap: 0.2rem;
   border: 0;
-  border-radius: 1.2rem;
+  border-radius: var(--radius-lg);
   color: var(--soft-muted);
   background: transparent;
   cursor: pointer;
 }
 
 .bottom-nav button span {
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
   font-weight: 700;
 }
 
@@ -837,7 +845,7 @@ button {
   display: grid;
   place-items: center;
   margin-bottom: 1rem;
-  border-radius: 1.3rem;
+  border-radius: var(--radius-lg);
   color: var(--navy);
   background: var(--lime);
 }
@@ -846,7 +854,7 @@ button {
   max-width: 18rem;
   margin: 0.6rem 0 1.5rem;
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   line-height: 1.5;
 }
 
@@ -854,11 +862,11 @@ button {
   width: 100%;
   padding: 0.95rem 1.2rem;
   border: 0;
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   color: var(--surface);
   background: var(--navy);
-  font-family: "Manrope", sans-serif;
-  font-size: 0.82rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-sm);
   font-weight: 800;
   cursor: pointer;
 }
@@ -877,7 +885,7 @@ button {
   position: relative;
   width: 100%;
   padding: 1rem 1.4rem 1.6rem;
-  border-radius: 2rem 2rem 0 0;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   background: var(--paper);
   animation: rise 260ms ease-out;
 }
@@ -916,14 +924,14 @@ button {
 .membership-sheet h2 {
   max-width: 18rem;
   margin-top: 0.4rem;
-  font-size: 1.7rem;
+  font-size: var(--fs-4xl);
   line-height: 1.12;
 }
 
 .sheet-intro {
   margin: 0.65rem 0 1.2rem;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: var(--fs-sm);
   line-height: 1.5;
 }
 
@@ -940,7 +948,7 @@ button {
   gap: 0.8rem;
   padding: 0.8rem;
   border: 1px solid var(--line);
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   background: var(--surface);
 }
 
@@ -954,13 +962,13 @@ button {
 }
 
 .benefit-list strong {
-  font-size: 0.78rem;
+  font-size: var(--fs-sm);
 }
 
 .benefit-list small {
   margin-top: 0.18rem;
   color: var(--muted);
-  font-size: 0.65rem;
+  font-size: var(--fs-xs);
 }
 
 .renewal-note {
@@ -968,7 +976,7 @@ button {
   margin-top: 0.7rem;
   color: var(--soft-muted);
   text-align: center;
-  font-size: 0.62rem;
+  font-size: var(--fs-xs);
 }
 
 .live-session {
@@ -1001,8 +1009,8 @@ button {
 
 .live-header strong {
   display: block;
-  font-family: "Manrope", sans-serif;
-  font-size: 0.95rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-md);
 }
 
 .live-status {
@@ -1012,7 +1020,7 @@ button {
   gap: 0.3rem;
   margin-top: 0.2rem;
   color: oklch(0.76 0.028 258);
-  font-size: 0.62rem;
+  font-size: var(--fs-xs);
 }
 
 .live-status i {
@@ -1035,25 +1043,25 @@ button {
   gap: 0.75rem;
   margin-bottom: 2.5rem;
   color: oklch(0.79 0.025 258);
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
   font-weight: 700;
 }
 
 .phrase {
   max-width: 92%;
   padding: 1rem;
-  border-radius: 1.25rem;
+  border-radius: var(--radius-lg);
 }
 
 .phrase small {
   color: oklch(0.72 0.03 258);
-  font-size: 0.61rem;
+  font-size: var(--fs-xs);
 }
 
 .phrase p {
   margin: 0.55rem 0 0;
-  font-family: "Manrope", sans-serif;
-  font-size: 1rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-lg);
   line-height: 1.45;
 }
 
@@ -1104,7 +1112,7 @@ button {
 .listening-wave span {
   width: 0.18rem;
   height: 1rem;
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   background: var(--lime);
   animation: wave 900ms infinite alternate ease-in-out;
 }
@@ -1132,7 +1140,7 @@ button {
   gap: 0.35rem;
   margin-bottom: 1.1rem;
   color: oklch(0.72 0.03 258);
-  font-size: 0.62rem;
+  font-size: var(--fs-xs);
 }
 
 .session-note svg {
@@ -1159,7 +1167,7 @@ button {
 .live-controls > span {
   margin-top: 0.65rem;
   color: oklch(0.67 0.02 258);
-  font-size: 0.62rem;
+  font-size: var(--fs-xs);
 }
 
 .feature-flow {
@@ -1184,14 +1192,14 @@ button {
 }
 
 .feature-header strong {
-  font-family: "Manrope", "PingFang SC", sans-serif;
-  font-size: 0.95rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-md);
 }
 
 .feature-header small {
   margin-top: 0.15rem;
   color: var(--muted);
-  font-size: 0.55rem;
+  font-size: var(--fs-2xs);
 }
 
 .feature-back,
@@ -1220,7 +1228,7 @@ button {
   align-items: center;
   padding: 1.25rem 1rem 1rem;
   overflow: hidden;
-  border-radius: 1.5rem;
+  border-radius: var(--radius-lg);
   color: var(--surface);
   background:
     radial-gradient(circle at 50% 0%, oklch(0.43 0.1 252), transparent 43%),
@@ -1279,7 +1287,7 @@ button {
 
 .person small {
   color: oklch(0.68 0.03 258);
-  font-size: 0.53rem;
+  font-size: var(--fs-2xs);
 }
 
 .voice-route {
@@ -1335,15 +1343,15 @@ button {
 
 .dialogue-preview h1 {
   margin: 0.45rem 0 0.3rem;
-  font-family: "Manrope", "PingFang SC", sans-serif;
-  font-size: 1.35rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-2xl);
   letter-spacing: -0.04em;
 }
 
 .dialogue-preview > p {
   margin: 0;
   color: oklch(0.73 0.03 258);
-  font-size: 0.63rem;
+  font-size: var(--fs-xs);
 }
 
 .smart-route {
@@ -1354,7 +1362,7 @@ button {
   padding-top: 0.7rem;
   border-top: 1px solid oklch(1 0 0 / 0.1);
   color: oklch(0.68 0.03 258);
-  font-size: 0.5rem;
+  font-size: var(--fs-2xs);
 }
 
 .smart-route span:first-child {
@@ -1369,7 +1377,7 @@ button {
   margin-top: 0.65rem;
   padding: 0.25rem 0.75rem;
   border: 1px solid var(--line);
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   background: var(--surface);
 }
 
@@ -1390,10 +1398,10 @@ button {
   height: 2rem;
   display: grid;
   place-items: center;
-  border-radius: 0.6rem;
+  border-radius: var(--radius-sm);
   color: var(--surface);
   background: var(--teal);
-  font-size: 0.6rem;
+  font-size: var(--fs-xs);
   font-weight: 700;
 }
 
@@ -1411,12 +1419,12 @@ button {
 
 .dialogue-language-card small {
   color: var(--muted);
-  font-size: 0.5rem;
+  font-size: var(--fs-2xs);
 }
 
 .dialogue-language-card strong {
   margin-top: 0.12rem;
-  font-size: 0.66rem;
+  font-size: var(--fs-xs);
 }
 
 .language-swap {
@@ -1444,13 +1452,13 @@ button {
 
 .dialogue-section-head h2 {
   margin: 0.18rem 0 0;
-  font-family: "Manrope", "PingFang SC", sans-serif;
-  font-size: 0.95rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-md);
 }
 
 .dialogue-section-head > span {
   color: var(--muted);
-  font-size: 0.52rem;
+  font-size: var(--fs-2xs);
 }
 
 .dialogue-modes {
@@ -1467,7 +1475,7 @@ button {
   gap: 0.65rem;
   padding: 0.65rem;
   border: 1px solid var(--line);
-  border-radius: 0.9rem;
+  border-radius: var(--radius-md);
   background: var(--surface);
   text-align: left;
   transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
@@ -1479,7 +1487,7 @@ button {
   height: 4.5rem;
   display: block;
   overflow: hidden;
-  border-radius: 0.75rem;
+  border-radius: var(--radius-md);
   background:
     radial-gradient(circle at 50% 0%, oklch(0.91 0.06 189), transparent 56%),
     var(--surface-soft);
@@ -1529,7 +1537,7 @@ button {
   width: 1.75rem;
   height: 1.35rem;
   display: block;
-  border-radius: 0.85rem 0.85rem 0.3rem 0.3rem;
+  border-radius: var(--radius-md) var(--radius-md) 0.3rem 0.3rem;
   background: var(--navy-light);
 }
 
@@ -1543,7 +1551,7 @@ button {
   bottom: 0;
   left: 0;
   color: var(--muted);
-  font-size: 0.4rem;
+  font-size: var(--fs-2xs);
   text-align: center;
 }
 
@@ -1706,14 +1714,14 @@ button {
 }
 
 .dialogue-mode-card strong {
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
 }
 
 .dialogue-mode-card small {
   max-width: 13rem;
   margin-top: 0.14rem;
   color: var(--muted);
-  font-size: 0.52rem;
+  font-size: var(--fs-2xs);
 }
 
 .dialogue-mode-card > b {
@@ -1724,7 +1732,7 @@ button {
   border-radius: 999rem;
   color: var(--navy);
   background: var(--lime);
-  font-size: 0.45rem;
+  font-size: var(--fs-2xs);
 }
 
 .mode-radio {
@@ -1755,7 +1763,7 @@ button {
   gap: 0.6rem;
   margin-top: 0.65rem;
   padding: 0.65rem;
-  border-radius: 0.85rem;
+  border-radius: var(--radius-md);
   color: var(--navy-light);
   background: var(--lime-soft);
 }
@@ -1766,13 +1774,13 @@ button {
 }
 
 .dialogue-privacy strong {
-  font-size: 0.6rem;
+  font-size: var(--fs-xs);
 }
 
 .dialogue-privacy small {
   margin-top: 0.12rem;
   color: var(--muted);
-  font-size: 0.5rem;
+  font-size: var(--fs-2xs);
 }
 
 .dialogue-start-bar {
@@ -1804,13 +1812,13 @@ button {
 }
 
 .dialogue-start-bar strong {
-  font-size: 0.62rem;
+  font-size: var(--fs-xs);
 }
 
 .dialogue-start-bar small {
   margin-top: 0.1rem;
   color: var(--muted);
-  font-size: 0.48rem;
+  font-size: var(--fs-2xs);
 }
 
 .dialogue-start-bar > button {
@@ -1819,10 +1827,10 @@ button {
   gap: 0.4rem;
   padding: 0.75rem 1rem;
   border: 0;
-  border-radius: 0.8rem;
+  border-radius: var(--radius-md);
   color: var(--navy);
   background: var(--lime);
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
   font-weight: 800;
 }
 
@@ -1837,7 +1845,7 @@ button {
   align-items: center;
   padding: 1.5rem 1rem 1.2rem;
   overflow: hidden;
-  border-radius: 1.5rem;
+  border-radius: var(--radius-lg);
   color: var(--surface);
   background:
     radial-gradient(circle at 80% 0%, oklch(0.4 0.1 254), transparent 38%),
@@ -1852,7 +1860,7 @@ button {
   display: grid;
   place-items: center;
   margin-bottom: 1rem;
-  border-radius: 1.2rem;
+  border-radius: var(--radius-lg);
   color: var(--navy);
   background: var(--lime);
 }
@@ -1861,7 +1869,7 @@ button {
   position: absolute;
   inset: -0.35rem;
   border: 1px solid var(--lime);
-  border-radius: 1.5rem;
+  border-radius: var(--radius-lg);
   opacity: 0;
 }
 
@@ -1880,8 +1888,8 @@ button {
 
 .meeting-status-card h1 {
   margin: 0.45rem 0 0.35rem;
-  font-family: "Manrope", "PingFang SC", sans-serif;
-  font-size: 1.35rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-2xl);
   letter-spacing: -0.04em;
 }
 
@@ -1889,7 +1897,7 @@ button {
   max-width: 17rem;
   margin: 0;
   color: oklch(0.74 0.03 258);
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
   line-height: 1.55;
 }
 
@@ -1902,7 +1910,7 @@ button {
   border-radius: 999rem;
   color: oklch(0.8 0.025 258);
   background: oklch(1 0 0 / 0.08);
-  font-size: 0.6rem;
+  font-size: var(--fs-xs);
 }
 
 .meeting-benefits {
@@ -1918,7 +1926,7 @@ button {
   gap: 0.75rem;
   padding: 0.75rem;
   border: 1px solid var(--line);
-  border-radius: 0.9rem;
+  border-radius: var(--radius-md);
   background: var(--surface);
 }
 
@@ -1926,7 +1934,7 @@ button {
   width: 2.3rem;
   height: 2.3rem;
   padding: 0.55rem;
-  border-radius: 0.7rem;
+  border-radius: var(--radius-md);
   color: var(--teal);
   background: oklch(0.95 0.04 189);
 }
@@ -1937,20 +1945,20 @@ button {
 }
 
 .meeting-benefits strong {
-  font-size: 0.7rem;
+  font-size: var(--fs-xs);
 }
 
 .meeting-benefits small {
   margin-top: 0.15rem;
   color: var(--muted);
-  font-size: 0.55rem;
+  font-size: var(--fs-2xs);
 }
 
 .live-transcript-card {
   margin-top: 0.8rem;
   padding: 0.85rem;
   border: 1px solid var(--line);
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   background: var(--surface);
   animation: content-appear 300ms ease-out;
 }
@@ -1965,7 +1973,7 @@ button {
   padding-bottom: 0.7rem;
   border-bottom: 1px solid var(--line);
   color: var(--muted);
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
 }
 
 .transcript-head span {
@@ -2000,10 +2008,10 @@ button {
   height: 1.8rem;
   display: grid;
   place-items: center;
-  border-radius: 0.55rem;
+  border-radius: var(--radius-sm);
   color: var(--surface);
   background: var(--teal);
-  font-size: 0.6rem;
+  font-size: var(--fs-xs);
 }
 
 .speaker-b {
@@ -2012,18 +2020,18 @@ button {
 
 .speaker-line small {
   color: var(--soft-muted);
-  font-size: 0.52rem;
+  font-size: var(--fs-2xs);
 }
 
 .speaker-line p {
   margin: 0.25rem 0;
-  font-size: 0.67rem;
+  font-size: var(--fs-xs);
   line-height: 1.45;
 }
 
 .speaker-line div > span {
   color: var(--teal);
-  font-size: 0.62rem;
+  font-size: var(--fs-xs);
   line-height: 1.4;
 }
 
@@ -2070,13 +2078,13 @@ button {
 
 .meeting-controls strong {
   margin-top: 0.55rem;
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
 }
 
 .meeting-controls small {
   margin-top: 0.15rem;
   color: var(--muted);
-  font-size: 0.52rem;
+  font-size: var(--fs-2xs);
 }
 
 .travel-content {
@@ -2087,7 +2095,7 @@ button {
   position: relative;
   padding: 1.3rem;
   overflow: hidden;
-  border-radius: 1.4rem;
+  border-radius: var(--radius-lg);
   color: var(--surface);
   background:
     radial-gradient(circle at 100% 0%, oklch(0.49 0.12 188), transparent 38%),
@@ -2106,14 +2114,14 @@ button {
 
 .offline-hero h1 {
   margin: 0.5rem 0 0.35rem;
-  font-family: "Manrope", "PingFang SC", sans-serif;
-  font-size: 1.35rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-2xl);
 }
 
 .offline-hero p {
   margin: 0;
   color: oklch(0.75 0.03 258);
-  font-size: 0.64rem;
+  font-size: var(--fs-xs);
   line-height: 1.55;
 }
 
@@ -2139,7 +2147,7 @@ button {
   height: 0.25rem;
   display: block;
   overflow: hidden;
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   background: oklch(1 0 0 / 0.12);
 }
 
@@ -2155,7 +2163,7 @@ button {
   display: block;
   margin-top: 0.35rem;
   color: oklch(0.66 0.03 258);
-  font-size: 0.52rem;
+  font-size: var(--fs-2xs);
 }
 
 .travel-section-head {
@@ -2167,13 +2175,13 @@ button {
 
 .travel-section-head h2 {
   margin: 0.2rem 0 0;
-  font-family: "Manrope", "PingFang SC", sans-serif;
-  font-size: 1rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-lg);
 }
 
 .travel-section-head > span {
   color: var(--muted);
-  font-size: 0.55rem;
+  font-size: var(--fs-2xs);
 }
 
 .language-packs {
@@ -2188,7 +2196,7 @@ button {
   gap: 0.7rem;
   padding: 0.7rem;
   border: 1px solid var(--line);
-  border-radius: 0.9rem;
+  border-radius: var(--radius-md);
   background: var(--surface);
 }
 
@@ -2197,11 +2205,11 @@ button {
   height: 2.6rem;
   display: grid;
   place-items: center;
-  border-radius: 0.75rem;
+  border-radius: var(--radius-md);
   color: var(--navy);
   background: var(--lime-soft);
-  font-family: "Manrope", sans-serif;
-  font-size: 0.65rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-xs);
   font-weight: 800;
 }
 
@@ -2211,13 +2219,13 @@ button {
 }
 
 .language-pack strong {
-  font-size: 0.7rem;
+  font-size: var(--fs-xs);
 }
 
 .language-pack small {
   margin-top: 0.15rem;
   color: var(--muted);
-  font-size: 0.53rem;
+  font-size: var(--fs-2xs);
 }
 
 .pack-download,
@@ -2260,7 +2268,7 @@ button {
   gap: 0.65rem;
   margin-top: 0.8rem;
   padding: 0.8rem;
-  border-radius: 0.9rem;
+  border-radius: var(--radius-md);
   background: var(--lime-soft);
 }
 
@@ -2269,13 +2277,13 @@ button {
 }
 
 .travel-tip strong {
-  font-size: 0.65rem;
+  font-size: var(--fs-xs);
 }
 
 .travel-tip p {
   margin: 0.2rem 0 0;
   color: var(--muted);
-  font-size: 0.56rem;
+  font-size: var(--fs-xs);
   line-height: 1.45;
 }
 
@@ -2307,7 +2315,7 @@ button {
   gap: 0.65rem;
   margin-bottom: 0.8rem;
   color: oklch(0.75 0.03 258);
-  font-size: 0.62rem;
+  font-size: var(--fs-xs);
 }
 
 .camera-viewport {
@@ -2316,7 +2324,7 @@ button {
   display: grid;
   place-items: center;
   overflow: hidden;
-  border-radius: 1.35rem;
+  border-radius: var(--radius-lg);
   background:
     linear-gradient(oklch(0.1 0.02 258 / 0.38), oklch(0.1 0.02 258 / 0.38)),
     linear-gradient(135deg, oklch(0.52 0.08 66), oklch(0.29 0.06 48));
@@ -2353,8 +2361,8 @@ button {
 .menu-paper > span {
   display: block;
   margin-bottom: 1.2rem;
-  font-family: "Manrope", sans-serif;
-  font-size: 0.75rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-sm);
   font-weight: 800;
   letter-spacing: 0.1em;
 }
@@ -2365,7 +2373,7 @@ button {
   padding: 0.18rem 0.28rem;
   border-radius: 0.2rem;
   font-family: serif;
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
   font-weight: 500;
 }
 
@@ -2398,7 +2406,7 @@ button {
   color: var(--surface);
   background: oklch(0.1 0.02 258 / 0.72);
   backdrop-filter: blur(0.6rem);
-  font-size: 0.54rem;
+  font-size: var(--fs-2xs);
   font-weight: 700;
 }
 
@@ -2437,14 +2445,14 @@ button {
   padding: 0.38rem 0.65rem;
   border-radius: 999rem;
   background: oklch(0.1 0.02 258 / 0.72);
-  font-size: 0.55rem;
+  font-size: var(--fs-2xs);
   transform: translateX(-50%);
 }
 
 .camera-result {
   margin-top: 0.7rem;
   padding: 0.8rem;
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   color: var(--ink);
   background: var(--surface);
   animation: content-appear 350ms ease-out;
@@ -2458,7 +2466,7 @@ button {
   margin-top: 0.7rem;
   padding: 0.7rem;
   border: 1px solid oklch(0.88 0.19 126 / 0.25);
-  border-radius: 0.9rem;
+  border-radius: var(--radius-md);
   color: var(--ink);
   background: var(--lime-soft);
   animation: content-appear 350ms ease-out;
@@ -2469,7 +2477,7 @@ button {
   height: 2.3rem;
   display: grid;
   place-items: center;
-  border-radius: 0.7rem;
+  border-radius: var(--radius-md);
   color: var(--navy);
   background: var(--lime);
 }
@@ -2480,13 +2488,13 @@ button {
 }
 
 .direct-translation-status strong {
-  font-size: 0.65rem;
+  font-size: var(--fs-xs);
 }
 
 .direct-translation-status small {
   margin-top: 0.16rem;
   color: var(--muted);
-  font-size: 0.5rem;
+  font-size: var(--fs-2xs);
 }
 
 .direct-translation-status > button {
@@ -2505,7 +2513,7 @@ button {
   justify-content: space-between;
   padding-bottom: 0.55rem;
   border-bottom: 1px solid var(--line);
-  font-size: 0.55rem;
+  font-size: var(--fs-2xs);
 }
 
 .result-head span {
@@ -2525,7 +2533,7 @@ button {
   justify-content: space-between;
   padding: 0.48rem 0;
   border-bottom: 1px solid var(--line);
-  font-size: 0.66rem;
+  font-size: var(--fs-xs);
 }
 
 .result-line:last-child {
@@ -2534,7 +2542,7 @@ button {
 
 .result-line small {
   color: var(--muted);
-  font-size: 0.52rem;
+  font-size: var(--fs-2xs);
 }
 
 .camera-controls {
@@ -2599,14 +2607,14 @@ button {
 }
 
 .setup-header strong {
-  font-family: "Manrope", "PingFang SC", sans-serif;
-  font-size: 0.95rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-md);
 }
 
 .setup-header > span {
   justify-self: end;
   color: oklch(0.7 0.03 258);
-  font-size: 0.65rem;
+  font-size: var(--fs-xs);
 }
 
 .setup-close {
@@ -2710,7 +2718,7 @@ button {
   left: 0.65rem;
   width: 0.55rem;
   height: 2rem;
-  border-radius: 0 0 0.5rem 0.5rem;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
   background: oklch(0.75 0.03 258);
 }
 
@@ -2735,20 +2743,20 @@ button {
 
 .pairing-visual h2 {
   margin: 0;
-  font-family: "Manrope", "PingFang SC", sans-serif;
-  font-size: 1.45rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-3xl);
   letter-spacing: -0.04em;
 }
 
 .pairing-visual p {
   margin: 0.55rem 0 0;
   color: oklch(0.72 0.03 258);
-  font-size: 0.76rem;
+  font-size: var(--fs-sm);
 }
 
 .setup-panel {
   padding: 1rem 1.15rem 1.5rem;
-  border-radius: 2rem 2rem 0 0;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   color: var(--ink);
   background: var(--paper);
 }
@@ -2761,7 +2769,7 @@ button {
   gap: 0.75rem;
   padding: 0.75rem;
   border: 1px solid var(--line);
-  border-radius: 1.15rem;
+  border-radius: var(--radius-lg);
   background: var(--surface);
 }
 
@@ -2770,7 +2778,7 @@ button {
   height: 3rem;
   display: grid;
   place-items: center;
-  border-radius: 0.9rem;
+  border-radius: var(--radius-md);
   background: var(--lime-soft);
 }
 
@@ -2780,13 +2788,13 @@ button {
 }
 
 .found-device strong {
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
 }
 
 .found-device small {
   margin-top: 0.22rem;
   color: var(--muted);
-  font-size: 0.62rem;
+  font-size: var(--fs-xs);
 }
 
 .found-device.skeleton {
@@ -2796,10 +2804,10 @@ button {
 .mini-connect {
   padding: 0.55rem 0.8rem;
   border: 0;
-  border-radius: 0.65rem;
+  border-radius: var(--radius-md);
   color: var(--surface);
   background: var(--navy);
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
   font-weight: 700;
 }
 
@@ -2847,7 +2855,7 @@ button {
   border: 1px solid var(--line);
   border-radius: 50%;
   color: var(--soft-muted);
-  font-size: 0.62rem;
+  font-size: var(--fs-xs);
 }
 
 .pairing-steps .complete > span {
@@ -2864,13 +2872,13 @@ button {
 }
 
 .pairing-steps strong {
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
 }
 
 .pairing-steps small {
   margin-top: 0.1rem;
   color: var(--muted);
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
 }
 
 .setup-help {
@@ -2879,7 +2887,7 @@ button {
   border: 0;
   color: var(--muted);
   background: transparent;
-  font-size: 0.65rem;
+  font-size: var(--fs-xs);
 }
 
 .tab-page {
@@ -2896,8 +2904,8 @@ button {
 
 .page-header h1 {
   margin: 0.25rem 0 0;
-  font-family: "Manrope", "PingFang SC", sans-serif;
-  font-size: 1.75rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-4xl);
   letter-spacing: -0.05em;
 }
 
@@ -2919,7 +2927,7 @@ button {
   border: 1px solid var(--line);
   border-radius: 999rem;
   background: var(--surface);
-  font-size: 0.6rem;
+  font-size: var(--fs-xs);
   font-weight: 700;
 }
 
@@ -2936,7 +2944,7 @@ button {
   align-items: center;
   padding: 0.55rem;
   border: 1px solid var(--line);
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   background: var(--surface);
 }
 
@@ -2954,12 +2962,12 @@ button {
 
 .hub-language-pair small {
   color: var(--muted);
-  font-size: 0.5rem;
+  font-size: var(--fs-2xs);
 }
 
 .hub-language-pair strong {
   margin-top: 0.12rem;
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
 }
 
 .hub-swap {
@@ -2978,7 +2986,7 @@ button {
   margin-top: 0.65rem;
   padding: 1.25rem;
   overflow: hidden;
-  border-radius: 1.4rem;
+  border-radius: var(--radius-lg);
   color: var(--surface);
   background:
     radial-gradient(circle at 100% 0%, oklch(0.43 0.1 252), transparent 40%),
@@ -2998,7 +3006,7 @@ button {
 .hub-wave i {
   width: 0.16rem;
   height: 0.7rem;
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   background: var(--lime);
   animation: wave 850ms infinite alternate ease-in-out;
 }
@@ -3014,8 +3022,8 @@ button {
 .hub-live-card h2 {
   max-width: 14rem;
   margin: 0.55rem 0 0.35rem;
-  font-family: "Manrope", "PingFang SC", sans-serif;
-  font-size: 1.35rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-2xl);
   line-height: 1.15;
 }
 
@@ -3023,7 +3031,7 @@ button {
   max-width: 17rem;
   margin: 0;
   color: oklch(0.72 0.03 258);
-  font-size: 0.62rem;
+  font-size: var(--fs-xs);
   line-height: 1.5;
 }
 
@@ -3047,8 +3055,8 @@ button {
   justify-content: center;
   gap: 0.4rem;
   padding: 0.72rem;
-  border-radius: 0.75rem;
-  font-size: 0.67rem;
+  border-radius: var(--radius-md);
+  font-size: var(--fs-xs);
   font-weight: 800;
 }
 
@@ -3056,7 +3064,7 @@ button {
   width: 2.8rem;
   display: grid;
   place-items: center;
-  border-radius: 0.75rem;
+  border-radius: var(--radius-md);
 }
 
 .hub-tools {
@@ -3072,7 +3080,7 @@ button {
   align-items: center;
   padding: 0.65rem 0.4rem;
   border: 1px solid var(--line);
-  border-radius: 0.9rem;
+  border-radius: var(--radius-md);
   background: var(--surface);
 }
 
@@ -3082,7 +3090,7 @@ button {
   display: grid;
   place-items: center;
   margin-bottom: 0.4rem;
-  border-radius: 0.6rem;
+  border-radius: var(--radius-sm);
   color: var(--teal);
   background: oklch(0.95 0.04 189);
 }
@@ -3093,13 +3101,13 @@ button {
 }
 
 .hub-tools strong {
-  font-size: 0.65rem;
+  font-size: var(--fs-xs);
 }
 
 .hub-tools small {
   margin-top: 0.12rem;
   color: var(--muted);
-  font-size: 0.5rem;
+  font-size: var(--fs-2xs);
 }
 
 .phrase-book {
@@ -3121,7 +3129,7 @@ button {
   border: 1px solid var(--line);
   border-radius: 999rem;
   background: var(--surface);
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -3139,7 +3147,7 @@ button {
   gap: 0.7rem;
   margin-top: 0.55rem;
   padding: 0.8rem;
-  border-radius: 0.9rem;
+  border-radius: var(--radius-md);
   background: var(--surface-soft);
 }
 
@@ -3151,18 +3159,18 @@ button {
 
 .phrase-player small {
   color: var(--teal);
-  font-size: 0.5rem;
+  font-size: var(--fs-2xs);
 }
 
 .phrase-player strong {
   margin-top: 0.18rem;
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
 }
 
 .phrase-player span {
   margin-top: 0.28rem;
   color: var(--muted);
-  font-size: 0.56rem;
+  font-size: var(--fs-xs);
 }
 
 .phrase-player button {
@@ -3181,7 +3189,7 @@ button {
   grid-template-columns: repeat(3, 1fr);
   gap: 0.5rem;
   padding: 0.9rem;
-  border-radius: 1.2rem;
+  border-radius: var(--radius-lg);
   color: var(--surface);
   background: var(--navy);
 }
@@ -3202,14 +3210,14 @@ button {
 
 .record-overview strong {
   color: var(--lime);
-  font-family: "Manrope", sans-serif;
-  font-size: 1.35rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-2xl);
 }
 
 .record-overview span {
   margin-top: 0.2rem;
   color: oklch(0.72 0.03 258);
-  font-size: 0.54rem;
+  font-size: var(--fs-2xs);
 }
 
 .filter-row {
@@ -3225,7 +3233,7 @@ button {
   border-radius: 999rem;
   color: var(--muted);
   background: var(--surface);
-  font-size: 0.65rem;
+  font-size: var(--fs-xs);
   white-space: nowrap;
 }
 
@@ -3248,7 +3256,7 @@ button {
   gap: 0.75rem;
   padding: 0.9rem 0.8rem;
   border: 1px solid var(--line);
-  border-radius: 1.1rem;
+  border-radius: var(--radius-lg);
   background: var(--surface);
   text-align: left;
 }
@@ -3259,7 +3267,7 @@ button {
   display: grid;
   place-items: center;
   align-self: start;
-  border-radius: 0.85rem;
+  border-radius: var(--radius-md);
   color: var(--navy);
   background: var(--lime-soft);
 }
@@ -3281,13 +3289,13 @@ button {
 }
 
 .record-title strong {
-  font-size: 0.78rem;
+  font-size: var(--fs-sm);
 }
 
 .record-copy > small,
 .record-title small {
   color: var(--soft-muted);
-  font-size: 0.55rem;
+  font-size: var(--fs-2xs);
 }
 
 .record-summary {
@@ -3296,10 +3304,10 @@ button {
   gap: 0.3rem;
   margin-top: 0.55rem;
   padding: 0.5rem;
-  border-radius: 0.6rem;
+  border-radius: var(--radius-sm);
   color: var(--muted);
   background: var(--surface-soft);
-  font-size: 0.6rem;
+  font-size: var(--fs-xs);
   line-height: 1.45;
 }
 
@@ -3326,7 +3334,7 @@ button {
   max-height: 88dvh;
   padding: 1rem 1rem 1.5rem;
   overflow-y: auto;
-  border-radius: 2rem 2rem 0 0;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   background: var(--paper);
   animation: editor-rise 260ms ease-out;
 }
@@ -3341,13 +3349,13 @@ button {
 .record-detail header h2,
 .profile-panel header h2 {
   margin: 0.25rem 0 0.15rem;
-  font-family: "Manrope", "PingFang SC", sans-serif;
-  font-size: 1.25rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-xl);
 }
 
 .record-detail header small {
   color: var(--muted);
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
 }
 
 .record-detail header button,
@@ -3364,7 +3372,7 @@ button {
 .detail-summary {
   margin-top: 1rem;
   padding: 0.9rem;
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   background: var(--lime-soft);
 }
 
@@ -3373,13 +3381,13 @@ button {
   align-items: center;
   gap: 0.3rem;
   color: var(--teal);
-  font-size: 0.6rem;
+  font-size: var(--fs-xs);
   font-weight: 700;
 }
 
 .detail-summary p {
   margin: 0.55rem 0 0.8rem;
-  font-size: 0.7rem;
+  font-size: var(--fs-xs);
   line-height: 1.5;
 }
 
@@ -3391,12 +3399,12 @@ button {
 }
 
 .detail-summary b {
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
 }
 
 .detail-summary small {
   color: var(--muted);
-  font-size: 0.52rem;
+  font-size: var(--fs-2xs);
 }
 
 .detail-transcript {
@@ -3411,7 +3419,7 @@ button {
   gap: 0.6rem;
   padding: 0.75rem;
   border: 1px solid var(--line);
-  border-radius: 0.85rem;
+  border-radius: var(--radius-md);
   background: var(--surface);
 }
 
@@ -3426,18 +3434,18 @@ button {
 
 .detail-transcript small {
   color: var(--muted);
-  font-size: 0.5rem;
+  font-size: var(--fs-2xs);
 }
 
 .detail-transcript strong {
   margin-top: 0.25rem;
-  font-size: 0.65rem;
+  font-size: var(--fs-xs);
 }
 
 .detail-transcript i {
   margin-top: 0.3rem;
   color: var(--teal);
-  font-size: 0.62rem;
+  font-size: var(--fs-xs);
 }
 
 .detail-actions {
@@ -3454,9 +3462,9 @@ button {
   gap: 0.35rem;
   padding: 0.7rem;
   border: 1px solid var(--line);
-  border-radius: 0.75rem;
+  border-radius: var(--radius-md);
   background: var(--surface);
-  font-size: 0.6rem;
+  font-size: var(--fs-xs);
   font-weight: 700;
 }
 
@@ -3476,7 +3484,7 @@ button {
   border: 0;
   color: oklch(0.72 0.04 285);
   background: transparent;
-  font-size: 0.7rem;
+  font-size: var(--fs-xs);
 }
 
 .sleep-back svg {
@@ -3494,7 +3502,7 @@ button {
 .sleep-heading p {
   margin: 0.4rem 0 0;
   color: oklch(0.7 0.03 258);
-  font-size: 0.7rem;
+  font-size: var(--fs-xs);
 }
 
 .moon-orbit {
@@ -3515,7 +3523,7 @@ button {
   gap: 0.85rem;
   padding: 0.85rem;
   border: 1px solid oklch(1 0 0 / 0.1);
-  border-radius: 1.35rem;
+  border-radius: var(--radius-lg);
   background: oklch(1 0 0 / 0.07);
 }
 
@@ -3526,7 +3534,7 @@ button {
   display: grid;
   place-items: center;
   overflow: hidden;
-  border-radius: 1.05rem;
+  border-radius: var(--radius-lg);
   background: linear-gradient(145deg, oklch(0.6 0.12 222), oklch(0.3 0.1 270));
 }
 
@@ -3555,26 +3563,26 @@ button {
 
 .playing-copy > span {
   color: oklch(0.74 0.12 292);
-  font-size: 0.52rem;
+  font-size: var(--fs-2xs);
   font-weight: 700;
 }
 
 .playing-copy > strong {
   margin-top: 0.2rem;
-  font-size: 0.78rem;
+  font-size: var(--fs-sm);
 }
 
 .playing-copy > small {
   margin-top: 0.18rem;
   color: oklch(0.68 0.03 258);
-  font-size: 0.55rem;
+  font-size: var(--fs-2xs);
 }
 
 .sound-progress {
   height: 0.16rem;
   margin-top: 0.6rem;
   overflow: hidden;
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   background: oklch(1 0 0 / 0.12);
 }
 
@@ -3619,7 +3627,7 @@ button {
   padding: 0;
   overflow: hidden;
   border: 1px solid oklch(1 0 0 / 0.08);
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   color: var(--surface);
   background: oklch(1 0 0 / 0.055);
   text-align: left;
@@ -3634,7 +3642,7 @@ button {
   display: grid;
   place-items: center;
   margin: 0.4rem;
-  border-radius: 0.75rem;
+  border-radius: var(--radius-md);
   background: linear-gradient(145deg, oklch(0.58 0.13 222), oklch(0.27 0.11 268));
 }
 
@@ -3658,14 +3666,14 @@ button {
 
 .sound-card > strong {
   margin-top: 0.65rem;
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
 }
 
 .sound-card > small {
   padding-bottom: 0.7rem;
   margin-top: 0.18rem;
   color: oklch(0.66 0.03 258);
-  font-size: 0.54rem;
+  font-size: var(--fs-2xs);
 }
 
 .sleep-tools {
@@ -3680,7 +3688,7 @@ button {
   align-items: center;
   gap: 0.7rem;
   padding: 0.7rem;
-  border-radius: 0.9rem;
+  border-radius: var(--radius-md);
   background: oklch(1 0 0 / 0.055);
 }
 
@@ -3689,7 +3697,7 @@ button {
   height: 2.3rem;
   display: grid;
   place-items: center;
-  border-radius: 0.7rem;
+  border-radius: var(--radius-md);
   color: oklch(0.85 0.1 292);
   background: oklch(1 0 0 / 0.07);
 }
@@ -3702,13 +3710,13 @@ button {
 }
 
 .sleep-tools strong {
-  font-size: 0.7rem;
+  font-size: var(--fs-xs);
 }
 
 .sleep-tools small {
   margin-top: 0.15rem;
   color: oklch(0.65 0.03 258);
-  font-size: 0.54rem;
+  font-size: var(--fs-2xs);
 }
 
 .user-card {
@@ -3724,10 +3732,10 @@ button {
   height: 3.3rem;
   display: grid;
   place-items: center;
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   color: var(--surface);
   background: var(--navy);
-  font-family: "Manrope", sans-serif;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
   font-weight: 800;
 }
 
@@ -3737,13 +3745,13 @@ button {
 }
 
 .user-card strong {
-  font-size: 0.9rem;
+  font-size: var(--fs-md);
 }
 
 .user-card small {
   margin-top: 0.2rem;
   color: var(--muted);
-  font-size: 0.6rem;
+  font-size: var(--fs-xs);
 }
 
 .level-pill {
@@ -3751,14 +3759,14 @@ button {
   border-radius: 999rem;
   color: var(--navy);
   background: var(--lime-soft);
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
   font-weight: 700;
 }
 
 .my-device-card {
   padding: 1rem;
   overflow: hidden;
-  border-radius: 1.35rem;
+  border-radius: var(--radius-lg);
   color: var(--surface);
   background: var(--navy);
 }
@@ -3775,8 +3783,8 @@ button {
 
 .device-card-head h2 {
   margin: 0.3rem 0 0;
-  font-family: "Manrope", sans-serif;
-  font-size: 1rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-lg);
 }
 
 .device-card-head .text-button {
@@ -3811,14 +3819,14 @@ button {
 }
 
 .battery-stat strong {
-  font-family: "Manrope", sans-serif;
-  font-size: 1.4rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-2xl);
 }
 
 .battery-stat small {
   grid-column: 1 / -1;
   color: oklch(0.68 0.03 258);
-  font-size: 0.55rem;
+  font-size: var(--fs-2xs);
 }
 
 .device-actions {
@@ -3835,13 +3843,13 @@ button {
   justify-content: center;
   gap: 0.35rem;
   border: 0;
-  border-radius: 0.75rem;
+  border-radius: var(--radius-md);
   color: oklch(0.76 0.025 258);
   background: oklch(1 0 0 / 0.065);
 }
 
 .device-actions button span {
-  font-size: 0.55rem;
+  font-size: var(--fs-2xs);
 }
 
 .membership-row {
@@ -3853,7 +3861,7 @@ button {
   margin-top: 0.75rem;
   padding: 0.85rem;
   border: 1px solid var(--line);
-  border-radius: 1.15rem;
+  border-radius: var(--radius-lg);
   background: var(--surface);
   text-align: left;
 }
@@ -3863,7 +3871,7 @@ button {
   height: 2.7rem;
   display: grid;
   place-items: center;
-  border-radius: 0.8rem;
+  border-radius: var(--radius-md);
   background: var(--lime);
 }
 
@@ -3876,23 +3884,23 @@ button {
 
 .membership-row div > small {
   color: var(--teal);
-  font-size: 0.53rem;
+  font-size: var(--fs-2xs);
   font-weight: 700;
 }
 
 .membership-row div > strong {
   margin-top: 0.18rem;
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
 }
 
 .membership-row div > i {
   position: relative;
   height: 0.22rem;
   margin-top: 0.55rem;
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   color: var(--soft-muted);
   background: var(--line);
-  font-size: 0.5rem;
+  font-size: var(--fs-2xs);
 }
 
 .membership-row div > i b {
@@ -3916,7 +3924,7 @@ button {
   margin-top: 0.75rem;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 1.15rem;
+  border-radius: var(--radius-lg);
   background: var(--surface);
 }
 
@@ -3942,7 +3950,7 @@ button {
   height: 2.2rem;
   display: grid;
   place-items: center;
-  border-radius: 0.65rem;
+  border-radius: var(--radius-md);
   color: var(--navy);
   background: var(--surface-soft);
 }
@@ -3953,13 +3961,13 @@ button {
 }
 
 .settings-list strong {
-  font-size: 0.7rem;
+  font-size: var(--fs-xs);
 }
 
 .settings-list small {
   margin-top: 0.16rem;
   color: var(--muted);
-  font-size: 0.55rem;
+  font-size: var(--fs-2xs);
 }
 
 .app-version {
@@ -3967,7 +3975,7 @@ button {
   margin-top: 1rem;
   color: var(--soft-muted);
   text-align: center;
-  font-size: 0.52rem;
+  font-size: var(--fs-2xs);
 }
 
 .service-footer {
@@ -3982,7 +3990,7 @@ button {
   align-items: center;
   gap: 0.3rem;
   color: var(--muted);
-  font-size: 0.48rem;
+  font-size: var(--fs-2xs);
 }
 
 .service-footer > span i {
@@ -4002,7 +4010,7 @@ button {
   border: 0;
   color: var(--soft-muted);
   background: transparent;
-  font-size: 0.46rem;
+  font-size: var(--fs-2xs);
 }
 
 .find-device-backdrop {
@@ -4016,7 +4024,7 @@ button {
   width: 100%;
   max-width: 21rem;
   padding: 1.2rem;
-  border-radius: 1.5rem;
+  border-radius: var(--radius-lg);
   background: var(--paper);
   text-align: center;
 }
@@ -4075,15 +4083,15 @@ button {
 
 .find-device-card h2 {
   margin: 0.4rem 0;
-  font-family: "Manrope", "PingFang SC", sans-serif;
-  font-size: 1.2rem;
+  font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: var(--fs-xl);
 }
 
 .find-device-card p {
   margin: 0 auto 1rem;
   max-width: 15rem;
   color: var(--muted);
-  font-size: 0.65rem;
+  font-size: var(--fs-xs);
   line-height: 1.5;
 }
 
@@ -4103,7 +4111,7 @@ button {
   align-items: center;
   padding: 0.75rem;
   border: 1px solid var(--line);
-  border-radius: 0.8rem;
+  border-radius: var(--radius-md);
   background: var(--surface);
   text-align: left;
 }
@@ -4126,7 +4134,7 @@ button {
   width: 2.3rem;
   height: 2.3rem;
   padding: 0.55rem;
-  border-radius: 0.7rem;
+  border-radius: var(--radius-md);
   color: var(--teal);
   background: oklch(0.95 0.04 189);
 }
@@ -4137,13 +4145,13 @@ button {
 }
 
 .help-options strong {
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
 }
 
 .help-options small {
   margin-top: 0.15rem;
   color: var(--muted);
-  font-size: 0.52rem;
+  font-size: var(--fs-2xs);
 }
 
 .privacy-options > div {
@@ -4152,7 +4160,7 @@ button {
   align-items: center;
   padding: 0.75rem;
   border: 1px solid var(--line);
-  border-radius: 0.8rem;
+  border-radius: var(--radius-md);
   background: var(--surface);
 }
 
@@ -4162,13 +4170,13 @@ button {
 }
 
 .privacy-options strong {
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
 }
 
 .privacy-options small {
   margin-top: 0.15rem;
   color: var(--muted);
-  font-size: 0.52rem;
+  font-size: var(--fs-2xs);
 }
 
 .privacy-options > div > i {
@@ -4202,7 +4210,7 @@ button {
   gap: 0.35rem;
   margin: 0.3rem 0 0;
   color: var(--teal);
-  font-size: 0.55rem;
+  font-size: var(--fs-2xs);
 }
 
 @media (min-width: 52rem) {
@@ -4248,7 +4256,7 @@ button {
     display: flex;
     align-items: center;
     gap: 0.8rem;
-    font-size: 1.15rem;
+    font-size: var(--fs-xl);
   }
 
   .story-content {
@@ -4259,15 +4267,15 @@ button {
 
   .story-label {
     color: var(--lime);
-    font-family: "Manrope", sans-serif;
-    font-size: 0.68rem;
+    font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: var(--fs-xs);
     font-weight: 800;
     letter-spacing: 0.15em;
   }
 
   .story-content h2 {
     margin: 1.2rem 0;
-    font-family: "Manrope", sans-serif;
+    font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
     font-size: clamp(3rem, 5vw, 4.6rem);
     line-height: 0.98;
     letter-spacing: -0.07em;
@@ -4276,7 +4284,7 @@ button {
   .story-content > p {
     max-width: 23rem;
     color: oklch(0.75 0.03 258);
-    font-size: 0.95rem;
+    font-size: var(--fs-md);
     line-height: 1.65;
   }
 
@@ -4289,13 +4297,13 @@ button {
 
   .story-stat strong {
     color: var(--lime);
-    font-family: "Manrope", sans-serif;
+    font-family: "Manrope", "PingFang SC", "Microsoft YaHei", sans-serif;
     font-size: 3rem;
   }
 
   .story-stat span {
     color: oklch(0.76 0.03 258);
-    font-size: 0.72rem;
+    font-size: var(--fs-xs);
     line-height: 1.4;
   }
 
@@ -4303,7 +4311,7 @@ button {
     position: relative;
     z-index: 2;
     color: oklch(0.64 0.03 258);
-    font-size: 0.65rem;
+    font-size: var(--fs-xs);
   }
 
   .phone-app {
@@ -4390,7 +4398,7 @@ button {
 }
 
 .wordmark {
-  font-size: 1rem;
+  font-size: var(--fs-lg);
 }
 
 .device-pill {
@@ -4401,7 +4409,7 @@ button {
 .device-hero {
   margin: 0 0.8rem;
   padding: 1.9rem 1.35rem 1.2rem;
-  border-radius: 1.65rem;
+  border-radius: var(--radius-xl);
 }
 
 .hero-copy h1 {
@@ -4418,7 +4426,7 @@ button {
 .start-button {
   margin-top: 2.4rem;
   padding: 0.75rem;
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
 }
 
 .section-block,
@@ -4444,7 +4452,7 @@ button {
   min-height: 7.7rem;
   padding: 0.95rem;
   border-color: transparent;
-  border-radius: 1.15rem;
+  border-radius: var(--radius-lg);
   box-shadow: 0 0.15rem 0.9rem oklch(0.18 0.02 258 / 0.045);
 }
 
@@ -4453,18 +4461,18 @@ button {
 }
 
 .mode-icon {
-  border-radius: 0.75rem;
+  border-radius: var(--radius-md);
 }
 
 .pro-card {
   margin-top: 1.4rem;
   padding: 1rem;
-  border-radius: 1.2rem;
+  border-radius: var(--radius-lg);
 }
 
 .recent-row {
   border-top-color: transparent;
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   background: var(--surface);
 }
 
@@ -4472,7 +4480,7 @@ button {
   height: 4.35rem;
   padding: 0.32rem;
   border-color: oklch(1 0 0 / 0.45);
-  border-radius: 1.45rem;
+  border-radius: var(--radius-lg);
   box-shadow: 0 0.45rem 1.8rem oklch(0.2 0.03 258 / 0.1);
 }
 
@@ -4489,7 +4497,7 @@ button {
 }
 
 .page-header h1 {
-  font-size: 1.65rem;
+  font-size: var(--fs-4xl);
 }
 
 .page-icon-button,
@@ -4510,11 +4518,11 @@ button {
 
 .dialogue-preview {
   padding: 1.4rem 1rem 1.1rem;
-  border-radius: 1.35rem;
+  border-radius: var(--radius-lg);
 }
 
 .dialogue-preview h1 {
-  font-size: 1.25rem;
+  font-size: var(--fs-xl);
 }
 
 .dialogue-language-card {
@@ -4539,7 +4547,7 @@ button {
   gap: 0;
   padding: 0.42rem;
   border-color: transparent;
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   box-shadow: 0 0.15rem 0.9rem oklch(0.18 0.02 258 / 0.045);
   transform: none;
 }
@@ -4554,7 +4562,7 @@ button {
 .mode-illustration {
   width: 100%;
   height: 5.7rem;
-  border-radius: 0.75rem;
+  border-radius: var(--radius-md);
 }
 
 .dialogue-mode-card > span:nth-of-type(2) {
@@ -4564,7 +4572,7 @@ button {
 
 .dialogue-mode-card strong {
   overflow: hidden;
-  font-size: 0.65rem;
+  font-size: var(--fs-xs);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -4572,7 +4580,7 @@ button {
 .dialogue-mode-card small {
   margin-top: 0.2rem;
   overflow: hidden;
-  font-size: 0.49rem;
+  font-size: var(--fs-2xs);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -4625,7 +4633,7 @@ button {
 .hub-live-card,
 .offline-hero,
 .meeting-status-card {
-  border-radius: 1.3rem;
+  border-radius: var(--radius-lg);
 }
 
 button {
@@ -4661,7 +4669,7 @@ button:focus-visible {
   gap: 1rem;
   margin-top: 1rem;
   padding: 1rem;
-  border-radius: 1.1rem;
+  border-radius: var(--radius-lg);
   color: var(--surface);
   background:
     radial-gradient(circle at 100% 0%, oklch(0.42 0.08 252), transparent 46%),
@@ -4679,7 +4687,7 @@ button:focus-visible {
   align-items: center;
   gap: 0.35rem;
   color: oklch(0.76 0.03 258);
-  font-size: 0.52rem;
+  font-size: var(--fs-2xs);
 }
 
 .subscription-card div > span i {
@@ -4691,24 +4699,24 @@ button:focus-visible {
 
 .subscription-card div > b {
   margin-top: 0.35rem;
-  font-size: 0.82rem;
+  font-size: var(--fs-sm);
 }
 
 .subscription-card div > small {
   margin-top: 0.2rem;
   color: oklch(0.7 0.03 258);
-  font-size: 0.52rem;
+  font-size: var(--fs-2xs);
 }
 
 .subscription-card > strong {
-  font-size: 1.4rem;
+  font-size: var(--fs-2xl);
   letter-spacing: -0.05em;
 }
 
 .subscription-card > strong small {
   margin-left: 0.15rem;
   color: oklch(0.7 0.03 258);
-  font-size: 0.48rem;
+  font-size: var(--fs-2xs);
   font-weight: 500;
 }
 
@@ -4759,13 +4767,13 @@ button:focus-visible {
 }
 
 .billing-timeline strong {
-  font-size: 0.65rem;
+  font-size: var(--fs-xs);
 }
 
 .billing-timeline small {
   margin-top: 0.16rem;
   color: var(--muted);
-  font-size: 0.52rem;
+  font-size: var(--fs-2xs);
 }
 
 .renewal-disclosure {
@@ -4773,7 +4781,7 @@ button:focus-visible {
   grid-template-columns: auto 1fr;
   gap: 0.65rem;
   padding: 0.8rem;
-  border-radius: 0.85rem;
+  border-radius: var(--radius-md);
   background: var(--surface-soft);
 }
 
@@ -4782,13 +4790,13 @@ button:focus-visible {
 }
 
 .renewal-disclosure strong {
-  font-size: 0.64rem;
+  font-size: var(--fs-xs);
 }
 
 .renewal-disclosure p {
   margin: 0.25rem 0 0;
   color: var(--muted);
-  font-size: 0.54rem;
+  font-size: var(--fs-2xs);
   line-height: 1.5;
 }
 
@@ -4801,9 +4809,9 @@ button:focus-visible {
 .subscription-actions button {
   padding: 0.75rem;
   border: 0;
-  border-radius: 0.8rem;
+  border-radius: var(--radius-md);
   background: var(--surface-soft);
-  font-size: 0.62rem;
+  font-size: var(--fs-xs);
   font-weight: 700;
 }
 
@@ -4829,7 +4837,7 @@ button:focus-visible {
   border: 0;
   color: var(--muted);
   background: transparent;
-  font-size: 0.48rem;
+  font-size: var(--fs-2xs);
 }
 
 .legal-links i {
@@ -4851,7 +4859,7 @@ button:focus-visible {
 
 .brand-mark,
 .story-brand span {
-  border-radius: 0.65rem;
+  border-radius: var(--radius-md);
   box-shadow: inset 0 0 0 1px oklch(1 0 0 / 0.24);
 }
 
@@ -4933,7 +4941,7 @@ button:focus-visible {
   gap: 0.8rem;
   padding: 0.8rem;
   border: 0;
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   color: var(--surface);
   background:
     radial-gradient(circle at 12% 0%, oklch(0.52 0.12 285), transparent 48%),
@@ -4948,7 +4956,7 @@ button:focus-visible {
   display: grid;
   place-items: center;
   overflow: hidden;
-  border-radius: 0.9rem;
+  border-radius: var(--radius-md);
   color: oklch(0.9 0.1 90);
   background: oklch(1 0 0 / 0.1);
 }
@@ -4975,28 +4983,28 @@ button:focus-visible {
 
 .home-sleep-row > span:nth-child(2) strong {
   margin-top: 0.15rem;
-  font-size: 0.78rem;
+  font-size: var(--fs-sm);
 }
 
 .home-sleep-row > span:nth-child(2) b {
   margin-top: 0.12rem;
   color: oklch(0.68 0.03 258);
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
   font-weight: 500;
 }
 
 /* Readable type scale for real-device use. */
 .phone-app small {
-  font-size: 0.75rem !important;
+  font-size: var(--fs-sm) !important;
   line-height: 1.35;
 }
 
 .eyebrow {
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
 }
 
 .bottom-nav button span {
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
 }
 
 .mode-card strong,
@@ -5005,22 +5013,22 @@ button:focus-visible {
 .language-pack strong,
 .settings-list strong,
 .hub-tools strong {
-  font-size: 0.82rem;
+  font-size: var(--fs-sm);
 }
 
 .dialogue-mode-card small {
-  font-size: 0.7rem !important;
+  font-size: var(--fs-xs) !important;
 }
 
 .scene-user small {
-  font-size: 0.48rem !important;
+  font-size: var(--fs-2xs) !important;
 }
 
 .app-version,
 .service-footer > span,
 .service-footer button,
 .legal-links button {
-  font-size: 0.65rem;
+  font-size: var(--fs-xs);
 }
 
 /* Use whitespace—not elevation—to group secondary content. */
@@ -5084,7 +5092,7 @@ button:focus-visible {
 .hub-live-card h2 {
   max-width: none;
   margin: 0.7rem 0 0;
-  font-size: 1.55rem;
+  font-size: var(--fs-3xl);
 }
 
 .hub-live-actions {
@@ -5118,7 +5126,7 @@ button:focus-visible {
 
 .pro-card h3 {
   margin: 0 0 0.28rem;
-  font-size: 0.9rem;
+  font-size: var(--fs-md);
 }
 
 /* LingoPods premium visual system: monochrome materials + one system accent. */
@@ -5190,7 +5198,7 @@ body {
 }
 
 .wordmark {
-  font-size: 1.02rem;
+  font-size: var(--fs-lg);
   font-weight: 700;
   letter-spacing: -0.035em;
 }
@@ -5223,7 +5231,7 @@ body {
 }
 
 .device-hero {
-  border-radius: 1.8rem;
+  border-radius: var(--radius-xl);
 }
 
 .hero-copy .eyebrow,
@@ -5604,7 +5612,7 @@ button:active {
 
 .recent-row,
 .home-sleep-row {
-  border-radius: 1.15rem;
+  border-radius: var(--radius-lg);
 }
 
 .recent-icon,
@@ -5624,7 +5632,7 @@ button:active {
 }
 
 .pro-card {
-  border-radius: 1.15rem;
+  border-radius: var(--radius-lg);
 }
 
 .pro-card .eyebrow {
@@ -5851,7 +5859,7 @@ button:active {
   border-radius: 999rem;
   color: oklch(0.72 0.01 258);
   background: oklch(1 0 0 / 0.07);
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
 }
 
 .conversation-meta span:first-child {
@@ -5898,14 +5906,14 @@ button:active {
 .turn-stage h1 {
   margin: 0.3rem 0 0;
   color: var(--surface);
-  font-size: 1.55rem;
+  font-size: var(--fs-3xl);
   letter-spacing: -0.045em;
 }
 
 .turn-stage p {
   margin: 0.3rem 0 0;
   color: oklch(0.65 0.01 258);
-  font-size: 0.65rem;
+  font-size: var(--fs-xs);
 }
 
 .conversation-transcript {
@@ -5920,7 +5928,7 @@ button:active {
   gap: 0.6rem;
   align-items: flex-start;
   padding: 0.7rem;
-  border-radius: 0.95rem;
+  border-radius: var(--radius-md);
   background: oklch(1 0 0 / 0.06);
 }
 
@@ -5929,10 +5937,10 @@ button:active {
   height: 1.7rem;
   display: grid;
   place-items: center;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-sm);
   color: var(--surface);
   background: oklch(1 0 0 / 0.12);
-  font-size: 0.54rem;
+  font-size: var(--fs-2xs);
   font-weight: 700;
 }
 
@@ -5952,7 +5960,7 @@ button:active {
 
 .compact-phrase p {
   margin: 0.25rem 0 0;
-  font-size: 0.73rem;
+  font-size: var(--fs-sm);
   line-height: 1.45;
 }
 
@@ -5965,7 +5973,7 @@ button:active {
   border: 0;
   color: var(--muted);
   background: transparent;
-  font-size: 0.52rem;
+  font-size: var(--fs-2xs);
 }
 
 .confidence-word i {
@@ -6004,7 +6012,7 @@ button:active {
 }
 
 .smart-control-row small {
-  font-size: 0.58rem !important;
+  font-size: var(--fs-xs) !important;
 }
 
 .smart-mic {
@@ -6036,7 +6044,7 @@ button:active {
 .live-settings-sheet {
   width: 100%;
   padding: 0.9rem 1rem 1.5rem;
-  border-radius: 1.8rem 1.8rem 0 0;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   color: var(--ink);
   background: oklch(0.985 0.002 258 / 0.9);
   backdrop-filter: blur(2.4rem);
@@ -6051,7 +6059,7 @@ button:active {
 
 .live-settings-sheet header h2 {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: var(--fs-xl);
 }
 
 .live-settings-sheet header button {
@@ -6072,7 +6080,7 @@ button:active {
   display: block;
   margin-bottom: 0.5rem;
   color: var(--muted);
-  font-size: 0.65rem;
+  font-size: var(--fs-xs);
   font-weight: 650;
 }
 
@@ -6085,9 +6093,9 @@ button:active {
   flex: 1;
   padding: 0.55rem 0.25rem;
   border: 0;
-  border-radius: 0.65rem;
+  border-radius: var(--radius-md);
   background: var(--surface-soft);
-  font-size: 0.62rem;
+  font-size: var(--fs-xs);
 }
 
 .context-chips button.active {
@@ -6110,7 +6118,7 @@ button:active {
   gap: 0.65rem;
   padding: 0.7rem;
   border: 0;
-  border-radius: 0.8rem;
+  border-radius: var(--radius-md);
   background: var(--surface);
   text-align: left;
 }
@@ -6128,14 +6136,14 @@ button:active {
 
 .route-options strong,
 .session-preferences strong {
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
 }
 
 .route-options small,
 .session-preferences small {
   margin-top: 0.12rem;
   color: var(--muted);
-  font-size: 0.56rem !important;
+  font-size: var(--fs-xs) !important;
 }
 
 .session-preferences button > i {
@@ -6171,7 +6179,7 @@ button:active {
   margin-top: 0.75rem;
   padding: 0.7rem;
   border: 0;
-  border-radius: 0.85rem;
+  border-radius: var(--radius-md);
   background: var(--surface);
   text-align: left;
 }
@@ -6184,7 +6192,7 @@ button:active {
   border: 1px solid var(--line);
   border-radius: 50%;
   color: var(--muted);
-  font-size: 0.6rem;
+  font-size: var(--fs-xs);
 }
 
 .consent-card.accepted > span {
@@ -6199,19 +6207,19 @@ button:active {
 }
 
 .consent-card strong {
-  font-size: 0.67rem;
+  font-size: var(--fs-xs);
 }
 
 .consent-card small {
   margin-top: 0.12rem;
   color: var(--muted);
-  font-size: 0.56rem !important;
+  font-size: var(--fs-xs) !important;
 }
 
 .meeting-summary {
   margin-top: 0.75rem;
   padding: 0.85rem;
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   background: var(--surface);
   animation: content-appear 300ms ease-out;
 }
@@ -6230,19 +6238,19 @@ button:active {
 
 .summary-top strong {
   color: var(--ink);
-  font-size: 0.75rem;
+  font-size: var(--fs-sm);
 }
 
 .summary-top small {
   margin-top: 0.08rem;
   color: var(--muted);
-  font-size: 0.52rem !important;
+  font-size: var(--fs-2xs) !important;
 }
 
 .meeting-summary > p {
   margin: 0.7rem 0;
   color: var(--muted);
-  font-size: 0.66rem;
+  font-size: var(--fs-xs);
   line-height: 1.55;
 }
 
@@ -6257,9 +6265,9 @@ button:active {
   align-items: center;
   gap: 0.35rem;
   padding: 0.5rem;
-  border-radius: 0.65rem;
+  border-radius: var(--radius-md);
   background: var(--surface-soft);
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
 }
 
 .decision-list svg {
@@ -6280,9 +6288,9 @@ button:active {
   gap: 0.3rem;
   padding: 0.6rem;
   border: 0;
-  border-radius: 0.65rem;
+  border-radius: var(--radius-md);
   background: var(--surface-soft);
-  font-size: 0.6rem;
+  font-size: var(--fs-xs);
 }
 
 .trip-prep-card {
@@ -6294,7 +6302,7 @@ button:active {
   margin-bottom: 0.65rem;
   padding: 0.7rem;
   border: 0;
-  border-radius: 0.9rem;
+  border-radius: var(--radius-md);
   background: var(--lime-soft);
   text-align: left;
 }
@@ -6304,7 +6312,7 @@ button:active {
   height: 2.5rem;
   display: grid;
   place-items: center;
-  border-radius: 0.75rem;
+  border-radius: var(--radius-md);
   color: var(--surface);
   background: var(--lime);
 }
@@ -6316,19 +6324,19 @@ button:active {
 
 .trip-prep-card small {
   color: var(--muted);
-  font-size: 0.55rem !important;
+  font-size: var(--fs-2xs) !important;
 }
 
 .trip-prep-card strong {
   margin-top: 0.15rem;
-  font-size: 0.7rem;
+  font-size: var(--fs-xs);
 }
 
 .pack-capabilities {
   display: block;
   margin-top: 0.2rem;
   color: var(--soft-muted);
-  font-size: 0.48rem;
+  font-size: var(--fs-2xs);
 }
 
 .vocabulary-panel {
@@ -6340,25 +6348,25 @@ button:active {
   align-items: baseline;
   gap: 0.45rem;
   padding: 0.8rem;
-  border-radius: 0.85rem;
+  border-radius: var(--radius-md);
   background: var(--lime-soft);
 }
 
 .vocabulary-stats strong {
   color: var(--lime);
-  font-size: 1.5rem;
+  font-size: var(--fs-3xl);
 }
 
 .vocabulary-stats span {
   color: var(--muted);
-  font-size: 0.6rem;
+  font-size: var(--fs-xs);
 }
 
 .vocabulary-list {
   display: grid;
   margin-top: 0.6rem;
   overflow: hidden;
-  border-radius: 0.85rem;
+  border-radius: var(--radius-md);
   background: var(--surface);
 }
 
@@ -6380,13 +6388,13 @@ button:active {
 }
 
 .vocabulary-list strong {
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
 }
 
 .vocabulary-list small {
   margin-top: 0.12rem;
   color: var(--muted);
-  font-size: 0.54rem !important;
+  font-size: var(--fs-2xs) !important;
 }
 
 .vocabulary-list button {
@@ -6394,7 +6402,7 @@ button:active {
   border: 0;
   color: var(--lime);
   background: transparent;
-  font-size: 0.58rem;
+  font-size: var(--fs-xs);
 }
 
 .add-vocabulary {
@@ -6406,10 +6414,10 @@ button:active {
   margin-top: 0.6rem;
   padding: 0.7rem;
   border: 0;
-  border-radius: 0.75rem;
+  border-radius: var(--radius-md);
   color: var(--surface);
   background: var(--ink);
-  font-size: 0.62rem;
+  font-size: var(--fs-xs);
 }
 
 .third-party-plan {
@@ -6421,7 +6429,7 @@ button:active {
   margin-bottom: 0.6rem;
   padding: 0.7rem;
   border: 0;
-  border-radius: 0.8rem;
+  border-radius: var(--radius-md);
   background: var(--surface-soft);
   text-align: left;
 }
@@ -6431,7 +6439,7 @@ button:active {
   height: 2.3rem;
   display: grid;
   place-items: center;
-  border-radius: 0.65rem;
+  border-radius: var(--radius-md);
   color: var(--lime);
   background: var(--surface);
 }
@@ -6442,13 +6450,13 @@ button:active {
 }
 
 .third-party-plan strong {
-  font-size: 0.65rem;
+  font-size: var(--fs-xs);
 }
 
 .third-party-plan small {
   margin-top: 0.12rem;
   color: var(--muted);
-  font-size: 0.54rem !important;
+  font-size: var(--fs-2xs) !important;
 }
 
 @media (min-width: 52rem) {
@@ -6476,7 +6484,7 @@ button:active {
 .phrase-actions-sheet {
   width: 100%;
   padding: 0.9rem 1rem 1.5rem;
-  border-radius: 1.8rem 1.8rem 0 0;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   color: var(--ink);
   background: oklch(0.985 0.002 258 / 0.9);
   backdrop-filter: blur(2.4rem);
@@ -6497,7 +6505,7 @@ button:active {
   gap: 0.4rem;
   padding: 0.7rem 0.2rem;
   border: 0;
-  border-radius: 0.8rem;
+  border-radius: var(--radius-md);
   color: var(--ink);
   background: var(--surface);
 }
@@ -6507,7 +6515,7 @@ button:active {
 }
 
 .phrase-action-grid button span {
-  font-size: 0.53rem;
+  font-size: var(--fs-2xs);
 }
 
 .remember-word {
@@ -6519,7 +6527,7 @@ button:active {
   margin-top: 0.6rem;
   padding: 0.7rem;
   border: 0;
-  border-radius: 0.8rem;
+  border-radius: var(--radius-md);
   background: var(--lime-soft);
   text-align: left;
 }
@@ -6534,13 +6542,13 @@ button:active {
 }
 
 .remember-word strong {
-  font-size: 0.65rem;
+  font-size: var(--fs-xs);
 }
 
 .remember-word small {
   margin-top: 0.12rem;
   color: var(--muted);
-  font-size: 0.53rem !important;
+  font-size: var(--fs-2xs) !important;
 }
 
 .calibration-list {
@@ -6555,7 +6563,7 @@ button:active {
   align-items: center;
   gap: 0.65rem;
   padding: 0.7rem;
-  border-radius: 0.8rem;
+  border-radius: var(--radius-md);
   background: var(--surface);
 }
 
@@ -6577,18 +6585,18 @@ button:active {
 }
 
 .calibration-list strong {
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
 }
 
 .calibration-list small {
   margin-top: 0.12rem;
   color: var(--muted);
-  font-size: 0.53rem !important;
+  font-size: var(--fs-2xs) !important;
 }
 
 .calibration-list b {
   color: var(--lime);
-  font-size: 0.55rem;
+  font-size: var(--fs-2xs);
 }
 
 .device-battery-grid {
@@ -6612,20 +6620,20 @@ button:active {
 
 .device-battery-grid small {
   color: oklch(0.65 0.01 258);
-  font-size: 0.48rem !important;
+  font-size: var(--fs-2xs) !important;
 }
 
 .device-battery-grid strong {
   margin-top: 0.2rem;
   color: var(--surface);
-  font-size: 0.72rem;
+  font-size: var(--fs-xs);
 }
 
 .device-info-list {
   display: grid;
   margin-top: 0.6rem;
   overflow: hidden;
-  border-radius: 0.85rem;
+  border-radius: var(--radius-md);
   background: var(--surface);
 }
 
@@ -6651,13 +6659,13 @@ button:active {
 }
 
 .device-info-list strong {
-  font-size: 0.66rem;
+  font-size: var(--fs-xs);
 }
 
 .device-info-list small {
   margin-top: 0.12rem;
   color: var(--muted);
-  font-size: 0.52rem !important;
+  font-size: var(--fs-2xs) !important;
 }
 
 .device-info-list button > svg {
@@ -6673,7 +6681,7 @@ button:active {
 
 .member-value span {
   padding: 0.55rem 0.2rem;
-  border-radius: 0.65rem;
+  border-radius: var(--radius-md);
   background: var(--surface-soft);
   text-align: center;
 }
@@ -6685,13 +6693,13 @@ button:active {
 
 .member-value strong {
   color: var(--ink);
-  font-size: 0.82rem;
+  font-size: var(--fs-sm);
 }
 
 .member-value small {
   margin-top: 0.12rem;
   color: var(--muted);
-  font-size: 0.48rem !important;
+  font-size: var(--fs-2xs) !important;
 }
 
 @media (min-width: 52rem) {
@@ -6703,5 +6711,418 @@ button:active {
     bottom: 2rem;
     border-radius: 0 2.5rem 2.5rem 0;
     overflow: hidden;
+  }
+}
+
+/* ============================================================
+   设计系统收口:字号 / 圆角 token、触控目标、安全区、
+   交互反馈、等宽数字、暗色模式、减少动态效果
+   ============================================================ */
+
+:root {
+  --fs-2xs: 0.625rem;
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.8125rem;
+  --fs-md: 0.9375rem;
+  --fs-lg: 1.0625rem;
+  --fs-xl: 1.25rem;
+  --fs-2xl: 1.375rem;
+  --fs-3xl: 1.5rem;
+  --fs-4xl: 1.75rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.75rem;
+}
+
+/* 触控目标 ≥ 44px */
+.order-actions button,
+.remove-shortcut {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.order-actions {
+  gap: 0.3rem;
+}
+
+.icon-button,
+.editor-close,
+.sheet-close,
+.feature-back,
+.feature-settings,
+.setup-close,
+.page-icon-button {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+/* 安全区:底部导航与全屏页脚避开 Home 横条 */
+.bottom-nav {
+  bottom: calc(0.7rem + env(safe-area-inset-bottom, 0px));
+}
+
+.smart-live-controls {
+  padding-bottom: calc(1.3rem + env(safe-area-inset-bottom, 0px));
+}
+
+.live-controls {
+  padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
+}
+
+.meeting-controls {
+  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+.camera-controls {
+  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* 交互反馈:全局按压 + 悬停 */
+button {
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    opacity 150ms ease,
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+}
+
+button:active {
+  opacity: 0.82;
+}
+
+.start-button:active {
+  opacity: 0.92;
+  transform: scale(0.985);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  button:hover {
+    opacity: 0.9;
+  }
+}
+
+/* 数字等宽:计时器 / 电量 / 统计不抖动 */
+.meeting-status-card h1,
+.record-overview strong,
+.member-value strong,
+.device-battery-grid strong,
+.hub-device,
+.device-pill,
+.storage-bar small {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 快捷编辑行:移除拖拽暗示后的网格 */
+.shortcut-edit-row {
+  grid-template-columns: auto 1fr auto auto;
+}
+
+/* 全局演示提示 toast */
+.demo-toast {
+  z-index: 95;
+}
+
+/* 语言卡:行改为可点击按钮 */
+.dialogue-language-card > button {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.dialogue-language-card > button:first-of-type {
+  border-bottom: 1px solid var(--line);
+}
+
+/* 会议:暂停按钮 + 结束确认 */
+.meeting-main-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.meeting-pause {
+  width: 2.75rem;
+  height: 2.75rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--ink);
+  background: var(--surface);
+}
+
+.meeting-confirm {
+  width: 100%;
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem 0 0.2rem;
+  text-align: center;
+}
+
+.meeting-confirm strong {
+  margin-top: 0;
+  font-size: var(--fs-sm);
+}
+
+.meeting-confirm small {
+  color: var(--muted);
+  font-size: var(--fs-2xs);
+}
+
+.meeting-confirm-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.65rem;
+}
+
+.meeting-confirm-actions button {
+  padding: 0.65rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  background: var(--surface);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+}
+
+.meeting-confirm-actions .confirm-end {
+  border: 0;
+  color: var(--surface);
+  background: var(--navy);
+}
+
+/* 个人中心:深色模式开关 */
+.settings-list button > i.theme-toggle {
+  width: 2.15rem;
+  height: 1.25rem;
+  display: block;
+  justify-self: end;
+  border-radius: 999rem;
+  background: var(--line);
+  transition: background-color 180ms ease;
+}
+
+.settings-list button > i.theme-toggle b {
+  display: block;
+  width: 0.95rem;
+  height: 0.95rem;
+  margin: 0.14rem 0 0 0.14rem;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: 0 1px 3px oklch(0 0 0 / 0.25);
+  transition: transform 180ms ease;
+}
+
+.settings-list button > i.theme-toggle.toggle-on {
+  background: var(--teal);
+}
+
+.settings-list button > i.theme-toggle.toggle-on b {
+  transform: translateX(0.9rem);
+}
+
+/* ---------- 暗色模式 ---------- */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --ink: oklch(0.92 0.008 258);
+  --muted: oklch(0.7 0.01 258);
+  --soft-muted: oklch(0.58 0.01 258);
+  --paper: oklch(0.19 0.006 258);
+  --surface: oklch(0.24 0.008 258);
+  --surface-soft: oklch(0.29 0.01 258);
+  --line: oklch(0.34 0.008 258);
+  --navy: oklch(0.24 0.012 258);
+  --navy-light: oklch(0.46 0.02 258);
+  --lime: oklch(0.66 0.18 255);
+  --lime-soft: oklch(0.3 0.05 255);
+  --teal: oklch(0.66 0.18 255);
+  --orange: oklch(0.66 0.18 255);
+  --glass: oklch(0.22 0.008 258 / 0.76);
+  --shadow: 0 1.5rem 4rem oklch(0 0 0 / 0.45);
+}
+
+html[data-theme="dark"] {
+  background: oklch(0.13 0.005 258);
+}
+
+[data-theme="dark"] body {
+  background:
+    radial-gradient(circle at 50% 0%, oklch(0.22 0.03 255), transparent 48%),
+    oklch(0.14 0.005 258);
+}
+
+[data-theme="dark"] .phone-app {
+  background:
+    radial-gradient(circle at 100% 0%, oklch(0.24 0.03 255), transparent 30%),
+    var(--paper);
+}
+
+[data-theme="dark"] .topbar,
+[data-theme="dark"] .feature-header {
+  background: oklch(0.2 0.006 258 / 0.78);
+  box-shadow: inset 0 -1px 0 oklch(1 0 0 / 0.06);
+}
+
+[data-theme="dark"] .bottom-nav {
+  border-color: oklch(1 0 0 / 0.12);
+  background: oklch(0.2 0.008 258 / 0.92);
+  box-shadow: 0 0.45rem 1.8rem oklch(0 0 0 / 0.45);
+}
+
+[data-theme="dark"] .dialogue-start-bar {
+  background: oklch(0.2 0.006 258 / 0.94);
+}
+
+[data-theme="dark"] .device-pill,
+[data-theme="dark"] .hub-device {
+  background: oklch(0.28 0.02 255 / 0.5);
+  box-shadow: inset 0 0 0 1px oklch(0.66 0.18 255 / 0.2);
+}
+
+[data-theme="dark"] .device-hero {
+  background:
+    radial-gradient(circle at 86% 20%, oklch(0.32 0.06 255), transparent 34%),
+    linear-gradient(145deg, oklch(0.24 0.02 255), oklch(0.18 0.012 258));
+  box-shadow: inset 0 0 0 1px oklch(1 0 0 / 0.08);
+}
+
+[data-theme="dark"] .dialogue-mode-card.active {
+  background: oklch(0.26 0.03 255);
+}
+
+/* 强调色背景上的文字保持深色(强调色在暗色下提亮) */
+[data-theme="dark"] .start-button,
+[data-theme="dark"] .translated-phrase {
+  color: oklch(0.17 0.01 258);
+}
+
+/* ---------- 暗色模式补修:"navy/深底白字"卡片文字恢复亮色 ----------
+   浅色主题下 navy 是亮蓝底配 surface 白字;
+   暗色下 navy 与 surface 同时变深, 深底深字不可读, 统一改回亮字 */
+[data-theme="dark"] .sleep-page,
+[data-theme="dark"] .sleep-page .section-heading h2,
+[data-theme="dark"] .sound-card,
+[data-theme="dark"] .home-sleep-row,
+[data-theme="dark"] .meeting-orb,
+[data-theme="dark"] .live-session,
+[data-theme="dark"] .live-header,
+[data-theme="dark"] .device-hero,
+[data-theme="dark"] .desktop-story,
+[data-theme="dark"] .record-meeting,
+[data-theme="dark"] .editor-save,
+[data-theme="dark"] .mini-connect,
+[data-theme="dark"] .meeting-confirm-actions .confirm-end,
+[data-theme="dark"] .pro-card,
+[data-theme="dark"] .pack-download,
+[data-theme="dark"] .turn-ring,
+[data-theme="dark"] .turn-stage h1,
+[data-theme="dark"] .compact-phrase > span {
+  color: var(--ink);
+}
+
+/* 白底卡(dialogue-preview/hub-live-card 背景最终走 var(--ink))上的
+   中灰文字在暗色下加深 */
+[data-theme="dark"] .dialogue-preview p,
+[data-theme="dark"] .person small,
+[data-theme="dark"] .smart-route span,
+[data-theme="dark"] .scene-user small {
+  color: oklch(0.45 0.01 258);
+}
+
+/* 白底卡上的蓝色 eyebrow 在暗色下加深 */
+[data-theme="dark"] .dialogue-preview .eyebrow,
+[data-theme="dark"] .hub-live-card .eyebrow {
+  color: oklch(0.48 0.13 252);
+}
+
+/* 白底返回/设置圆钮的图标在暗色下加深 */
+[data-theme="dark"] .feature-back,
+[data-theme="dark"] .feature-settings,
+[data-theme="dark"] .page-icon-button {
+  color: oklch(0.4 0.01 258);
+}
+
+/* lime/teal 亮底上的文字在暗色下强制深色(亮底深字) */
+[data-theme="dark"] .language-person,
+[data-theme="dark"] .speaker-avatar,
+[data-theme="dark"] .speaker-b,
+[data-theme="dark"] .hub-main-action,
+[data-theme="dark"] .hub-mic-action,
+[data-theme="dark"] .add-shortcut,
+[data-theme="dark"] .dialogue-start-bar > button,
+[data-theme="dark"] .subscription-actions button:first-child,
+[data-theme="dark"] .turn-stage.active .turn-ring,
+[data-theme="dark"] .compact-phrase.translated > span {
+  color: oklch(0.17 0.01 258);
+}
+
+/* "背景走 var(--ink)"的反转卡(浅色墨蓝深底白字, 暗色下变白底):
+   头像、设备卡、离线英雄、会议状态卡、管理按钮等, 暗色下配深字 */
+[data-theme="dark"] .user-avatar,
+[data-theme="dark"] .my-device-card,
+[data-theme="dark"] .offline-hero,
+[data-theme="dark"] .meeting-status-card,
+[data-theme="dark"] .manage-button {
+  color: oklch(0.17 0.01 258);
+}
+
+/* 白底反转卡内的次级文字(中灰)在暗色下加深 */
+[data-theme="dark"] .my-device-card small,
+[data-theme="dark"] .my-device-card b,
+[data-theme="dark"] .offline-hero small,
+[data-theme="dark"] .offline-hero p,
+[data-theme="dark"] .meeting-status-card small,
+[data-theme="dark"] .meeting-status-card p,
+[data-theme="dark"] .device-battery-grid small,
+[data-theme="dark"] .my-device-card .device-actions button,
+[data-theme="dark"] .my-device-card .text-button,
+[data-theme="dark"] .meeting-status-card .meeting-languages {
+  color: oklch(0.42 0.015 258);
+}
+
+/* 白底状态卡上的 eyebrow 在暗色下加深 */
+[data-theme="dark"] .meeting-status-card .eyebrow {
+  color: oklch(0.48 0.13 252);
+}
+
+/* 摘要徽标: 暗色下 lime-soft 变深底, 配亮蓝字 */
+[data-theme="dark"] .summary-badge,
+[data-theme="dark"] .language-code {
+  color: var(--lime);
+}
+
+/* 开始按钮(暗色白底)副文案: 恢复不透明深灰 */
+[data-theme="dark"] .start-button small {
+  color: oklch(0.42 0.02 258);
+  opacity: 1;
+}
+
+/* 硬编码亮蓝底的翻译短语卡: 暗色下配深字 */
+[data-theme="dark"] .compact-phrase.translated {
+  color: oklch(0.25 0.04 255);
+}
+
+/* 记录页筛选胶囊(硬编码亮白底): 暗色下配深灰字 */
+[data-theme="dark"] .filter-row button {
+  color: oklch(0.4 0.015 258);
+}
+
+/* ---------- 减少动态效果(全覆盖) ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

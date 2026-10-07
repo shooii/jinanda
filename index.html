@@ -1,10 +1,29 @@
 <!doctype html>
-<html lang="<!-- figma:lang -->">
+<html lang="zh-CN">
   <head>
     <!-- figma:head-start -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><!-- figma:title --></title>
+    <title>LingoPods · AI 翻译耳机</title>
+    <script>
+      try {
+        var rawTheme = localStorage.getItem("lingo.theme")
+        var theme = null
+        if (rawTheme) {
+          try {
+            theme = JSON.parse(rawTheme)
+          } catch (error) {}
+        }
+        if (theme !== "dark" && theme !== "light") {
+          theme =
+            window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light"
+        }
+        document.documentElement.dataset.theme = theme
+      } catch (error) {}
+    </script>
     <!-- figma:head-end -->
   </head>
   <body>

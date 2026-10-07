@@ -21,3 +21,6 @@ logs/
 /.opencode-skills/
 
 .pnpm-store/
+
+# WorkBuddy agent state
+.workbuddy/

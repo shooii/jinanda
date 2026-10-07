@@ -1,0 +1,11 @@
+{
+  "title": "LingoPods",
+  "description": "This app enhances user experience for overseas customers by offering innovative features while streamlining functionality, driving subscriptions for audio device users.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

@@ -1,5 +1,7 @@
+import { useState } from "react"
 import { AppButton } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
+import type { IconName } from "@/components/Icon"
 import { useEscapeKey } from "@/lib/core"
 
 
@@ -10,19 +12,9 @@ export type Shortcut = {
   detail: string
   icon: IconName
   enabled: boolean
-  featured?: boolean
-  badge?: string
 }
 
 export const defaultShortcuts: Shortcut[] = [
-  {
-    id: "face",
-    title: "面对面翻译",
-    detail: "实时双向对话",
-    icon: "globe",
-    enabled: true,
-    featured: true,
-  },
   {
     id: "meeting",
     title: "会议记录",
@@ -36,7 +28,6 @@ export const defaultShortcuts: Shortcut[] = [
     detail: "离线也能使用",
     icon: "plane",
     enabled: true,
-    badge: "新功能",
   },
   {
     id: "camera",
@@ -47,10 +38,10 @@ export const defaultShortcuts: Shortcut[] = [
   },
   {
     id: "call",
-    title: "通话翻译",
-    detail: "实时翻译语音通话",
-    icon: "headphones",
-    enabled: false,
+    title: "音视频通话",
+    detail: "通话实时翻译",
+    icon: "phone",
+    enabled: true,
   },
   {
     id: "text",
@@ -59,7 +50,37 @@ export const defaultShortcuts: Shortcut[] = [
     icon: "notes",
     enabled: false,
   },
+  {
+    id: "watch",
+    title: "媒体同传",
+    detail: "电影 · 网课听成母语",
+    icon: "monitor",
+    enabled: false,
+  },
+  {
+    id: "coach",
+    title: "口语教练",
+    detail: "AI 评分你的发音",
+    icon: "sparkles",
+    enabled: false,
+  },
 ]
+
+/**
+ * 用最新目录补齐历史数据。
+ * localStorage 里的 shortcuts 是「整体替换」语义，老用户存的旧数组缺少后来新增的功能
+ * （例如「音视频通话」），会导致新功能在首页与「更多功能」里都不可见。
+ * 这里保留用户自己的启用状态与排序，只把目录里缺失的条目按默认值追加到末尾。
+ */
+export function mergeShortcuts(stored: Shortcut[]): Shortcut[] {
+  if (!Array.isArray(stored) || stored.length === 0) {
+    return defaultShortcuts.map((item) => ({ ...item }))
+  }
+  const known = new Set(stored.map((item) => item?.id))
+  const missing = defaultShortcuts.filter((item) => !known.has(item.id))
+  if (!missing.length) return stored
+  return [...stored, ...missing.map((item) => ({ ...item }))]
+}
 
 export function ShortcutEditor({
   shortcuts,
@@ -71,7 +92,7 @@ export function ShortcutEditor({
   onSave: (shortcuts: Shortcut[]) => void
 }) {
   const [draft, setDraft] = useState(shortcuts)
-  const [notice, setNotice] = useState("首页最多展示 4 个快捷功能")
+  const [notice, setNotice] = useState("首页最多展示 5 个快捷功能")
   useEscapeKey(onClose)
   const enabled = draft.filter((item) => item.enabled)
   const available = draft.filter((item) => !item.enabled)
@@ -79,7 +100,7 @@ export function ShortcutEditor({
   const toggle = (id: string) => {
     const target = draft.find((item) => item.id === id)
     if (!target) return
-    if (!target.enabled && enabled.length >= 4) {
+    if (!target.enabled && enabled.length >= 5) {
       setNotice("请先移除一个快捷功能，再添加新的")
       return
     }
@@ -139,7 +160,7 @@ export function ShortcutEditor({
         <div className="editor-hint">
           <Icon name="sparkles" size={16} />
           <span>{notice}</span>
-          <b>{enabled.length}/4</b>
+          <b>{enabled.length}/5</b>
         </div>
 
         <section className="editor-section">

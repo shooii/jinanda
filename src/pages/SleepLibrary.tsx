@@ -1,28 +1,32 @@
 import { useState } from "react"
-import { AppButton } from "@/components/AppButton"
+import { AppButton, toast } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
+import { useT } from "@/lib/i18n"
 
 
 
 export function SleepLibrary({ onBack }: { onBack: () => void }) {
-  const [playing, setPlaying] = useState("深海白噪音")
+  const t = useT()
+  const [playing, setPlaying] = useState(t("sleep.trackOceanTitle"))
+  const [timerOn, setTimerOn] = useState(false)
+  const [volumeOn, setVolumeOn] = useState(false)
   const tracks = [
-    { title: "深海白噪音", detail: "海浪 · 45 分钟", art: "ocean" },
-    { title: "森林雨夜", detail: "自然声 · 60 分钟", art: "forest" },
-    { title: "云端漫步", detail: "氛围音乐 · 30 分钟", art: "cloud" },
-    { title: "壁炉微光", detail: "环境声 · 90 分钟", art: "fire" },
+    { title: t("sleep.trackOceanTitle"), detail: t("sleep.trackOceanDetail"), art: "ocean" },
+    { title: t("sleep.trackForestTitle"), detail: t("sleep.trackForestDetail"), art: "forest" },
+    { title: t("sleep.trackCloudTitle"), detail: t("sleep.trackCloudDetail"), art: "cloud" },
+    { title: t("sleep.trackFireTitle"), detail: t("sleep.trackFireDetail"), art: "fire" },
   ]
 
   return (
     <main className="tab-page sleep-page">
       <AppButton className="sleep-back" onClick={onBack}>
-        <Icon name="chevron" size={17} /> 返回首页
+        <Icon name="chevron" size={17} /> {t("sleep.back")}
       </AppButton>
       <header className="page-header sleep-heading">
         <div>
-          <span className="eyebrow">晚安模式</span>
-          <h1>让耳朵慢下来</h1>
-          <p>专为耳机优化的舒缓声景与睡眠定时。</p>
+          <span className="eyebrow">{t("sleep.eyebrow")}</span>
+          <h1>{t("sleep.title")}</h1>
+          <p>{t("sleep.desc")}</p>
         </div>
         <span className="moon-orbit">
           <Icon name="moon" size={26} />
@@ -37,17 +41,17 @@ export function SleepLibrary({ onBack }: { onBack: () => void }) {
           <Icon name="moon" size={30} />
         </div>
         <div className="playing-copy">
-          <span>正在播放</span>
+          <span>{t("sleep.playing")}</span>
           <strong>{playing}</strong>
-          <small>睡眠定时 · 45 分钟后停止</small>
+          <small>{t("sleep.timerNote")}</small>
           <div className="sound-progress">
             <i />
           </div>
         </div>
         <AppButton
-          ariaLabel="暂停助眠音乐"
+          ariaLabel={t("sleep.pauseAria")}
           className="play-main"
-          onClick={() => setPlaying(playing ? "" : "深海白噪音")}
+          onClick={() => setPlaying(playing ? "" : t("sleep.trackOceanTitle"))}
         >
           <Icon name={playing ? "pause" : "play"} size={22} />
         </AppButton>
@@ -56,10 +60,19 @@ export function SleepLibrary({ onBack }: { onBack: () => void }) {
       <section className="sound-section">
         <div className="section-heading">
           <div>
-            <span className="eyebrow">为你推荐</span>
-            <h2>热门声景</h2>
+            <span className="eyebrow">{t("sleep.recommended")}</span>
+            <h2>{t("sleep.popular")}</h2>
           </div>
-          <AppButton className="text-button">查看全部</AppButton>
+          <AppButton
+            className="text-button"
+            onClick={() => {
+              const next = tracks[0]
+              setPlaying(next.title)
+              toast(`已播放：${next.title}`)
+            }}
+          >
+            <Icon name="play" size={14} /> {t("sleep.viewAll")}
+          </AppButton>
         </div>
         <div className="sound-grid">
           {tracks.map((track) => (
@@ -85,26 +98,28 @@ export function SleepLibrary({ onBack }: { onBack: () => void }) {
       </section>
 
       <section className="sleep-tools">
-        <div>
+        <AppButton onClick={() => setTimerOn((value) => !value)}>
           <span>
             <Icon name="moon" />
           </span>
           <p>
-            <strong>睡眠定时</strong>
-            <small>45 分钟后停止</small>
+            <strong>{t("sleep.timerTitle")}</strong>
+            <small>{timerOn ? "30 分钟后自动停止" : t("sleep.timerSub")}</small>
           </p>
-          <Icon name="chevron" />
-        </div>
-        <div>
+          <i className={`sleep-toggle ${timerOn ? "on" : ""}`} />
+        </AppButton>
+        <AppButton onClick={() => setVolumeOn((value) => !value)}>
           <span>
             <Icon name="audio" />
           </span>
           <p>
-            <strong>智能音量</strong>
-            <small>入睡后缓慢降低</small>
+            <strong>{t("sleep.volumeTitle")}</strong>
+            <small>
+              {volumeOn ? "已开启随睡眠自动降音" : t("sleep.volumeSub")}
+            </small>
           </p>
-          <Icon name="chevron" />
-        </div>
+          <i className={`sleep-toggle ${volumeOn ? "on" : ""}`} />
+        </AppButton>
       </section>
     </main>
   )

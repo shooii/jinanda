@@ -5,11 +5,12 @@ import type { ReactNode } from "react"
 
 export let toastListener: ((message: string) => void) | null = null
 
-export function demoToast(message = "原型演示：该功能开发中") {
+/** 轻提示：用于反馈操作结果（保存成功、已复制、请先填写等） */
+export function toast(message: string) {
   toastListener?.(message)
 }
 
-export function DemoToast() {
+export function AppToast() {
   const [message, setMessage] = useState<string | null>(null)
   const timer = useRef<number | null>(null)
 
@@ -27,7 +28,7 @@ export function DemoToast() {
 
   if (!message) return null
   return (
-    <div className="saved-toast demo-toast" role="status">
+    <div className="saved-toast" role="status" aria-live="polite">
       {message}
     </div>
   )
@@ -38,17 +39,20 @@ export function AppButton({
   className = "",
   onClick,
   ariaLabel,
+  disabled,
 }: {
   children: ReactNode
   className?: string
   onClick?: () => void
   ariaLabel?: string
+  disabled?: boolean
 }) {
   return (
     <button
       aria-label={ariaLabel}
       className={className}
-      onClick={onClick ?? (() => demoToast())}
+      disabled={disabled}
+      onClick={onClick}
       type="button"
     >
       {children}

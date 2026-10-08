@@ -1,102 +1,206 @@
-import { useEffect, useState } from "react"
-import { AppButton } from "@/components/AppButton"
+import { useState } from "react"
+import { AppButton, toast } from "@/components/AppButton"
+import { MiniBattery } from "@/components/BatteryPair"
 import { Earbuds, Icon } from "@/components/Icon"
 import { useEscapeKey, usePersistentState } from "@/lib/core"
+import {
+  themeDetailKey,
+  themeLabelKey,
+  themeModes,
+  useThemeMode,
+} from "@/lib/theme"
+import type { ThemeMode } from "@/lib/theme"
+import { DeviceCare } from "@/features/DeviceCare"
+import type { CareMode } from "@/features/DeviceCare"
+import { DeviceFitTest } from "@/features/DeviceFitTest"
+import { EqSettings, defaultEq, eqPresetLabel } from "@/features/EqSettings"
+import type { EqState } from "@/features/EqSettings"
+import { FindDevice } from "@/features/FindDevice"
+import { GestureSettings } from "@/features/GestureSettings"
+import { LegalDocument } from "@/features/LegalDocument"
+import type { LegalDocId } from "@/features/LegalDocument"
+import { ServiceStatus } from "@/features/ServiceStatus"
+import { SubscriptionManage } from "@/features/SubscriptionManage"
+import { SupportCenter } from "@/features/SupportCenter"
+import { WarrantyInfo } from "@/features/WarrantyInfo"
+import { channelById, regionById } from "@/lib/payments"
+import {
+  usePlan,
+  useVocabulary,
+  vocabularyCategories,
+  useDevices,
+} from "@/lib/store"
+import { allLanguages, langOption } from "@/lib/translate"
+import { useAppLanguage, useT } from "@/lib/i18n"
 
 
+
+type PanelId =
+  | "device"
+  | "language"
+  | "vocabulary"
+  | "privacy"
+  | "theme"
+  | null
+
+type OverlayId =
+  | "find"
+  | "gesture"
+  | "eq"
+  | "fit"
+  | "warranty"
+  | "support"
+  | "legal"
+  | "status"
+  | "billing"
+  | "devices"
+  | CareMode
+  | null
+
+const vocabCategoryKey: Record<string, string> = {
+  "产品名称": "vocab.cat.product",
+  "地点": "vocab.cat.place",
+  "联系人姓名": "vocab.cat.contact",
+  "专业术语": "vocab.cat.term",
+  "其他": "vocab.cat.other",
+}
 
 export function Profile({
   onConnect,
   onMembership,
+  onSleep,
 }: {
   onConnect: () => void
   onMembership: () => void
+  onSleep: () => void
 }) {
-  const [panel, setPanel] =
-    useState<"device" | "language" | "vocabulary" | "privacy" | "help" | null>(
-      null,
-    )
-  const [finding, setFinding] = useState(false)
-  const [theme, setTheme] = usePersistentState(
-    "lingo.theme",
-    document.documentElement.dataset.theme === "dark" ? "dark" : "light",
+  const [panel, setPanel] = useState<PanelId>(null)
+  const [overlay, setOverlay] = useState<OverlayId>(null)
+  const [legalDoc, setLegalDoc] = useState<LegalDocId>("privacy")
+  const [theme, setTheme] = useThemeMode()
+  const [eq, setEq] = usePersistentState<EqState>("lingo.eq", defaultEq)
+  const [plan] = usePlan()
+  const [appLang, setAppLang] = useAppLanguage()
+  const t = useT()
+  const channel = channelById(plan.channel)
+  const region = regionById(plan.regionId)
+  const vocabulary = useVocabulary()
+  const { active } = useDevices()
+  const [vocabEditing, setVocabEditing] = useState<string | null>(null)
+  const [vocabTerm, setVocabTerm] = useState("")
+  const [vocabCategory, setVocabCategory] = useState<string>(
+    vocabularyCategories[0],
+  )
+  const [vocabNote, setVocabNote] = useState("")
+  const [otaState, setOtaState] = useState<
+    "idle" | "checking" | "downloading" | "installing" | "done"
+  >("idle")
+  const [anc, setAnc] = usePersistentState<"off" | "trans" | "on" | "deep">(
+    "lingo.anc",
+    "on",
   )
 
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme
-  }, [theme])
+  const otaBusy =
+    otaState === "checking" ||
+    otaState === "downloading" ||
+    otaState === "installing"
+
+  const runOta = () => {
+    if (otaBusy) return
+    setOtaState("checking")
+    setTimeout(() => setOtaState("downloading"), 1200)
+    setTimeout(() => setOtaState("installing"), 2400)
+    setTimeout(() => setOtaState("done"), 3600)
+  }
+
+  const otaLabel = () => {
+    if (otaState === "checking") return `${t("ota.check")}…`
+    if (otaState === "downloading") return t("ota.downloading")
+    if (otaState === "installing") return t("ota.installing")
+    if (otaState === "done") return t("ota.latest")
+    return t("ota.check")
+  }
+
+  const ancModes: ("off" | "trans" | "on" | "deep")[] = [
+    "off",
+    "trans",
+    "on",
+    "deep",
+  ]
 
   useEscapeKey(() => {
-    if (finding) setFinding(false)
+    if (overlay) setOverlay(null)
     else if (panel) setPanel(null)
   })
+
+  const themeLabel = (mode: ThemeMode) => t(themeLabelKey(mode))
+
+  const appLangMeta = langOption(appLang)
 
   return (
     <main className="tab-page profile-page">
       <header className="page-header">
         <div>
-          <span className="eyebrow">个人中心</span>
-          <h1>我的</h1>
+          <span className="eyebrow">{t("profile.eyebrow")}</span>
+          <h1>{t("profile.title")}</h1>
         </div>
-        <AppButton
-          ariaLabel="个人设置"
-          className="page-icon-button"
-          onClick={() => setPanel("device")}
-        >
-          <Icon name="settings" />
-        </AppButton>
       </header>
 
       <section className="user-card">
         <span className="user-avatar">YL</span>
         <div>
           <strong>远行者</strong>
-          <small>已连续使用 12 天</small>
+          <small>{t("profile.days")}</small>
         </div>
-        <span className="level-pill">探索者</span>
+        <span className="level-pill">{t("profile.level")}</span>
       </section>
 
       <section className="my-device-card">
         <div className="device-card-head">
           <div>
             <span className="eyebrow">
-              <i /> 已连接
+              <i className={`conn-dot ${active.status}`} />
+              {active.status === "connected"
+                ? t("profile.connected")
+                : active.status === "connecting"
+                  ? t("devices.statusConnecting")
+                  : t("devices.statusDisconnected")}
             </span>
-            <h2>LingoPods Pro</h2>
+            <h2>{active.name}</h2>
           </div>
           <AppButton className="text-button" onClick={onConnect}>
-            管理
+            {t("profile.manage")}
           </AppButton>
         </div>
         <div className="device-display">
           <Earbuds />
           <div className="device-battery-grid">
             <span>
-              <small>左耳</small>
-              <strong>88%</strong>
+              <small>{t("profile.earLeft")}</small>
+              <MiniBattery level={active.leftBattery} side="L" />
             </span>
             <span>
-              <small>右耳</small>
-              <strong>84%</strong>
+              <small>{t("profile.earRight")}</small>
+              <MiniBattery level={active.rightBattery} side="R" />
             </span>
             <span>
-              <small>充电盒</small>
-              <strong>62%</strong>
+              <small>{t("profile.earCase")}</small>
+              <MiniBattery level={active.caseBattery} side="盒" />
             </span>
           </div>
         </div>
         <div className="device-actions">
           <AppButton onClick={onConnect}>
             <Icon name="bluetooth" />
-            <span>重新连接</span>
+            <span>{t("profile.reconnect")}</span>
           </AppButton>
-          <AppButton onClick={() => setFinding(true)}>
-            <Icon name="audio" />
-            <span>查找耳机</span>
+          <AppButton onClick={() => setOverlay("find")}>
+            <Icon name="pin" />
+            <span>{t("profile.find")}</span>
           </AppButton>
           <AppButton onClick={() => setPanel("device")}>
             <Icon name="settings" />
-            <span>设备设置</span>
+            <span>{t("profile.deviceSettings")}</span>
           </AppButton>
         </div>
       </section>
@@ -106,42 +210,35 @@ export function Profile({
           <Icon name="sparkles" />
         </span>
         <div>
-          <small>LINGO+ 会员</small>
-          <strong>设备赠送权益使用中</strong>
+          <small>{t("profile.memberLabel")}</small>
+          <strong>{t("profile.memberDetail")}</strong>
           <i>
-            <b /> 还剩 10 个月
+            <b /> {t("profile.memberLeft")}
           </i>
         </div>
         <Icon name="chevron" />
       </AppButton>
 
       <section className="settings-list">
-        <AppButton
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-        >
+        <AppButton onClick={() => setPanel("theme")}>
           <span>
-            <Icon name="moon" />
+            <Icon name={theme === "dark" ? "moon" : theme === "light" ? "sun" : "monitor"} />
           </span>
           <div>
-            <strong>深色模式</strong>
+            <strong>{t("profile.theme")}</strong>
             <small>
-              {theme === "dark" ? "已开启 · 适合夜间使用" : "关闭 · 白天更清爽"}
+              {themeLabel(theme)}{theme === "system" ? ` · ${t("profile.themeAuto")}` : ""}
             </small>
           </div>
-          <i
-            className={`theme-toggle ${theme === "dark" ? "toggle-on" : ""}`}
-            aria-hidden="true"
-          >
-            <b />
-          </i>
+          <Icon name="chevron" />
         </AppButton>
         <AppButton onClick={() => setPanel("language")}>
           <span>
             <Icon name="globe" />
           </span>
           <div>
-            <strong>翻译语言</strong>
-            <small>中文、英语、西班牙语</small>
+            <strong>{t("profile.language")}</strong>
+            <small>{`${appLangMeta.native} ${appLangMeta.label}`}</small>
           </div>
           <Icon name="chevron" />
         </AppButton>
@@ -150,8 +247,8 @@ export function Profile({
             <Icon name="sparkles" />
           </span>
           <div>
-            <strong>个人词汇</strong>
-            <small>姓名、地点和专业术语</small>
+            <strong>{t("profile.vocabulary")}</strong>
+            <small>{t("profile.vocabularyDetail")}</small>
           </div>
           <Icon name="chevron" />
         </AppButton>
@@ -160,67 +257,102 @@ export function Profile({
             <Icon name="notes" />
           </span>
           <div>
-            <strong>数据与隐私</strong>
-            <small>记录仅保存在你的账户中</small>
+            <strong>{t("profile.privacy")}</strong>
+            <small>{t("profile.privacyDetail")}</small>
           </div>
           <Icon name="chevron" />
         </AppButton>
-        <AppButton onClick={() => setPanel("help")}>
+        <AppButton onClick={() => setOverlay("support")}>
           <span>
             <Icon name="headphones" />
           </span>
           <div>
-            <strong>帮助与支持</strong>
-            <small>连接指南、常见问题</small>
+            <strong>{t("profile.support")}</strong>
+            <small>{t("profile.supportDetail")}</small>
+          </div>
+          <Icon name="chevron" />
+        </AppButton>
+        <AppButton onClick={() => setOverlay("billing")}>
+          <span>
+            <Icon name="card" />
+          </span>
+          <div>
+            <strong>{t("profile.billing")}</strong>
+            <small>
+              {channel ? channel.name : t("profile.billingGift")} · {region.currency}
+            </small>
+          </div>
+          <Icon name="chevron" />
+        </AppButton>
+        <AppButton onClick={onSleep}>
+          <span>
+            <Icon name="moon" />
+          </span>
+          <div>
+            <strong>夜间白噪音</strong>
+            <small>助眠音景 · 定时关闭</small>
           </div>
           <Icon name="chevron" />
         </AppButton>
       </section>
       <small className="app-version">
-        LingoPods 1.0 MVP · 设备编号 LP-8821
+        LingoPods 1.0 MVP · 设备编号 {active.model || "—"}
       </small>
       <div className="service-footer">
         <span>
-          <i /> 所有服务运行正常
+          <i /> {t("profile.servicesOk")}
         </span>
         <div>
-          <AppButton>隐私政策</AppButton>
-          <AppButton>用户协议</AppButton>
-          <AppButton>服务状态</AppButton>
+          <AppButton
+            onClick={() => {
+              setLegalDoc("privacy")
+              setOverlay("legal")
+            }}
+          >
+            {t("profile.privacyPolicy")}
+          </AppButton>
+          <AppButton
+            onClick={() => {
+              setLegalDoc("agreement")
+              setOverlay("legal")
+            }}
+          >
+            {t("profile.agreement")}
+          </AppButton>
+          <AppButton onClick={() => setOverlay("status")}>
+            {t("profile.serviceStatus")}
+          </AppButton>
         </div>
       </div>
-      {finding && (
-        <div className="find-device-backdrop">
-          <div
-            className="find-device-card"
-            role="dialog"
-            aria-modal="true"
-            aria-label="查找耳机"
-          >
-            <AppButton
-              ariaLabel="关闭查找耳机"
-              onClick={() => setFinding(false)}
-            >
-              <Icon name="close" />
-            </AppButton>
-            <div className="find-radar">
-              <i />
-              <i />
-              <span>
-                <Icon name="headphones" size={30} />
-              </span>
-            </div>
-            <span className="eyebrow">正在播放提示音</span>
-            <h2>耳机就在附近</h2>
-            <p>声音将逐渐增大。找到耳机后，请点击下方按钮停止。</p>
-            <AppButton
-              className="manage-button"
-              onClick={() => setFinding(false)}
-            >
-              已找到，停止播放
-            </AppButton>
-          </div>
-        </div>
+      {overlay === "find" && (
+        <FindDevice onClose={() => setOverlay(null)} />
+      )}
+      {overlay === "gesture" && (
+        <GestureSettings onClose={() => setOverlay(null)} />
+      )}
+      {overlay === "eq" && (
+        <EqSettings eq={eq} onChange={setEq} onClose={() => setOverlay(null)} />
+      )}
+      {(overlay === "clean" || overlay === "eject") && (
+        <DeviceCare mode={overlay} onClose={() => setOverlay(null)} />
+      )}
+      {overlay === "fit" && (
+        <DeviceFitTest onClose={() => setOverlay(null)} />
+      )}
+      {overlay === "warranty" && (
+        <WarrantyInfo onClose={() => setOverlay(null)} />
+      )}
+      {overlay === "support" && (
+        <SupportCenter onClose={() => setOverlay(null)} />
+      )}
+      {overlay === "legal" && (
+        <LegalDocument doc={legalDoc} onClose={() => setOverlay(null)} />
+      )}
+      {overlay === "status" && (
+        <ServiceStatus onClose={() => setOverlay(null)} />
+      )}
+      {overlay === "billing" && (
+        <SubscriptionManage onClose={() => setOverlay(null)} />
       )}
       {panel && (
         <div className="profile-panel-backdrop" onClick={() => setPanel(null)}>
@@ -229,84 +361,223 @@ export function Profile({
             onClick={(event) => event.stopPropagation()}
             role="dialog"
             aria-modal="true"
-            aria-label="设置"
+            aria-label={t("settings.eyebrow")}
           >
             <div className="sheet-handle" />
             <header>
               <div>
-                <span className="eyebrow">设置</span>
+                <span className="eyebrow">{t("settings.eyebrow")}</span>
                 <h2>
                   {panel === "device"
-                    ? "设备偏好"
+                    ? t("panel.device")
                     : panel === "language"
-                      ? "翻译语言"
+                      ? t("panel.language")
                       : panel === "vocabulary"
-                        ? "个人词汇"
+                        ? t("panel.vocabulary")
                         : panel === "privacy"
-                          ? "数据与隐私"
-                          : "帮助与支持"}
+                          ? t("panel.privacy")
+                          : panel === "theme"
+                            ? t("panel.theme")
+                            : t("panel.support")}
                 </h2>
               </div>
               <AppButton onClick={() => setPanel(null)}>
                 <Icon name="close" />
               </AppButton>
             </header>
+            {panel === "theme" && (
+              <div className="theme-mode-panel">
+                <div className="panel-options theme-mode-options">
+                  {themeModes.map((mode) => (
+                    <AppButton
+                      className={theme === mode.id ? "selected" : ""}
+                      key={mode.id}
+                      onClick={() => setTheme(mode.id)}
+                    >
+                      <span className="theme-mode-icon">
+                        <Icon name={mode.icon} size={20} />
+                      </span>
+                      <span>
+                        <strong>{t(themeLabelKey(mode.id))}</strong>
+                        <small>{t(themeDetailKey(mode.id))}</small>
+                      </span>
+                      {theme === mode.id && <Icon name="check" />}
+                    </AppButton>
+                  ))}
+                </div>
+                <p className="theme-mode-note">
+                  <Icon name="monitor" size={15} />
+                  {t("theme.note")}
+                </p>
+              </div>
+            )}
             {panel === "language" && (
-              <div className="panel-options">
-                <AppButton className="selected">
-                  <span>中文（普通话）</span>
-                  <Icon name="check" />
-                </AppButton>
-                <AppButton>
-                  <span>英语（美国）</span>
-                  <Icon name="check" />
-                </AppButton>
-                <AppButton>
-                  <span>西班牙语</span>
-                  <Icon name="plus" />
-                </AppButton>
+              <div className="language-panel">
+                <p className="language-panel-note">{t("language.note")}</p>
+                <div className="panel-options theme-mode-options">
+                  {allLanguages.map((item) => {
+                    const on = appLang === item.id
+                    return (
+                      <AppButton
+                        className={on ? "selected" : ""}
+                        key={item.id}
+                        onClick={() => {
+                          setAppLang(item.id)
+                          toast(t("toast.languageChanged"))
+                        }}
+                      >
+                        <span className="language-code">
+                          {item.id.toUpperCase()}
+                        </span>
+                        <span>
+                          <strong>{item.native}</strong>
+                          <small>{item.label}</small>
+                        </span>
+                        {on && <Icon name="check" />}
+                      </AppButton>
+                    )
+                  })}
+                </div>
               </div>
             )}
             {panel === "vocabulary" && (
               <div className="vocabulary-panel">
                 <div className="vocabulary-stats">
-                  <strong>12</strong>
-                  <span>个词汇已用于提升识别准确率</span>
+                  <strong>{vocabulary.entries.length}</strong>
+                  <span>
+                    {t("vocab.stats")}
+                    {vocabulary.entries.length === 0 ? t("vocab.statsTip") : ""}
+                  </span>
                 </div>
-                <div className="vocabulary-list">
-                  <div>
-                    <span>
-                      <strong>LingoPods</strong>
-                      <small>产品名称 · 按英文发音</small>
-                    </span>
-                    <AppButton>编辑</AppButton>
+
+                {vocabEditing ? (
+                  <div className="vocab-editor">
+                    <label className="form-field">
+                      <span>{t("vocab.word")}</span>
+                      <input
+                        onChange={(event) => setVocabTerm(event.target.value)}
+                        placeholder={t("vocab.wordPlaceholder")}
+                        value={vocabTerm}
+                      />
+                    </label>
+                    <label className="form-field">
+                      <span>{t("vocab.category")}</span>
+                      <div className="chip-row">
+                        {vocabularyCategories.map((item) => (
+                          <AppButton
+                            className={vocabCategory === item ? "active" : ""}
+                            key={item}
+                            onClick={() => setVocabCategory(item)}
+                          >
+                            {t(vocabCategoryKey[item] ?? "vocab.cat.other")}
+                          </AppButton>
+                        ))}
+                      </div>
+                    </label>
+                    <label className="form-field">
+                      <span>{t("vocab.noteLabel")}</span>
+                      <input
+                        onChange={(event) => setVocabNote(event.target.value)}
+                        placeholder={t("vocab.notePlaceholder")}
+                        value={vocabNote}
+                      />
+                    </label>
+                    <div className="stack-actions">
+                      <AppButton
+                        className="manage-button"
+                        onClick={() => {
+                          const term = vocabTerm.trim()
+                          if (!term) return
+                          if (vocabEditing === "new") {
+                            vocabulary.addEntry({
+                              term,
+                              category: vocabCategory,
+                              note: vocabNote.trim(),
+                            })
+                            toast(t("vocab.added"))
+                          } else {
+                            vocabulary.updateEntry(vocabEditing, {
+                              term,
+                              category: vocabCategory,
+                              note: vocabNote.trim(),
+                            })
+                            toast(t("vocab.updated"))
+                          }
+                          setVocabEditing(null)
+                        }}
+                      >
+                        {vocabEditing === "new" ? t("vocab.add") : t("vocab.save")}
+                      </AppButton>
+                      <AppButton
+                        className="text-button"
+                        onClick={() => setVocabEditing(null)}
+                      >
+                        {t("vocab.cancel")}
+                      </AppButton>
+                    </div>
                   </div>
-                  <div>
-                    <span>
-                      <strong>Shibuya</strong>
-                      <small>地点 · 涩谷</small>
-                    </span>
-                    <AppButton>编辑</AppButton>
-                  </div>
-                  <div>
-                    <span>
-                      <strong>Alex Chen</strong>
-                      <small>联系人姓名</small>
-                    </span>
-                    <AppButton>编辑</AppButton>
-                  </div>
-                </div>
-                <AppButton className="add-vocabulary">
-                  <Icon name="plus" /> 添加词汇
-                </AppButton>
+                ) : (
+                  <>
+                    {vocabulary.entries.length === 0 ? (
+                      <p className="empty-tip">
+                        {t("vocab.empty")}
+                      </p>
+                    ) : (
+                      <div className="vocabulary-list">
+                        {vocabulary.entries.map((item) => (
+                          <div key={item.id}>
+                            <span>
+                              <strong>{item.term}</strong>
+                              <small>
+                                {t(vocabCategoryKey[item.category] ?? "vocab.cat.other")}
+                                {item.note ? ` · ${item.note}` : ""}
+                              </small>
+                            </span>
+                            <AppButton
+                              onClick={() => {
+                                setVocabEditing(item.id)
+                                setVocabTerm(item.term)
+                                setVocabCategory(item.category)
+                                setVocabNote(item.note)
+                              }}
+                            >
+                              {t("vocab.edit")}
+                            </AppButton>
+                            <AppButton
+                              ariaLabel={`${t("vocab.deleted")} ${item.term}`}
+                              className="vocab-remove"
+                              onClick={() => {
+                                vocabulary.removeEntry(item.id)
+                                toast(t("vocab.deleted"))
+                              }}
+                            >
+                              <Icon name="close" size={15} />
+                            </AppButton>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <AppButton
+                      className="add-vocabulary"
+                      onClick={() => {
+                        setVocabEditing("new")
+                        setVocabTerm("")
+                        setVocabCategory("产品名称")
+                        setVocabNote("")
+                      }}
+                    >
+                      <Icon name="plus" /> {t("vocab.add")}
+                    </AppButton>
+                  </>
+                )}
               </div>
             )}
             {panel === "privacy" && (
               <div className="privacy-options">
                 <div>
                   <span>
-                    <strong>保存翻译记录</strong>
-                    <small>仅同步到你的加密账户</small>
+                    <strong>{t("privacy.save")}</strong>
+                    <small>{t("privacy.saveDetail")}</small>
                   </span>
                   <i className="toggle-on">
                     <b />
@@ -314,44 +585,16 @@ export function Profile({
                 </div>
                 <div>
                   <span>
-                    <strong>用于改进识别</strong>
-                    <small>默认关闭，不上传原始音频</small>
+                    <strong>{t("privacy.improve")}</strong>
+                    <small>{t("privacy.improveDetail")}</small>
                   </span>
                   <i>
                     <b />
                   </i>
                 </div>
                 <p>
-                  <Icon name="check" size={15} /> 原始音频将在会话结束后自动删除
+                  <Icon name="check" size={15} /> {t("privacy.audio")}
                 </p>
-              </div>
-            )}
-            {panel === "help" && (
-              <div className="help-options">
-                <AppButton>
-                  <Icon name="bluetooth" />
-                  <span>
-                    <strong>耳机无法连接</strong>
-                    <small>查看分步排查指南</small>
-                  </span>
-                  <Icon name="chevron" />
-                </AppButton>
-                <AppButton>
-                  <Icon name="mic" />
-                  <span>
-                    <strong>翻译效果不佳</strong>
-                    <small>优化佩戴与收音环境</small>
-                  </span>
-                  <Icon name="chevron" />
-                </AppButton>
-                <AppButton>
-                  <Icon name="profile" />
-                  <span>
-                    <strong>联系在线支持</strong>
-                    <small>平均 2 分钟内回复</small>
-                  </span>
-                  <Icon name="chevron" />
-                </AppButton>
               </div>
             )}
             {panel === "device" && (
@@ -359,8 +602,8 @@ export function Profile({
                 <div className="privacy-options">
                   <div>
                     <span>
-                      <strong>自动连接</strong>
-                      <small>打开 App 时连接最近设备</small>
+                      <strong>{t("device.autoConnect")}</strong>
+                      <small>{t("device.autoConnectDetail")}</small>
                     </span>
                     <i className="toggle-on">
                       <b />
@@ -368,8 +611,8 @@ export function Profile({
                   </div>
                   <div>
                     <span>
-                      <strong>佩戴检测</strong>
-                      <small>自动判断译文播放位置</small>
+                      <strong>{t("device.wear")}</strong>
+                      <small>{t("device.wearDetail")}</small>
                     </span>
                     <i className="toggle-on">
                       <b />
@@ -377,40 +620,101 @@ export function Profile({
                   </div>
                   <div>
                     <span>
-                      <strong>触控翻译</strong>
-                      <small>长按耳机开始对话</small>
+                      <strong>{t("device.touch")}</strong>
+                      <small>{t("device.touchDetail")}</small>
                     </span>
                     <i className="toggle-on">
                       <b />
                     </i>
                   </div>
                 </div>
+                <div className="device-enhance">
+                  <section className="enhance-block">
+                    <div className="enhance-row">
+                      <div className="enhance-copy">
+                        <strong>{t("ota.title")}</strong>
+                        <small>{`${t("ota.version")} 2.4.1`}</small>
+                      </div>
+                    </div>
+                    <AppButton
+                      className="text-button enhance-action"
+                      disabled={otaBusy}
+                      onClick={runOta}
+                    >
+                      {otaLabel()}
+                    </AppButton>
+                    {otaState === "done" && (
+                      <p className="enhance-status">
+                        <Icon name="check" size={14} /> {t("ota.done")}
+                      </p>
+                    )}
+                  </section>
+
+                  <section className="enhance-block">
+                    <strong className="enhance-title">{t("anc.title")}</strong>
+                    <div className="anc-options">
+                      {ancModes.map((mode) => (
+                        <AppButton
+                          key={mode}
+                          className={`anc-chip ${
+                            anc === mode ? "selected" : ""
+                          }`}
+                          onClick={() => setAnc(mode)}
+                        >
+                          <span>{t(`anc.${mode}`)}</span>
+                          {anc === mode && <Icon name="check" size={14} />}
+                        </AppButton>
+                      ))}
+                    </div>
+                  </section>
+                </div>
                 <div className="device-info-list">
-                  <AppButton>
+                  <AppButton onClick={() => setOverlay("gesture")}>
                     <span>
-                      <strong>触控手势</strong>
-                      <small>长按开始翻译 · 双击切换发言人</small>
+                      <strong>{t("device.keys")}</strong>
+                      <small>{t("device.keysDetail")}</small>
                     </span>
                     <Icon name="chevron" />
                   </AppButton>
-                  <AppButton>
+                  <AppButton onClick={() => setOverlay("eq")}>
                     <span>
-                      <strong>耳塞贴合测试</strong>
-                      <small>左右耳密封良好</small>
+                      <strong>{t("device.eq")}</strong>
+                      <small>{eqPresetLabel(eq)}</small>
                     </span>
                     <Icon name="chevron" />
                   </AppButton>
-                  <AppButton>
+                  <AppButton onClick={() => setOverlay("fit")}>
                     <span>
-                      <strong>固件版本 2.4.1</strong>
-                      <small>已是最新版本</small>
+                      <strong>{t("device.fit")}</strong>
+                      <small>{t("device.fitDetail")}</small>
+                    </span>
+                    <Icon name="chevron" />
+                  </AppButton>
+                  <AppButton onClick={() => setOverlay("clean")}>
+                    <span>
+                      <strong>{t("device.clean")}</strong>
+                      <small>{t("device.cleanDetail")}</small>
+                    </span>
+                    <Icon name="chevron" />
+                  </AppButton>
+                  <AppButton onClick={() => setOverlay("eject")}>
+                    <span>
+                      <strong>{t("device.eject")}</strong>
+                      <small>{t("device.ejectDetail")}</small>
+                    </span>
+                    <Icon name="chevron" />
+                  </AppButton>
+                  <AppButton onClick={() => toast(t("device.firmwareDetail"))}>
+                    <span>
+                      <strong>{t("device.firmware")}</strong>
+                      <small>{t("device.firmwareDetail")}</small>
                     </span>
                     <Icon name="check" />
                   </AppButton>
-                  <AppButton>
+                  <AppButton onClick={() => setOverlay("warranty")}>
                     <span>
-                      <strong>保修与设备信息</strong>
-                      <small>保修期至 2027 年 10 月</small>
+                      <strong>{t("device.warranty")}</strong>
+                      <small>{t("device.warrantyDetail")}</small>
                     </span>
                     <Icon name="chevron" />
                   </AppButton>

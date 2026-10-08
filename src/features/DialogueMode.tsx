@@ -1,7 +1,12 @@
+import { useState } from "react"
 import { AppButton } from "@/components/AppButton"
 import { FeatureHeader } from "@/components/FeatureHeader"
 import { Icon } from "@/components/Icon"
-import { usePersistentState } from "@/lib/core"
+import type { IconName } from "@/components/Icon"
+import { LangPicker } from "@/components/LangPicker"
+import { usePersistentState, useLangPair } from "@/lib/core"
+import { useT } from "@/lib/i18n"
+import { langOption } from "@/lib/translate"
 
 
 
@@ -22,11 +27,6 @@ export function ModeIllustration({ mode }: { mode: string }) {
         <i />
         <i />
         <i />
-        {mode === "smart" && (
-          <b>
-            <Icon name="sparkles" size={12} />
-          </b>
-        )}
       </span>
       <span className="scene-user scene-them">
         <i className="scene-head">
@@ -35,7 +35,7 @@ export function ModeIllustration({ mode }: { mode: string }) {
         <i className="scene-body" />
         <small>对方</small>
       </span>
-      {(mode === "hybrid" || mode === "speaker" || mode === "smart") && (
+      {(mode === "hybrid" || mode === "speaker") && (
         <span className="scene-phone">
           <i />
           <b className="phone-wave wave-left" />
@@ -53,115 +53,80 @@ export function DialogueMode({
   onClose: () => void
   onStart: () => void
 }) {
-  const [mode, setMode] = usePersistentState("lingo.dialogue-mode", "smart")
+  const t = useT()
+  const [mode, setMode] = usePersistentState("lingo.dialogue-mode", "share")
+  const {
+    me: myLang,
+    them: themLang,
+    setMe: setMyLang,
+    setThem: setThemLang,
+    swap,
+  } = useLangPair()
+  const [picker, setPicker] = useState<"me" | "them" | null>(null)
   const modes = [
     {
-      id: "smart",
-      title: "智能分配",
-      detail: "自动识别佩戴状态",
-      tag: "推荐",
-      icon: "sparkles" as IconName,
-    },
-    {
       id: "share",
-      title: "一人一只耳机",
-      detail: "双方各戴一只耳机",
-      tag: "最佳体验",
+      title: t("dialogue.modeShare"),
+      detail: t("dialogue.modeShareDetail"),
       icon: "headphones" as IconName,
     },
     {
       id: "hybrid",
-      title: "耳机 + 手机",
-      detail: "我戴耳机，对方听手机",
-      tag: "",
+      title: t("dialogue.modeHybrid"),
+      detail: t("dialogue.modeHybridDetail"),
       icon: "profile" as IconName,
     },
     {
       id: "speaker",
-      title: "手机免提对话",
-      detail: "双方直接使用手机",
-      tag: "",
+      title: t("dialogue.modeSpeaker"),
+      detail: t("dialogue.modeSpeakerDetail"),
       icon: "audio" as IconName,
     },
   ]
-  const selected = modes.find((item) => item.id === mode) ?? modes[0]
 
   return (
     <div className="feature-flow dialogue-flow">
       <FeatureHeader
         onClose={onClose}
-        subtitle="选择声音如何传递"
-        title="面对面翻译"
+        subtitle={t("dialogue.subtitle")}
+        title={t("dialogue.title")}
       />
       <main className="dialogue-content">
-        <section className="dialogue-preview">
-          <div className="conversation-people">
-            <div className="person person-me">
-              <span className="person-head">
-                <i />
-              </span>
-              <small>我</small>
-            </div>
-            <div className="voice-route">
-              <i />
-              <i />
-              <i />
-              <span>
-                <Icon name={selected.icon} size={22} />
-              </span>
-              <i />
-              <i />
-              <i />
-            </div>
-            <div className="person person-other">
-              <span className="person-head">
-                <i />
-              </span>
-              <small>对方</small>
-            </div>
-          </div>
-          <span className="eyebrow">
-            <i /> LINGOPODS PRO 已连接
-          </span>
-          <h1>{selected.title}</h1>
-          <p>{selected.detail}</p>
-          {mode === "smart" && (
-            <div className="smart-route">
-              <span>
-                <Icon name="check" size={14} /> 已检测到左耳佩戴
-              </span>
-              <span>对方语音将从手机播放</span>
-            </div>
-          )}
-        </section>
-
         <section className="dialogue-language-card">
-          <AppButton ariaLabel="更改我的语言">
+          <AppButton
+            ariaLabel={t("dialogue.myLang")}
+            onClick={() => setPicker("me")}
+          >
             <span className="language-person">我</span>
             <p>
-              <small>我的语言</small>
-              <strong>中文（普通话）</strong>
+              <small>{t("dialogue.myLang")}</small>
+              <strong>{langOption(myLang).native}</strong>
             </p>
-            <Icon name="chevron" size={17} />
           </AppButton>
-          <span className="language-swap">
+          <AppButton
+            ariaLabel={t("dialogue.swapLang")}
+            className="language-swap"
+            onClick={swap}
+          >
             <Icon name="swap" size={17} />
-          </span>
-          <AppButton ariaLabel="更改对方语言">
+          </AppButton>
+          <AppButton
+            ariaLabel={t("dialogue.otherLang")}
+            onClick={() => setPicker("them")}
+          >
             <span className="language-person other">TA</span>
             <p>
-              <small>对方语言</small>
-              <strong>英语（美国）</strong>
+              <small>{t("dialogue.otherLang")}</small>
+              <strong>{langOption(themLang).native}</strong>
             </p>
-            <Icon name="chevron" size={17} />
           </AppButton>
         </section>
 
         <div className="dialogue-section-head">
           <div>
-            <h2>对话方式</h2>
+            <h2>{t("dialogue.modesHeading")}</h2>
           </div>
-          <span>可随时切换</span>
+          <span>{t("dialogue.modesHint")}</span>
         </div>
         <section className="dialogue-modes">
           {modes.map((item) => (
@@ -177,7 +142,6 @@ export function DialogueMode({
                 <strong>{item.title}</strong>
                 <small>{item.detail}</small>
               </span>
-              {item.tag && <b>{item.tag}</b>}
               <i className="mode-radio">{mode === item.id && <span />}</i>
             </AppButton>
           ))}
@@ -186,8 +150,8 @@ export function DialogueMode({
         <div className="dialogue-privacy">
           <Icon name="headphones" size={18} />
           <span>
-            <strong>更卫生，也更灵活</strong>
-            <small>不方便分享耳机时，选择“耳机 + 手机”即可。</small>
+            <strong>{t("dialogue.privacyTitle")}</strong>
+            <small>{t("dialogue.privacySub")}</small>
           </span>
         </div>
       </main>
@@ -195,14 +159,26 @@ export function DialogueMode({
         <div>
           <span className="connected-dot" />
           <p>
-            <strong>设备已就绪</strong>
-            <small>预计延迟 0.8 秒</small>
+            <strong>{t("dialogue.deviceReady")}</strong>
+            <small>{t("dialogue.delay")}</small>
           </p>
         </div>
         <AppButton onClick={onStart}>
-          <Icon name="mic" size={20} /> 开始对话
+          <Icon name="mic" size={20} /> {t("dialogue.start")}
         </AppButton>
       </footer>
+
+      <LangPicker
+        onClose={() => setPicker(null)}
+        onPick={(id) => {
+          if (picker === "me") setMyLang(id)
+          else setThemLang(id)
+          setPicker(null)
+        }}
+        open={picker !== null}
+        title={picker === "me" ? t("dialogue.myLang") : t("dialogue.otherLang")}
+        value={picker === "me" ? myLang : themLang}
+      />
     </div>
   )
 }

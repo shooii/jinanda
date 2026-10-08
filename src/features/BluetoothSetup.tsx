@@ -1,14 +1,25 @@
 import { useEffect, useState } from "react"
-import { AppButton } from "@/components/AppButton"
+import { AppButton, toast } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
+import { InfoSheet } from "@/components/InfoSheet"
+import { copyText, nowLabel } from "@/lib/store"
 
 
+
+const connectHelp = [
+  { title: "确认耳机电量", detail: "电量低于 10% 时可能无法进入配对模式" },
+  { title: "打开充电盒并长按配对键", detail: "按住 3 秒直到指示灯白色闪烁" },
+  { title: "忽略旧的蓝牙记录", detail: "在系统蓝牙设置中删除 LingoPods Pro 后重试" },
+  { title: "靠近手机 1 米内", detail: "避免金属物体与 Wi-Fi 路由器的信号干扰" },
+]
 
 export function BluetoothSetup({ onClose }: { onClose: () => void }) {
   const [step, setStep] =
     useState<"searching" | "found" | "connecting" | "done" | "calibrate">(
       "searching",
     )
+  const [showHelp, setShowHelp] = useState(false)
+  const [ticket, setTicket] = useState("")
 
   useEffect(() => {
     if (step !== "searching") return
@@ -176,13 +187,74 @@ export function BluetoothSetup({ onClose }: { onClose: () => void }) {
                 继续设置
               </AppButton>
             ) : (
-              <AppButton className="setup-help">
+              <AppButton
+                className="setup-help"
+                onClick={() => setShowHelp(true)}
+              >
                 找不到设备？查看连接帮助
               </AppButton>
             )}
           </>
         )}
       </div>
+
+      {showHelp && (
+        <InfoSheet
+          eyebrow="连接帮助"
+          icon="bluetooth"
+          onClose={() => setShowHelp(false)}
+          title="找不到设备？"
+        >
+          <p className="sheet-intro">
+            按以下顺序排查，多数连接问题都能在前两步解决。
+          </p>
+          <ol className="support-steps">
+            {connectHelp.map((item, index) => (
+              <li key={item.title}>
+                <span>{index + 1}</span>
+                <div>
+                  <strong>{item.title}</strong>
+                  <small>{item.detail}</small>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <div className="stack-actions">
+            <AppButton
+              className="manage-button"
+              onClick={() => {
+                setShowHelp(false)
+                setStep("searching")
+                setTicket("")
+                toast("已重新开始搜索设备")
+              }}
+            >
+              重新搜索设备
+            </AppButton>
+            <AppButton
+              className="text-button"
+              onClick={async () => {
+                if (ticket) {
+                  const ok = await copyText(ticket)
+                  toast(ok ? "工单号已复制" : "复制失败，请手动记录")
+                  return
+                }
+                const id = `LP-${Date.now().toString().slice(-6)}`
+                setTicket(id)
+                toast(`支持工单已创建 · ${id}`)
+              }}
+            >
+              {ticket ? `工单 ${ticket} · 点击复制` : "仍无法连接，联系支持"}
+            </AppButton>
+          </div>
+          {ticket ? (
+            <p className="support-note">
+              <Icon name="check" size={14} />
+              {nowLabel()} 已创建连接问题工单，支持同学会在 2 分钟内回复。
+            </p>
+          ) : null}
+        </InfoSheet>
+      )}
     </div>
   )
 }

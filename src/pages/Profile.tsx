@@ -2,6 +2,7 @@ import { useState } from "react"
 import { AppButton, toast } from "@/components/AppButton"
 import { MiniBattery } from "@/components/BatteryPair"
 import { Earbuds, Icon } from "@/components/Icon"
+import { SwitchRow } from "@/components/SwitchRow"
 import { useEscapeKey, usePersistentState } from "@/lib/core"
 import {
   themeDetailKey,
@@ -25,14 +26,16 @@ import { SupportCenter } from "@/features/SupportCenter"
 import { WarrantyInfo } from "@/features/WarrantyInfo"
 import { channelById, regionById } from "@/lib/payments"
 import {
+  defaultPrivacy,
+  defaultDevicePrefs,
   usePlan,
   useVocabulary,
   vocabularyCategories,
   useDevices,
 } from "@/lib/store"
+import type { DevicePrefs, PrivacyPrefs } from "@/lib/store"
 import { allLanguages, langOption } from "@/lib/translate"
 import { useAppLanguage, useT } from "@/lib/i18n"
-
 
 
 type PanelId =
@@ -99,6 +102,14 @@ export function Profile({
     "lingo.anc",
     "on",
   )
+  const [privacy, setPrivacy] = usePersistentState<PrivacyPrefs>(
+    "lingo.privacy",
+    defaultPrivacy,
+  )
+  const [devicePrefs, setDevicePrefs] = usePersistentState<DevicePrefs>(
+    "lingo.device-prefs",
+    defaultDevicePrefs,
+  )
 
   const otaBusy =
     otaState === "checking" ||
@@ -146,15 +157,7 @@ export function Profile({
         </div>
       </header>
 
-      <section className="user-card">
-        <span className="user-avatar">YL</span>
-        <div>
-          <strong>远行者</strong>
-          <small>{t("profile.days")}</small>
-        </div>
-        <span className="level-pill">{t("profile.level")}</span>
-      </section>
-
+      {/* 设备卡即本位面的主信息，不再放一张只有占位姓名的用户卡 */}
       <section className="my-device-card">
         <div className="device-card-head">
           <div>
@@ -212,9 +215,6 @@ export function Profile({
         <div>
           <small>{t("profile.memberLabel")}</small>
           <strong>{t("profile.memberDetail")}</strong>
-          <i>
-            <b /> {t("profile.memberLeft")}
-          </i>
         </div>
         <Icon name="chevron" />
       </AppButton>
@@ -238,7 +238,7 @@ export function Profile({
           </span>
           <div>
             <strong>{t("profile.language")}</strong>
-            <small>{`${appLangMeta.native} ${appLangMeta.label}`}</small>
+            <small>{appLangMeta.native}</small>
           </div>
           <Icon name="chevron" />
         </AppButton>
@@ -289,15 +289,13 @@ export function Profile({
             <Icon name="moon" />
           </span>
           <div>
-            <strong>夜间白噪音</strong>
-            <small>助眠音景 · 定时关闭</small>
+            <strong>{t("sleep.eyebrow")}</strong>
+            <small>{t("sleep.title")}</small>
           </div>
           <Icon name="chevron" />
         </AppButton>
       </section>
-      <small className="app-version">
-        LingoPods 1.0 MVP · 设备编号 {active.model || "—"}
-      </small>
+      <small className="app-version">LingoPods 1.0 · {active.model || "—"}</small>
       <div className="service-footer">
         <span>
           <i /> {t("profile.servicesOk")}
@@ -324,36 +322,6 @@ export function Profile({
           </AppButton>
         </div>
       </div>
-      {overlay === "find" && (
-        <FindDevice onClose={() => setOverlay(null)} />
-      )}
-      {overlay === "gesture" && (
-        <GestureSettings onClose={() => setOverlay(null)} />
-      )}
-      {overlay === "eq" && (
-        <EqSettings eq={eq} onChange={setEq} onClose={() => setOverlay(null)} />
-      )}
-      {(overlay === "clean" || overlay === "eject") && (
-        <DeviceCare mode={overlay} onClose={() => setOverlay(null)} />
-      )}
-      {overlay === "fit" && (
-        <DeviceFitTest onClose={() => setOverlay(null)} />
-      )}
-      {overlay === "warranty" && (
-        <WarrantyInfo onClose={() => setOverlay(null)} />
-      )}
-      {overlay === "support" && (
-        <SupportCenter onClose={() => setOverlay(null)} />
-      )}
-      {overlay === "legal" && (
-        <LegalDocument doc={legalDoc} onClose={() => setOverlay(null)} />
-      )}
-      {overlay === "status" && (
-        <ServiceStatus onClose={() => setOverlay(null)} />
-      )}
-      {overlay === "billing" && (
-        <SubscriptionManage onClose={() => setOverlay(null)} />
-      )}
       {panel && (
         <div className="profile-panel-backdrop" onClick={() => setPanel(null)}>
           <div
@@ -574,24 +542,22 @@ export function Profile({
             )}
             {panel === "privacy" && (
               <div className="privacy-options">
-                <div>
-                  <span>
-                    <strong>{t("privacy.save")}</strong>
-                    <small>{t("privacy.saveDetail")}</small>
-                  </span>
-                  <i className="toggle-on">
-                    <b />
-                  </i>
-                </div>
-                <div>
-                  <span>
-                    <strong>{t("privacy.improve")}</strong>
-                    <small>{t("privacy.improveDetail")}</small>
-                  </span>
-                  <i>
-                    <b />
-                  </i>
-                </div>
+                <SwitchRow
+                  title={t("privacy.save")}
+                  detail={t("privacy.saveDetail")}
+                  on={privacy.save}
+                  onToggle={() =>
+                    setPrivacy((prev) => ({ ...prev, save: !prev.save }))
+                  }
+                />
+                <SwitchRow
+                  title={t("privacy.improve")}
+                  detail={t("privacy.improveDetail")}
+                  on={privacy.improve}
+                  onToggle={() =>
+                    setPrivacy((prev) => ({ ...prev, improve: !prev.improve }))
+                  }
+                />
                 <p>
                   <Icon name="check" size={15} /> {t("privacy.audio")}
                 </p>
@@ -600,33 +566,33 @@ export function Profile({
             {panel === "device" && (
               <>
                 <div className="privacy-options">
-                  <div>
-                    <span>
-                      <strong>{t("device.autoConnect")}</strong>
-                      <small>{t("device.autoConnectDetail")}</small>
-                    </span>
-                    <i className="toggle-on">
-                      <b />
-                    </i>
-                  </div>
-                  <div>
-                    <span>
-                      <strong>{t("device.wear")}</strong>
-                      <small>{t("device.wearDetail")}</small>
-                    </span>
-                    <i className="toggle-on">
-                      <b />
-                    </i>
-                  </div>
-                  <div>
-                    <span>
-                      <strong>{t("device.touch")}</strong>
-                      <small>{t("device.touchDetail")}</small>
-                    </span>
-                    <i className="toggle-on">
-                      <b />
-                    </i>
-                  </div>
+                  <SwitchRow
+                    title={t("device.autoConnect")}
+                    detail={t("device.autoConnectDetail")}
+                    on={devicePrefs.autoConnect}
+                    onToggle={() =>
+                      setDevicePrefs((prev) => ({
+                        ...prev,
+                        autoConnect: !prev.autoConnect,
+                      }))
+                    }
+                  />
+                  <SwitchRow
+                    title={t("device.wear")}
+                    detail={t("device.wearDetail")}
+                    on={devicePrefs.wear}
+                    onToggle={() =>
+                      setDevicePrefs((prev) => ({ ...prev, wear: !prev.wear }))
+                    }
+                  />
+                  <SwitchRow
+                    title={t("device.touch")}
+                    detail={t("device.touchDetail")}
+                    on={devicePrefs.touch}
+                    onToggle={() =>
+                      setDevicePrefs((prev) => ({ ...prev, touch: !prev.touch }))
+                    }
+                  />
                 </div>
                 <div className="device-enhance">
                   <section className="enhance-block">
@@ -704,13 +670,7 @@ export function Profile({
                     </span>
                     <Icon name="chevron" />
                   </AppButton>
-                  <AppButton onClick={() => toast(t("device.firmwareDetail"))}>
-                    <span>
-                      <strong>{t("device.firmware")}</strong>
-                      <small>{t("device.firmwareDetail")}</small>
-                    </span>
-                    <Icon name="check" />
-                  </AppButton>
+                  {/* 固件信息与版本号已在上方 OTA 区块呈现，此处不重复 */}
                   <AppButton onClick={() => setOverlay("warranty")}>
                     <span>
                       <strong>{t("device.warranty")}</strong>
@@ -724,6 +684,37 @@ export function Profile({
           </div>
         </div>
       )}
+      {overlay === "find" && (
+        <FindDevice onClose={() => setOverlay(null)} />
+      )}
+      {overlay === "gesture" && (
+        <GestureSettings onClose={() => setOverlay(null)} />
+      )}
+      {overlay === "eq" && (
+        <EqSettings eq={eq} onChange={setEq} onClose={() => setOverlay(null)} />
+      )}
+      {(overlay === "clean" || overlay === "eject") && (
+        <DeviceCare mode={overlay} onClose={() => setOverlay(null)} />
+      )}
+      {overlay === "fit" && (
+        <DeviceFitTest onClose={() => setOverlay(null)} />
+      )}
+      {overlay === "warranty" && (
+        <WarrantyInfo onClose={() => setOverlay(null)} />
+      )}
+      {overlay === "support" && (
+        <SupportCenter onClose={() => setOverlay(null)} />
+      )}
+      {overlay === "legal" && (
+        <LegalDocument doc={legalDoc} onClose={() => setOverlay(null)} />
+      )}
+      {overlay === "status" && (
+        <ServiceStatus onClose={() => setOverlay(null)} />
+      )}
+      {overlay === "billing" && (
+        <SubscriptionManage onClose={() => setOverlay(null)} />
+      )}
+
     </main>
   )
 }

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { AppButton } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
+import { SwitchRow } from "@/components/SwitchRow"
 import { useEscapeKey, usePersistentState } from "@/lib/core"
 import type { FeatureId } from "@/lib/core"
 import { useAppLanguage, useT } from "@/lib/i18n"
@@ -182,51 +183,36 @@ function SessionSettings({
         ) : null}
 
         <section className="session-preferences">
-          <AppButton onClick={shared.onToggleAutoDetect}>
-            <span>
-              <strong>自动检测语言</strong>
-              <small>根据说话内容自动识别我与对方语种</small>
-            </span>
-            <i className={shared.autoDetect ? "toggle-on" : ""}>
-              <b />
-            </i>
-          </AppButton>
-          <AppButton onClick={shared.onToggleContext}>
-            <span>
-              <strong>{t("context.title")}</strong>
-              <small>{t("context.tip")}</small>
-            </span>
-            <i className={shared.contextOn ? "toggle-on" : ""}>
-              <b />
-            </i>
-          </AppButton>
-          <AppButton onClick={shared.onToggleNoSave}>
-            <span>
-              <strong>{t("session.noSave")}</strong>
-              <small>{t("session.saved")}</small>
-            </span>
-            <i className={shared.noSave ? "toggle-on" : ""}>
-              <b />
-            </i>
-          </AppButton>
-          <AppButton onClick={shared.onToggleOffline}>
-            <span>
-              <strong>{t("session.offlinePref")}</strong>
-              <small>{t("session.offlineDetail")}</small>
-            </span>
-            <i className={shared.offline ? "toggle-on" : ""}>
-              <b />
-            </i>
-          </AppButton>
-          <AppButton onClick={shared.onToggleLockScreen}>
-            <span>
-              <strong>{t("session.lockScreen")}</strong>
-              <small>{t("session.lockScreenDetail")}</small>
-            </span>
-            <i className={shared.lockScreen ? "toggle-on" : ""}>
-              <b />
-            </i>
-          </AppButton>
+          <SwitchRow
+            title={t("session.autoDetect")}
+            detail={t("session.autoDetectDetail")}
+            on={shared.autoDetect}
+            onToggle={shared.onToggleAutoDetect}
+          />
+          <SwitchRow
+            title={t("context.title")}
+            detail={t("context.tip")}
+            on={shared.contextOn}
+            onToggle={shared.onToggleContext}
+          />
+          <SwitchRow
+            title={t("session.noSave")}
+            detail={shared.noSave ? t("session.noSaveDetail") : t("session.saved")}
+            on={shared.noSave}
+            onToggle={shared.onToggleNoSave}
+          />
+          <SwitchRow
+            title={t("session.offlinePref")}
+            detail={t("session.offlineDetail")}
+            on={shared.offline}
+            onToggle={shared.onToggleOffline}
+          />
+          <SwitchRow
+            title={t("session.lockScreen")}
+            detail={t("session.lockScreenDetail")}
+            on={shared.lockScreen}
+            onToggle={shared.onToggleLockScreen}
+          />
         </section>
 
         <section className="session-tone">

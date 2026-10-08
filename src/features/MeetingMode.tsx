@@ -301,29 +301,6 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
               <small className="participant-tip">{t("meeting.tip")}</small>
             </section>
 
-            <section className="meeting-benefits">
-              <div>
-                <Icon name="mic" />
-                <span>
-                  <strong>智能区分发言人</strong>
-                  <small>最多识别 8 位参会者</small>
-                </span>
-              </div>
-              <div>
-                <Icon name="sparkles" />
-                <span>
-                  <strong>AI 自动整理</strong>
-                  <small>摘要、决定与待办事项</small>
-                </span>
-              </div>
-              <div>
-                <Icon name="notes" />
-                <span>
-                  <strong>双语会议纪要</strong>
-                  <small>原文与翻译可随时回看</small>
-                </span>
-              </div>
-            </section>
           </>
         )}
       </main>

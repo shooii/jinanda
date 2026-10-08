@@ -3,6 +3,7 @@ import { AppButton } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
 import { LangPicker } from "@/components/LangPicker"
 import { ShortcutEditor } from "@/features/ShortcutEditor"
+import { shortcutLabel } from "@/features/ShortcutEditor"
 import type { Shortcut } from "@/features/ShortcutEditor"
 import type { FeatureId } from "@/lib/core"
 import { useLangPair } from "@/lib/core"
@@ -37,9 +38,9 @@ export function Home({
   return (
     <>
       <header className="topbar home-topbar">
-        <h1 className="home-title">翻译</h1>
+        <h1 className="home-title">{t("nav.translate")}</h1>
         <AppButton
-          ariaLabel="管理蓝牙耳机"
+          ariaLabel={t("profile.deviceSettings")}
           className="device-pill"
           onClick={onConnect}
         >
@@ -58,11 +59,11 @@ export function Home({
               className="home-lang-cell"
               onClick={() => setPicker("me")}
             >
-              <small>我的语言</small>
+              <small>{t("dialogue.myLang")}</small>
               <strong>{langOption(myLangId).native}</strong>
             </AppButton>
             <AppButton
-              ariaLabel="交换语言"
+              ariaLabel={t("dialogue.swapLang")}
               className="home-swap"
               onClick={swap}
             >
@@ -72,7 +73,7 @@ export function Home({
               className="home-lang-cell"
               onClick={() => setPicker("them")}
             >
-              <small>对方语言</small>
+              <small>{t("dialogue.otherLang")}</small>
               <strong>{langOption(themLangId).native}</strong>
             </AppButton>
           </div>
@@ -105,13 +106,13 @@ export function Home({
 
         <section className="home-block">
           <div className="section-heading">
-            <h2>快捷功能</h2>
+            <h2>{t("shortcut.enabled")}</h2>
             <AppButton
               className="edit-trigger"
               onClick={() => setEditing(true)}
             >
               <Icon name="settings" size={14} />
-              <span>编辑</span>
+              <span>{t("shortcut.editShort")}</span>
             </AppButton>
           </div>
           <div className="home-tools">
@@ -124,8 +125,8 @@ export function Home({
                 <span className="home-tool-icon">
                   <Icon name={item.icon} size={20} />
                 </span>
-                <strong>{item.title}</strong>
-                <small>{item.detail}</small>
+                <strong>{shortcutLabel(t, item.id).title}</strong>
+                <small>{shortcutLabel(t, item.id).detail}</small>
               </AppButton>
             ))}
           </div>
@@ -152,7 +153,7 @@ export function Home({
             setPicker(null)
           }}
           open
-          title={picker === "me" ? "我的语言" : "对方语言"}
+          title={picker === "me" ? t("dialogue.myLang") : t("dialogue.otherLang")}
           value={picker === "me" ? myLangId : themLangId}
         />
       )}

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { AppButton } from "@/components/AppButton"
+import { AppButton, toast } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
 import type { IconName } from "@/components/Icon"
 import { useEscapeKey, usePersistentState } from "@/lib/core"
@@ -113,9 +113,15 @@ export function GestureSettings({ onClose }: { onClose: () => void }) {
         </div>
         <AppButton
           className="gesture-reset"
-          onClick={() => setGestures(defaultGestures)}
+          onClick={() => {
+            // 已是默认值时也要给出反馈，避免「点了没反应」的错觉
+            const same =
+              JSON.stringify(gestures) === JSON.stringify(defaultGestures)
+            setGestures(defaultGestures)
+            toast(same ? t("gesture.alreadyDefault") : t("gesture.resetDone"))
+          }}
         >
-          恢复默认
+          {t("gesture.reset")}
         </AppButton>
       </header>
 

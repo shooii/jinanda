@@ -113,6 +113,7 @@ export function TravelMode({ onClose }: { onClose: () => void }) {
                         ? "pack-loading"
                         : "pack-download"
                   }
+                  disabled={isDownloaded}
                   onClick={() => download(pack.language)}
                 >
                   {isDownloaded ? (

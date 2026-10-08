@@ -38,7 +38,6 @@ export function Records() {
   const [progress, setProgress] = useState(0)
   const [selected, setSelected] = useState<SavedRecord | null>(null)
   const records: SavedRecord[] = [...saved, ...sampleRecords]
-  const typeCount = new Set(records.map((record) => record.type)).size
   const t = useT()
   const typeLabel = (type: string): string => {
     if (type === "会议") return t("records.tMeeting")
@@ -108,21 +107,6 @@ export function Records() {
         </AppButton>
       </header>
 
-      <section className="record-overview">
-        <div>
-          <strong>{records.length}</strong>
-          <span>{t("records.statAll")}</span>
-        </div>
-        <div>
-          <strong>{saved.length}</strong>
-          <span>{t("records.statSaved")}</span>
-        </div>
-        <div>
-          <strong>{typeCount}</strong>
-          <span>{t("records.statTypes")}</span>
-        </div>
-      </section>
-
       <div className="filter-row">
         {FILTERS.map((item) => (
           <AppButton
@@ -160,9 +144,6 @@ export function Records() {
                 <small>{record.time}</small>
               </span>
               <small>{record.meta}</small>
-              <span className="record-summary">
-                <Icon name="sparkles" size={14} /> {record.summary}
-              </span>
             </span>
             <Icon name="chevron" size={17} />
           </AppButton>

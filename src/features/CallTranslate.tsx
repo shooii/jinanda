@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import type { CSSProperties } from "react"
 import { AppButton, toast } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
+import { SwitchRow } from "@/components/SwitchRow"
 import type { IconName } from "@/components/Icon"
 import { LangPicker } from "@/components/LangPicker"
 import { useEscapeKey, usePersistentState, useLangPair } from "@/lib/core"
@@ -12,7 +13,13 @@ import {
   translatePhrase,
   type LangId,
 } from "@/lib/translate"
-import { useSavedRecords, nowLabel, recordToText, downloadText } from "@/lib/store"
+import {
+  useSavedRecords,
+  usePrivacyPrefs,
+  nowLabel,
+  recordToText,
+  downloadText,
+} from "@/lib/store"
 
 type CallKind = "video" | "voice"
 
@@ -114,6 +121,7 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
   /** 通话结束后落库的记录 id，用于避免重复写入 */
   const loggedId = useRef<string | null>(null)
   const [, addRecord] = useSavedRecords()
+  const [privacy] = usePrivacyPrefs()
   const tick = useRef<number | null>(null)
 
   const peer = PEERS.find((item) => item.id === peerId) ?? PEERS[0]
@@ -185,7 +193,7 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
   const hangup = () => {
     if (tick.current) window.clearInterval(tick.current)
     // 只要对方接入过就记一条：按seconds > 0 判断会让「接通后立刻挂断」静默丢失记录
-    if ((joined || seconds > 0) && !loggedId.current) {
+    if ((joined || seconds > 0) && !loggedId.current && privacy.save) {
       const entry = addRecord({
         title: `${kind === "video" ? t("call.video") : t("call.voice")} · ${peer.name}`,
         meta: `${meName} ⇄ ${themName}`,
@@ -375,52 +383,26 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
               </AppButton>
             ))}
           </div>
-          <AppButton
-            className="callx-switch-row"
-            onClick={() => setAutoDetect((v) => !v)}
-          >
-            <span className="callx-switch-icon">
-              <Icon name="bolt" size={17} />
-            </span>
-            <span className="callx-switch-copy">
-              <strong>{t("callx.autoDetect")}</strong>
-            </span>
-            <i className={autoDetect ? "callx-switch toggle-on" : "callx-switch"}>
-              <b />
-            </i>
-          </AppButton>
-          <AppButton
-            className="callx-switch-row"
-            onClick={() => setSpeakerOn((v) => !v)}
-          >
-            <span className="callx-switch-icon">
-              <Icon name="volume" size={17} />
-            </span>
-            <span className="callx-switch-copy">
-              <strong>
-                {speakerOn ? t("callx.speakerOn") : t("callx.speakerOff")}
-              </strong>
-              <small>{t("session.soundOut")}</small>
-            </span>
-            <i className={speakerOn ? "callx-switch toggle-on" : "callx-switch"}>
-              <b />
-            </i>
-          </AppButton>
-          <AppButton
-            className="callx-switch-row"
-            onClick={() => setOverlay((v) => !v)}
-          >
-            <span className="callx-switch-icon">
-              <Icon name="monitor" size={17} />
-            </span>
-            <span className="callx-switch-copy">
-              <strong>{t("callx.overlay")}</strong>
-              <small>{t("callx.overlayNote")}</small>
-            </span>
-            <i className={overlay ? "callx-switch toggle-on" : "callx-switch"}>
-              <b />
-            </i>
-          </AppButton>
+          <SwitchRow
+            icon="bolt"
+            title={t("callx.autoDetect")}
+            on={autoDetect}
+            onToggle={() => setAutoDetect((v) => !v)}
+          />
+          <SwitchRow
+            icon="volume"
+            title={speakerOn ? t("callx.speakerOn") : t("callx.speakerOff")}
+            detail={t("session.soundOut")}
+            on={speakerOn}
+            onToggle={() => setSpeakerOn((v) => !v)}
+          />
+          <SwitchRow
+            icon="monitor"
+            title={t("callx.overlay")}
+            detail={t("callx.overlayNote")}
+            on={overlay}
+            onToggle={() => setOverlay((v) => !v)}
+          />
         </div>
       </div>
     </div>
@@ -778,13 +760,13 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="call-summary-actions">
-          {/* 挂断时已自动落进「记录」页，这里只做状态提示，不再需要二次保存 */}
-          <AppButton className="text-button" disabled>
-            <Icon name="check" size={16} />
+          {/* 挂断时已自动落进「记录」页；这里只呈现状态，不再放一个点不动的「按钮」 */}
+          <p className="call-summary-status">
+            <Icon name={loggedId.current ? "check" : "close"} size={15} />
             <span>
-              {loggedId.current ? t("callz.logged") : t("session.saved")}
+              {loggedId.current ? t("callz.logged") : t("callz.notLogged")}
             </span>
-          </AppButton>
+          </p>
           <AppButton
             className="text-button"
             disabled={turns.length === 0}

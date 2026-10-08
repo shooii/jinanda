@@ -4,14 +4,20 @@ import { FeatureHeader } from "@/components/FeatureHeader"
 import { Icon } from "@/components/Icon"
 import { LangPicker } from "@/components/LangPicker"
 import { usePersistentState } from "@/lib/core"
+import { useT } from "@/lib/i18n"
 import { langOption } from "@/lib/translate"
 import type { LangId } from "@/lib/translate"
 
 
 
 export function CameraMode({ onClose }: { onClose: () => void }) {
+  const t = useT()
   const [scanning, setScanning] = useState(true)
+  /** 每点一次快门自增，用于在「已在扫描」时也能重新触发一次扫描 */
+  const [scanRun, setScanRun] = useState(0)
   const [showResult, setShowResult] = useState(false)
+  /** 点按快门的短暂反馈：扫描中再点也能看到明确响应 */
+  const [pulsing, setPulsing] = useState(false)
   const [showOriginal, setShowOriginal] = useState(false)
   const [flash, setFlash] = useState(false)
   const [picker, setPicker] = useState<"from" | "to" | null>(null)
@@ -30,14 +36,14 @@ export function CameraMode({ onClose }: { onClose: () => void }) {
       setShowResult(true)
     }, 1700)
     return () => window.clearTimeout(timer)
-  }, [scanning])
+  }, [scanning, scanRun])
 
   return (
     <div className="feature-flow camera-flow">
       <FeatureHeader
         onClose={onClose}
-        subtitle="菜单、路牌与文档"
-        title="拍照翻译"
+        subtitle={t("feature.cameraDetail")}
+        title={t("feature.camera")}
       />
       <main className="camera-content">
         <div className="camera-languages">
@@ -45,7 +51,7 @@ export function CameraMode({ onClose }: { onClose: () => void }) {
             {langOption(fromLang).native}
           </AppButton>
           <AppButton
-            ariaLabel="交换语言"
+            ariaLabel={t("dialogue.swapLang")}
             onClick={() => {
               const prev = fromLang
               setFromLang(toLang)
@@ -66,7 +72,7 @@ export function CameraMode({ onClose }: { onClose: () => void }) {
               onClick={() => setShowOriginal((value) => !value)}
             >
               <Icon name={showOriginal ? "sparkles" : "notes"} size={15} />
-              {showOriginal ? "查看中文" : "对照原文"}
+              {showOriginal ? t("camera.showTranslated") : t("camera.showOriginal")}
             </AppButton>
           )}
           <div
@@ -98,13 +104,13 @@ export function CameraMode({ onClose }: { onClose: () => void }) {
           <span className="scan-corner corner-b" />
           <span className="scan-corner corner-c" />
           <span className="scan-corner corner-d" />
-          {scanning && <i className="scan-line" />}
+          {scanning && <i className="scan-line" key={scanRun} />}
           <div className="camera-guide">
             {scanning
-              ? "正在识别并替换英文…"
+              ? t("camera.scanning")
               : showOriginal
-                ? "正在对照英文原文"
-                : "已将 4 处英文替换为中文"}
+                ? t("camera.showingSource")
+                : t("camera.replaced")}
           </div>
         </section>
 
@@ -114,15 +120,15 @@ export function CameraMode({ onClose }: { onClose: () => void }) {
               <Icon name="check" size={18} />
             </span>
             <div>
-              <strong>译文已覆盖到原图</strong>
+              <strong>{t("camera.replaced")}</strong>
               <small>
-                保留原有排版与文字位置 · {langOption(fromLang).label} →{" "}
+                {t("camera.overlayHint")} · {langOption(fromLang).label} →{" "}
                 {langOption(toLang).label}
               </small>
             </div>
             <AppButton
-              ariaLabel="保存翻译图片"
-              onClick={() => toast("图片已保存到相册")}
+              ariaLabel={t("camera.saveImage")}
+              onClick={() => toast(t("camera.saved"))}
             >
               <Icon name="camera" size={18} />
             </AppButton>
@@ -131,26 +137,31 @@ export function CameraMode({ onClose }: { onClose: () => void }) {
       </main>
       <footer className="camera-controls">
         <AppButton
-          ariaLabel="从相册选择图片"
+          ariaLabel={t("camera.pickImage")}
           className="gallery-button"
           onClick={() => {
             setScanning(true)
-            toast("已从相册选取图片")
+            toast(t("camera.picked"))
           }}
         >
           <Icon name="image" />
         </AppButton>
         <AppButton
-          ariaLabel="重新扫描"
-          className={`shutter-button ${scanning ? "scanning" : ""}`}
-          onClick={() => setScanning(true)}
+          ariaLabel={t("camera.rescan")}
+          className={`shutter-button ${scanning ? "scanning" : ""}${pulsing ? " pulsing" : ""}`}
+          onClick={() => {
+            setScanRun((n) => n + 1)
+            setScanning(true)
+            setPulsing(true)
+            window.setTimeout(() => setPulsing(false), 340)
+          }}
         >
           <span>
             <Icon name="camera" size={25} />
           </span>
         </AppButton>
         <AppButton
-          ariaLabel={flash ? "关闭闪光灯" : "开启闪光灯"}
+          ariaLabel={t("camera.flash")}
           className={`gallery-button ${flash ? "flash-on" : ""}`}
           onClick={() => setFlash((value) => !value)}
         >
@@ -168,7 +179,7 @@ export function CameraMode({ onClose }: { onClose: () => void }) {
             setScanning(true)
           }}
           open
-          title={picker === "from" ? "识别语言" : "翻译为"}
+          title={picker === "from" ? t("camera.sourceLang") : t("camera.targetLang")}
           value={picker === "from" ? fromLang : toLang}
         />
       )}

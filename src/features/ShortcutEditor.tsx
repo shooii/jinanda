@@ -3,68 +3,46 @@ import { AppButton } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
 import type { IconName } from "@/components/Icon"
 import { useEscapeKey } from "@/lib/core"
+import { useT } from "@/lib/i18n"
 
-
-
+/**
+ * 快捷功能目录：只存 id / 图标 / 是否启用。
+ * 名称与说明统一走 i18n（feature.<id> / feature.<id>Detail），
+ * 不再把中文写进 localStorage，切换界面语言时首页磁贴会跟着变。
+ */
 export type Shortcut = {
   id: string
-  title: string
-  detail: string
   icon: IconName
   enabled: boolean
 }
 
 export const defaultShortcuts: Shortcut[] = [
-  {
-    id: "meeting",
-    title: "会议记录",
-    detail: "转写与 AI 纪要",
-    icon: "calendar",
-    enabled: true,
-  },
-  {
-    id: "travel",
-    title: "旅行模式",
-    detail: "离线也能使用",
-    icon: "plane",
-    enabled: true,
-  },
-  {
-    id: "camera",
-    title: "拍照翻译",
-    detail: "菜单、路牌与文档",
-    icon: "camera",
-    enabled: true,
-  },
-  {
-    id: "call",
-    title: "音视频通话",
-    detail: "通话实时翻译",
-    icon: "phone",
-    enabled: true,
-  },
-  {
-    id: "text",
-    title: "文本翻译",
-    detail: "输入或粘贴文字",
-    icon: "notes",
-    enabled: false,
-  },
-  {
-    id: "watch",
-    title: "媒体同传",
-    detail: "电影 · 网课听成母语",
-    icon: "monitor",
-    enabled: false,
-  },
-  {
-    id: "coach",
-    title: "口语教练",
-    detail: "AI 评分你的发音",
-    icon: "sparkles",
-    enabled: false,
-  },
+  { id: "meeting", icon: "calendar", enabled: true },
+  { id: "travel", icon: "plane", enabled: true },
+  { id: "camera", icon: "camera", enabled: true },
+  { id: "call", icon: "phone", enabled: true },
+  { id: "text", icon: "notes", enabled: false },
+  { id: "watch", icon: "monitor", enabled: false },
+  { id: "coach", icon: "sparkles", enabled: false },
 ]
+
+/** 首页最多展示的快捷功能数量 */
+export const MAX_SHORTCUTS = 5
+/** 至少保留的快捷功能数量 */
+export const MIN_SHORTCUTS = 2
+
+/** 按 id 取功能名与说明，缺 key 时回退到 id 本身，避免出现空白磁贴 */
+export function shortcutLabel(
+  t: (key: string) => string,
+  id: string,
+): { title: string; detail: string } {
+  const title = t(`feature.${id}`)
+  const detail = t(`feature.${id}Detail`)
+  return {
+    title: title.includes("feature.") ? id : title,
+    detail: detail.includes("feature.") ? "" : detail,
+  }
+}
 
 /**
  * 用最新目录补齐历史数据。
@@ -78,8 +56,13 @@ export function mergeShortcuts(stored: Shortcut[]): Shortcut[] {
   }
   const known = new Set(stored.map((item) => item?.id))
   const missing = defaultShortcuts.filter((item) => !known.has(item.id))
-  if (!missing.length) return stored
-  return [...stored, ...missing.map((item) => ({ ...item }))]
+  const restored = stored.map((item) => ({
+    id: item.id,
+    icon: item.icon ?? defaultShortcuts.find((d) => d.id === item.id)?.icon ?? "sparkles",
+    enabled: item.enabled !== false,
+  })) as Shortcut[]
+  if (!missing.length) return restored
+  return [...restored, ...missing.map((item) => ({ ...item }))]
 }
 
 export function ShortcutEditor({
@@ -91,8 +74,9 @@ export function ShortcutEditor({
   onClose: () => void
   onSave: (shortcuts: Shortcut[]) => void
 }) {
+  const t = useT()
   const [draft, setDraft] = useState(shortcuts)
-  const [notice, setNotice] = useState("首页最多展示 5 个快捷功能")
+  const [notice, setNotice] = useState(t("shortcut.limit"))
   useEscapeKey(onClose)
   const enabled = draft.filter((item) => item.enabled)
   const available = draft.filter((item) => !item.enabled)
@@ -100,12 +84,12 @@ export function ShortcutEditor({
   const toggle = (id: string) => {
     const target = draft.find((item) => item.id === id)
     if (!target) return
-    if (!target.enabled && enabled.length >= 5) {
-      setNotice("请先移除一个快捷功能，再添加新的")
+    if (!target.enabled && enabled.length >= MAX_SHORTCUTS) {
+      setNotice(t("shortcut.full"))
       return
     }
-    if (target.enabled && enabled.length <= 2) {
-      setNotice("至少保留 2 个快捷功能")
+    if (target.enabled && enabled.length <= MIN_SHORTCUTS) {
+      setNotice(t("shortcut.min"))
       return
     }
     setDraft((items) =>
@@ -113,7 +97,7 @@ export function ShortcutEditor({
         item.id === id ? { ...item, enabled: !item.enabled } : item,
       ),
     )
-    setNotice(target.enabled ? "已移至更多功能" : "已添加到首页")
+    setNotice(target.enabled ? t("shortcut.movedOut") : t("shortcut.added"))
   }
 
   const move = (id: string, direction: -1 | 1) => {
@@ -128,7 +112,7 @@ export function ShortcutEditor({
     ]
     const inactiveItems = draft.filter((item) => !item.enabled)
     setDraft([...reordered, ...inactiveItems])
-    setNotice("排序已更新")
+    setNotice(t("shortcut.reordered"))
   }
 
   return (
@@ -138,41 +122,41 @@ export function ShortcutEditor({
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label="编辑快捷功能"
+        aria-label={t("shortcut.edit")}
       >
         <header className="editor-header">
           <AppButton
-            ariaLabel="取消编辑"
+            ariaLabel={t("shortcut.edit")}
             className="editor-close"
             onClick={onClose}
           >
             <Icon name="close" size={19} />
           </AppButton>
           <div>
-            <strong>编辑快捷功能</strong>
-            <small>按你的使用习惯排列首页</small>
+            <strong>{t("shortcut.edit")}</strong>
+            <small>{t("shortcut.editHint")}</small>
           </div>
           <AppButton className="editor-save" onClick={() => onSave(draft)}>
-            完成
+            {t("shortcut.done")}
           </AppButton>
         </header>
 
         <div className="editor-hint">
           <Icon name="sparkles" size={16} />
           <span>{notice}</span>
-          <b>{enabled.length}/5</b>
+          <b>{enabled.length}/{MAX_SHORTCUTS}</b>
         </div>
 
         <section className="editor-section">
           <div className="editor-section-title">
-            <span>首页快捷功能</span>
+            <span>{t("shortcut.enabled")}</span>
             <AppButton
               onClick={() => {
                 setDraft(defaultShortcuts.map((item) => ({ ...item })))
-                setNotice("已恢复默认排序")
+                setNotice(t("shortcut.resetDone"))
               }}
             >
-              恢复默认
+              {t("shortcut.reset")}
             </AppButton>
           </div>
           <div className="shortcut-list">
@@ -182,19 +166,19 @@ export function ShortcutEditor({
                   <Icon name={item.icon} size={19} />
                 </span>
                 <span className="edit-row-copy">
-                  <strong>{item.title}</strong>
-                  <small>{item.detail}</small>
+                  <strong>{shortcutLabel(t, item.id).title}</strong>
+                  <small>{shortcutLabel(t, item.id).detail}</small>
                 </span>
                 <span className="order-actions">
                   <AppButton
-                    ariaLabel={`上移${item.title}`}
+                    ariaLabel={`↑ ${shortcutLabel(t, item.id).title}`}
                     className={index === 0 ? "disabled up" : "up"}
                     onClick={() => move(item.id, -1)}
                   >
                     <Icon name="chevron" size={15} />
                   </AppButton>
                   <AppButton
-                    ariaLabel={`下移${item.title}`}
+                    ariaLabel={`↓ ${shortcutLabel(t, item.id).title}`}
                     className={
                       index === enabled.length - 1 ? "disabled down" : "down"
                     }
@@ -204,7 +188,7 @@ export function ShortcutEditor({
                   </AppButton>
                 </span>
                 <AppButton
-                  ariaLabel={`移除${item.title}`}
+                  ariaLabel={`${t("shortcut.available")} ${shortcutLabel(t, item.id).title}`}
                   className="remove-shortcut"
                   onClick={() => toggle(item.id)}
                 >
@@ -217,8 +201,8 @@ export function ShortcutEditor({
 
         <section className="editor-section more-section">
           <div className="editor-section-title">
-            <span>更多功能</span>
-            <small>点击添加到首页</small>
+            <span>{t("shortcut.available")}</span>
+            <small>{t("shortcut.added")}</small>
           </div>
           <div className="shortcut-list">
             {available.length ? (
@@ -232,8 +216,8 @@ export function ShortcutEditor({
                     <Icon name={item.icon} size={19} />
                   </span>
                   <span className="edit-row-copy">
-                    <strong>{item.title}</strong>
-                    <small>{item.detail}</small>
+                    <strong>{shortcutLabel(t, item.id).title}</strong>
+                    <small>{shortcutLabel(t, item.id).detail}</small>
                   </span>
                   <span className="add-shortcut">
                     <Icon name="plus" size={17} />
@@ -242,7 +226,7 @@ export function ShortcutEditor({
               ))
             ) : (
               <div className="all-added">
-                <Icon name="check" size={16} /> 所有功能都已添加到首页
+                <Icon name="check" size={16} /> {t("shortcut.allAdded")}
               </div>
             )}
           </div>

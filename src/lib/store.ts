@@ -498,8 +498,38 @@ export function useDevices(): UseDevicesResult {
   } as const
 }
 
-export type PlanState = {
-  source: "device" | "standalone" | "none"
+/**
+ * 数据与隐私偏好：`save` 关闭后，会话与通话结束后不再自动写入记录。
+ * 「我的 → 数据与隐私」面板与通话页共用同一份状态。
+ */
+export type PrivacyPrefs = {
+  save: boolean
+  improve: boolean
+}
+
+export const defaultPrivacy: PrivacyPrefs = { save: true, improve: false }
+
+export function usePrivacyPrefs() {
+  return usePersistentState<PrivacyPrefs>("lingo.privacy", defaultPrivacy)
+}
+
+/**
+ * 设备侧偏好（自动连接 / 佩戴检测 / 触控）。
+ * 原型无法下发到硬件，但作为用户偏好持久化，保证开关有真实状态。
+ */
+export type DevicePrefs = {
+  autoConnect: boolean
+  wear: boolean
+  touch: boolean
+}
+
+export const defaultDevicePrefs: DevicePrefs = {
+  autoConnect: true,
+  wear: true,
+  touch: true,
+}
+
+export type PlanState = {  source: "device" | "standalone" | "none"
   name: string
   autoRenew: boolean
   renewDate: string

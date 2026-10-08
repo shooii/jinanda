@@ -160,7 +160,6 @@ export function DialogueMode({
           <span className="connected-dot" />
           <p>
             <strong>{t("dialogue.deviceReady")}</strong>
-            <small>{t("dialogue.delay")}</small>
           </p>
         </div>
         <AppButton onClick={onStart}>

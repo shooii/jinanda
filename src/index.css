@@ -14104,19 +14104,6 @@ html[data-theme="dark"] {
   color: var(--ink);
 }
 
-.home-more {
-  display: block;
-  width: 100%;
-  min-height: 2.7rem;
-  margin-top: 0.65rem;
-  border: 1px solid var(--line);
-  border-radius: 0.85rem;
-  color: var(--ink);
-  background: var(--surface);
-  font-size: 0.82rem;
-  font-weight: 700;
-}
-
 .home-connect-copy strong,
 .home-connect-copy small {
   color: oklch(0.28 0.02 258);

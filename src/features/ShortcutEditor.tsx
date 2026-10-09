@@ -28,7 +28,7 @@ export const defaultShortcuts: Shortcut[] = [
 ]
 
 /** 首页最多展示的快捷功能数量 */
-export const MAX_SHORTCUTS = 5
+export const MAX_SHORTCUTS = 6
 /** 至少保留的快捷功能数量 */
 export const MIN_SHORTCUTS = 2
 

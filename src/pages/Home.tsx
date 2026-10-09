@@ -31,7 +31,6 @@ export function Home({
   dialogueMode: DialogueModeId
 }) {
   const [editing, setEditing] = useState(false)
-  const [showMore, setShowMore] = useState(false)
   const { me: myLangId, them: themLangId, setMe: setMyLangId, setThem: setThemLangId, swap } =
     useLangPair()
   const [picker, setPicker] = useState<"me" | "them" | null>(null)
@@ -142,7 +141,7 @@ export function Home({
             </AppButton>
           </div>
           <div className="home-tools">
-            {(showMore ? enabled : enabled.slice(0, 3)).map((item) => (
+            {enabled.map((item) => (
               <AppButton
                 className="home-tool"
                 key={item.id}
@@ -156,7 +155,6 @@ export function Home({
               </AppButton>
             ))}
           </div>
-          {enabled.length > 3 && <AppButton className="home-more" onClick={() => setShowMore((value) => !value)}>{showMore ? "收起功能" : `更多功能（${enabled.length - 3}）`}</AppButton>}
         </section>
       </main>
 

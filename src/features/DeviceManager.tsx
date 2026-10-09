@@ -98,9 +98,11 @@ export function DeviceManager({ onClose }: { onClose: () => void }) {
         </div>
       </header>
 
+      <p className="prototype-note">交互演示 · 当前没有真实蓝牙连接或电量读取</p>
+
       {adding === "idle" ? (
         <div className="dm-body">
-          <section className={`dm-active ${statusClass(active.status)}`}>
+          {active.id && <section className={`dm-active ${statusClass(active.status)}`}>
             <div className="dm-active-head">
               <span className="eyebrow">{t("devices.current")}</span>
               <span className={`dm-badge ${statusClass(active.status)}`}>
@@ -121,7 +123,7 @@ export function DeviceManager({ onClose }: { onClose: () => void }) {
               <MiniBattery level={active.rightBattery} label="R" />
               <MiniBattery level={active.caseBattery} label={t("devices.caseTag")} />
             </div>
-          </section>
+          </section>}
 
           <div className="section-heading">
             <h3>{t("devices.paired")}</h3>
@@ -207,9 +209,9 @@ export function DeviceManager({ onClose }: { onClose: () => void }) {
 
           <AppButton className="dm-add" onClick={() => setAdding("searching")}>
             <Icon name="plus" size={18} />
-            <span>{t("devices.add")}</span>
+            <span>体验设备连接演示</span>
           </AppButton>
-          <p className="dm-add-hint">{t("devices.addHint")}</p>
+          <p className="dm-add-hint">不会搜索或连接真实蓝牙耳机。</p>
         </div>
       ) : (
         <div className="dm-scan">
@@ -226,12 +228,12 @@ export function DeviceManager({ onClose }: { onClose: () => void }) {
           </div>
           <h2>
             {adding === "searching"
-              ? t("devices.scanning")
+              ? "演示：搜索设备"
               : adding === "found"
-                ? t("devices.found")
+                ? "演示：找到设备"
                 : adding === "connecting"
-                  ? t("devices.statusConnecting")
-                  : t("devices.statusConnected")}
+                  ? "演示：连接中"
+                  : "演示完成"}
           </h2>
           {adding === "found" && (
             <div className="dm-found">

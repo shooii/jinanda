@@ -307,6 +307,7 @@ function TalkFlow({
 
   return (
     <main className="share-stage">
+      <p className="session-truth" role="status">{live ? "演示进行中 · 示例对话会自动出现" : "交互演示 · 点按麦克风查看示例对话"}<br />{shared.offline ? "离线模式仅为界面演示" : "声音输出：耳机模式（演示）"}</p>
       <div className="share-canvas" ref={canvasRef}>
         {turns.length === 0 ? (
           <p className="share-empty">

@@ -32,6 +32,7 @@ export default function App() {
   const [showLive, setShowLive] = useState(false)
   const [showMembership, setShowMembership] = useState(false)
   const [showDevices, setShowDevices] = useState(false)
+  const [dialogueModeChosen, setDialogueModeChosen] = usePersistentState("lingo.dialogue-mode-chosen", false)
   const [onboarded, setOnboarded] = usePersistentState("lingo.onboarded", false)
   const [storedShortcuts, setShortcuts] = usePersistentState(
     "lingo.shortcuts",
@@ -86,6 +87,7 @@ export default function App() {
             onClose={() => transitionTo(() => setActiveFeature(null))}
             onStart={() =>
               transitionTo(() => {
+                setDialogueModeChosen(true)
                 setActiveFeature(null)
                 setShowLive(true)
               })
@@ -143,7 +145,15 @@ export default function App() {
                 onConnect={() => transitionTo(() => setShowDevices(true))}
                 onSaveShortcuts={setShortcuts}
                 shortcuts={shortcuts}
-                onMode={(mode) => transitionTo(() => setActiveFeature(mode))}
+                onMode={(mode) => transitionTo(() => {
+                  if (mode === "dialogue" && dialogueModeChosen) setShowLive(true)
+                  else setActiveFeature(mode)
+                })}
+                onChangeDialogueMode={() => transitionTo(() => setActiveFeature("dialogue"))}
+                onStartPhone={() => transitionTo(() => {
+                  setDialogueModeChosen(true)
+                  setShowLive(true)
+                })}
               />
             ) : tab === "notes" ? (
               <Records />
@@ -173,7 +183,7 @@ export default function App() {
                   ariaLabel={item.label}
                   className={tab === item.id ? "active" : ""}
                   key={item.id}
-                  onClick={() => transitionTo(() => setTab(item.id))}
+                  onClick={() => setTab(item.id)}
                 >
                   <Icon name={item.icon} />
                   <span>{item.label}</span>

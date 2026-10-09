@@ -170,13 +170,13 @@ export function Profile({
                   ? t("devices.statusConnecting")
                   : t("devices.statusDisconnected")}
             </span>
-            <h2>{active.name}</h2>
+            <h2>{active.id ? active.name : "尚未连接耳机"}</h2>
           </div>
           <AppButton className="text-button" onClick={onConnect}>
             {t("profile.manage")}
           </AppButton>
         </div>
-        <div className="device-display">
+        {active.id && <div className="device-display">
           <Earbuds />
           <div className="device-battery-grid">
             <span>
@@ -192,20 +192,20 @@ export function Profile({
               <MiniBattery level={active.caseBattery} label={t("devices.caseTag")} />
             </span>
           </div>
-        </div>
+        </div>}
         <div className="device-actions">
           <AppButton onClick={onConnect}>
             <Icon name="bluetooth" />
-            <span>{t("profile.reconnect")}</span>
+            <span>{active.id ? t("profile.reconnect") : "查看设备"}</span>
           </AppButton>
-          <AppButton onClick={() => setOverlay("find")}>
+          {active.id && <AppButton onClick={() => setOverlay("find")}>
             <Icon name="pin" />
             <span>{t("profile.find")}</span>
-          </AppButton>
-          <AppButton onClick={() => setPanel("device")}>
+          </AppButton>}
+          {active.id && <AppButton onClick={() => setPanel("device")}>
             <Icon name="settings" />
             <span>{t("profile.deviceSettings")}</span>
-          </AppButton>
+          </AppButton>}
         </div>
       </section>
 
@@ -215,12 +215,13 @@ export function Profile({
         </span>
         <div>
           <small>{t("profile.memberLabel")}</small>
-          <strong>{t("profile.memberDetail")}</strong>
+          <strong>{plan.source === "none" ? "尚未开通 · 查看方案" : t("profile.memberDetail")}</strong>
         </div>
         <Icon name="chevron" />
       </AppButton>
 
       <section className="settings-list">
+        <h3 className="settings-group-title">外观与翻译</h3>
         <AppButton onClick={() => setPanel("theme")}>
           <span>
             <Icon name={theme === "dark" ? "moon" : theme === "light" ? "sun" : "monitor"} />
@@ -263,13 +264,14 @@ export function Profile({
           </div>
           <Icon name="chevron" />
         </AppButton>
+        <h3 className="settings-group-title">账户与帮助</h3>
         <AppButton onClick={() => setPanel("privacy")}>
           <span>
             <Icon name="notes" />
           </span>
           <div>
             <strong>{t("profile.privacy")}</strong>
-            <small>{t("profile.privacyDetail")}</small>
+            <small>记录保存在当前浏览器，尚未同步账户</small>
           </div>
           <Icon name="chevron" />
         </AppButton>
@@ -283,14 +285,14 @@ export function Profile({
           </div>
           <Icon name="chevron" />
         </AppButton>
-        <AppButton onClick={() => setOverlay("billing")}>
+        <AppButton onClick={plan.source === "none" ? onMembership : () => setOverlay("billing")}>
           <span>
             <Icon name="card" />
           </span>
           <div>
             <strong>{t("profile.billing")}</strong>
             <small>
-              {channel ? channel.name : t("profile.billingGift")} · {region.currency}
+              {plan.source === "none" ? "暂无账单" : `${channel ? channel.name : t("profile.billingGift")} · ${region.currency}`}
             </small>
           </div>
           <Icon name="chevron" />
@@ -309,7 +311,7 @@ export function Profile({
       <small className="app-version">LingoPods 1.0 · {active.model || "—"}</small>
       <div className="service-footer">
         <span>
-          <i /> {t("profile.servicesOk")}
+          <i /> 翻译与设备服务尚未接入
         </span>
         <div>
           <AppButton
@@ -553,25 +555,15 @@ export function Profile({
             )}
             {panel === "privacy" && (
               <div className="privacy-options">
+                <p className="prototype-note">当前为交互演示：偏好和记录仅保存在当前浏览器，尚无账户同步或音频上传。</p>
                 <SwitchRow
                   title={t("privacy.save")}
-                  detail={t("privacy.saveDetail")}
+                  detail="仅影响支持保存的演示流程，数据留在当前浏览器"
                   on={privacy.save}
                   onToggle={() =>
                     setPrivacy((prev) => ({ ...prev, save: !prev.save }))
                   }
                 />
-                <SwitchRow
-                  title={t("privacy.improve")}
-                  detail={t("privacy.improveDetail")}
-                  on={privacy.improve}
-                  onToggle={() =>
-                    setPrivacy((prev) => ({ ...prev, improve: !prev.improve }))
-                  }
-                />
-                <p>
-                  <Icon name="check" size={15} /> {t("privacy.audio")}
-                </p>
               </div>
             )}
             {panel === "device" && (

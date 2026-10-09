@@ -378,6 +378,7 @@ const canvasFor = (side: Side | null) => {
             <Icon name="more" size={18} />
           </AppButton>
         </header>
+        <p className="session-truth" role="status">交互演示 · {listening ? "正在生成示例译文" : "选择一侧麦克风开始"} · 声音输出：手机</p>
         {menu === "more" ? morePopover : null}
       </div>
 

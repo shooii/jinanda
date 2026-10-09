@@ -6,6 +6,7 @@ import type { IconName } from "@/components/Icon"
 import { LangPicker } from "@/components/LangPicker"
 import { usePersistentState, useLangPair } from "@/lib/core"
 import { useT } from "@/lib/i18n"
+import { useDevices } from "@/lib/store"
 import { langOption } from "@/lib/translate"
 
 
@@ -55,6 +56,8 @@ export function DialogueMode({
 }) {
   const t = useT()
   const [mode, setMode] = usePersistentState("lingo.dialogue-mode", "share")
+  const { active } = useDevices()
+  const connected = active.status === "connected"
   const {
     me: myLang,
     them: themLang,
@@ -152,10 +155,10 @@ export function DialogueMode({
         <div>
           <span className="connected-dot" />
           <p>
-            <strong>{t("dialogue.deviceReady")}</strong>
+            <strong>{connected ? "耳机模式为交互演示" : "未连接耳机 · 可使用手机免提"}</strong>
           </p>
         </div>
-        <AppButton onClick={onStart}>
+        <AppButton disabled={!connected && mode !== "speaker"} onClick={onStart}>
           <Icon name="mic" size={20} /> {t("dialogue.start")}
         </AppButton>
       </footer>

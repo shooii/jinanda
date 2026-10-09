@@ -372,7 +372,7 @@ export type PairedDevice = {
 
 const DAY = 24 * 60 * 60 * 1000
 
-export const defaultDevices: PairedDevice[] = [
+export const demoDevices: PairedDevice[] = [
   {
     id: "d-pro",
     name: "LingoPods Pro",
@@ -411,12 +411,22 @@ export const defaultDevices: PairedDevice[] = [
   },
 ]
 
+// A fresh install has no paired hardware. The cards above are only fixtures for
+// the opt-in interaction demo, never a real connection or a battery reading.
+export const defaultDevices: PairedDevice[] = []
+
 const DEVICES_KEY = "lingo.devices"
 
 let devicesState: PairedDevice[] = (() => {
   try {
     const raw = window.localStorage.getItem(DEVICES_KEY)
-    if (raw) return JSON.parse(raw) as PairedDevice[]
+    if (raw) return (JSON.parse(raw) as PairedDevice[]).map((device) => ({
+      ...device,
+      status: "disconnected" as DeviceStatus,
+      leftBattery: 0,
+      rightBattery: 0,
+      caseBattery: 0,
+    }))
   } catch {
     /* 解析失败时回退默认值 */
   }
@@ -676,10 +686,10 @@ export type PlanState = {  source: "device" | "standalone" | "none"
 }
 
 export const defaultPlan: PlanState = {
-  source: "device",
+  source: "none",
   name: "Lingo+ Unlimited",
-  autoRenew: true,
-  renewDate: "2026 年 10 月 18 日",
+  autoRenew: false,
+  renewDate: "",
   price: "¥0",
   channel: null,
   regionId: "CN",
@@ -692,7 +702,10 @@ export const defaultPlan: PlanState = {
 /** 会员订阅状态（设备赠送 / 单独订阅 / 已到期） */
 export function usePlan() {
   const [plan, setPlan] = usePersistentState<PlanState>("lingo.plan", defaultPlan)
-  return [{ ...defaultPlan, ...plan }, setPlan] as const
+  const current = { ...defaultPlan, ...plan }
+  // Older demo data granted an unverified device subscription on first load.
+  if (current.source === "device" && !current.purchasedAt) current.source = "none"
+  return [current, setPlan] as const
 }
 
 export type Order = {

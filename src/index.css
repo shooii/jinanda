@@ -14067,3 +14067,106 @@ html[data-theme="dark"] {
 .pill-batt-cell.low > i {
   color: var(--warn);
 }
+
+/* Compact, honest demo states and readable secondary actions. */
+.prototype-note {
+  margin: 0.3rem 0 0.75rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.home-dialogue-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.65rem;
+}
+
+.home-dialogue-actions button {
+  min-height: 2.65rem;
+  border-radius: 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.home-phone-start {
+  flex: 1;
+  border: 0;
+  background: var(--lime);
+  color: white;
+}
+
+.home-mode-link {
+  padding: 0 0.75rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.home-more {
+  display: block;
+  width: 100%;
+  min-height: 2.7rem;
+  margin-top: 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 0.85rem;
+  color: var(--ink);
+  background: var(--surface);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.home-connect-copy strong,
+.home-connect-copy small {
+  color: oklch(0.28 0.02 258);
+}
+
+.home-start-copy small {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.session-truth {
+  margin: 0;
+  padding: 0.65rem 0.85rem;
+  color: oklch(0.82 0.01 258);
+  background: oklch(0.27 0.012 258);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.settings-group-title {
+  margin: 0;
+  padding: 0.85rem 0.85rem 0.4rem;
+  color: var(--muted);
+  font-size: 0.77rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.settings-list small,
+.record-card small,
+.home-tool small,
+.dialogue-mode-card small {
+  font-size: max(0.76rem, var(--fs-xs));
+  line-height: 1.4;
+}
+
+.page-icon-button:has(span) {
+  width: auto;
+  padding: 0 0.8rem;
+  gap: 0.35rem;
+  border-radius: 999rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+[data-theme="dark"] {
+  --muted: oklch(0.78 0.01 258);
+  --soft-muted: oklch(0.69 0.01 258);
+}

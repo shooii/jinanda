@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { AppButton, toast } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
 import type { IconName } from "@/components/Icon"
@@ -6,9 +6,7 @@ import { useEscapeKey } from "@/lib/core"
 import {
   downloadText,
   recordToText,
-  sampleRecords,
   useFavorites,
-  useHiddenRecords,
   useSavedRecords,
 } from "@/lib/store"
 import type { SavedRecord } from "@/lib/store"
@@ -37,20 +35,13 @@ const FILTERS = [
 export function Records() {
   const [filter, setFilter] = useState("全部")
   const [saved, , removeRecord] = useSavedRecords()
-  const [hidden, setHidden] = useHiddenRecords()
   const [playing, setPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
   const [selected, setSelected] = useState<SavedRecord | null>(null)
   const [query, setQuery] = useState("")
   const [confirming, setConfirming] = useState(false)
   const { hasFavorite, toggleFavorite } = useFavorites()
-  const records: SavedRecord[] = useMemo(
-    () =>
-      [...saved, ...sampleRecords].filter(
-        (record) => !hidden.includes(record.id),
-      ),
-    [saved, hidden],
-  )
+  const records: SavedRecord[] = saved
   const t = useT()
   const typeLabel = (type: string): string => {
     if (type === "会议") return t("records.tMeeting")
@@ -129,12 +120,7 @@ export function Records() {
 
   const deleteSelected = () => {
     if (!selected) return
-    // 示例记录来自常量，删除后需单独记下，否则刷新会复活
-    if (selected.id.startsWith("sample-")) {
-      setHidden((ids) => [...ids, selected.id])
-    } else {
-      removeRecord(selected.id)
-    }
+    removeRecord(selected.id)
     toast(t("records.deleted"))
     setSelected(null)
     setConfirming(false)
@@ -160,7 +146,7 @@ export function Records() {
             toast(t("records.exportedAll"))
           }}
         >
-          <Icon name="plane" />
+          <Icon name="plane" /> <span>导出</span>
         </AppButton>
       </header>
 
@@ -184,8 +170,8 @@ export function Records() {
         ) : null}
       </div>
 
-      <div className="filter-row">
-        {FILTERS.map((item) => (
+      {records.length > 0 && <div className="filter-row">
+        {FILTERS.filter((item) => item.id === "全部" || records.some((record) => record.type === item.id)).map((item) => (
           <AppButton
             className={filter === item.id ? "active" : ""}
             key={item.id}
@@ -194,12 +180,12 @@ export function Records() {
             {t(item.key)}
           </AppButton>
         ))}
-      </div>
+      </div>}
 
       <section className="record-list">
         {visibleRecords.length === 0 ? (
           <p className="empty-tip">
-            {keyword ? t("records.searchEmpty") : t("records.emptyFilter")}
+            {keyword ? t("records.searchEmpty") : records.length === 0 ? "暂无记录。对话默认不保存，可在对话设置中开启保存。" : t("records.emptyFilter")}
           </p>
         ) : (
           visibleRecords.map((record) => (

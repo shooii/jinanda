@@ -1,11 +1,19 @@
 name: Deploy Pages
+
 on:
   push:
     branches: [master]
+  workflow_dispatch:
+
 permissions:
   contents: read
   pages: write
   id-token: write
+
+# Only one Pages deployment at a time. In-progress runs are allowed to finish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -14,20 +22,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Must run before setup-node: setup-node's `cache: pnpm` needs pnpm on PATH.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'pnpm'
-
-      - name: Install pnpm
-        run: npm install -g pnpm
+          node-version: 22
+          cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Build project
         run: pnpm build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
 
       - name: Upload build artifact
         uses: actions/upload-pages-artifact@v3

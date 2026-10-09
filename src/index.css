@@ -14170,3 +14170,78 @@ html[data-theme="dark"] {
   --muted: oklch(0.78 0.01 258);
   --soft-muted: oklch(0.69 0.01 258);
 }
+
+/* Face-to-face setup: one choice per row, one clear action. */
+.dialogue-flow .dialogue-modes {
+  grid-template-columns: 1fr;
+  gap: 0.55rem;
+}
+
+.dialogue-flow .dialogue-mode-card {
+  min-height: 4.7rem;
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr) 1.25rem;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.95rem;
+  text-align: left;
+}
+
+.dialogue-flow .dialogue-mode-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  display: grid;
+  place-items: center;
+  border-radius: 0.75rem;
+  color: var(--teal);
+  background: var(--surface-soft);
+}
+
+.dialogue-flow .dialogue-mode-card > .dialogue-mode-copy {
+  min-height: 0;
+  padding: 0;
+}
+
+.dialogue-flow .dialogue-mode-copy strong {
+  font-size: 0.96rem;
+  white-space: normal;
+}
+
+.dialogue-flow .dialogue-mode-copy small {
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  white-space: normal;
+}
+
+.dialogue-flow .dialogue-mode-card .mode-radio {
+  position: static;
+  width: 1.15rem;
+  height: 1.15rem;
+  justify-self: end;
+}
+
+.dialogue-flow .dialogue-start-bar {
+  grid-template-columns: 1fr;
+  gap: 0.55rem;
+  padding: 0.7rem 1rem calc(0.7rem + env(safe-area-inset-bottom));
+}
+
+.dialogue-flow .dialogue-start-bar > div {
+  display: block;
+  text-align: center;
+}
+
+.dialogue-flow .dialogue-start-bar strong {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.dialogue-flow .dialogue-start-bar > button {
+  width: 100%;
+  min-height: 3.05rem;
+  justify-content: center;
+  border-radius: 0.8rem;
+  font-size: 0.92rem;
+}

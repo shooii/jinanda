@@ -11,6 +11,7 @@ import { useLangPair } from "@/lib/core"
 import { useDevices } from "@/lib/store"
 import { langOption } from "@/lib/translate"
 import { useT } from "@/lib/i18n"
+import type { DialogueModeId } from "@/features/DialogueMode"
 
 export function Home({
   onConnect,
@@ -19,6 +20,7 @@ export function Home({
   onMode,
   onChangeDialogueMode,
   onStartPhone,
+  dialogueMode,
 }: {
   onConnect: () => void
   shortcuts: Shortcut[]
@@ -26,6 +28,7 @@ export function Home({
   onMode: (mode: FeatureId) => void
   onChangeDialogueMode: () => void
   onStartPhone: () => void
+  dialogueMode: DialogueModeId
 }) {
   const [editing, setEditing] = useState(false)
   const [showMore, setShowMore] = useState(false)
@@ -36,10 +39,6 @@ export function Home({
   const { active } = useDevices()
   const t = useT()
   const connected = active.status === "connected"
-  const [lastMode, setLastMode] = useState(() => {
-    try { return JSON.parse(window.localStorage.getItem("lingo.dialogue-mode") || '"share"') as string }
-    catch { return "share" }
-  })
   /** 左右耳 + 充电盒的完整电量，仅在 aria / 长按提示里出现 */
   const batterySummary = t("devices.batterySummary")
     .replace("{left}", String(active.leftBattery))
@@ -105,7 +104,7 @@ export function Home({
               </span>
               <span className="home-start-copy">
                 <strong>继续对话</strong>
-                <small>{lastMode === "speaker" ? "手机免提" : lastMode === "hybrid" ? "耳机 + 手机" : "一人一只耳机"}</small>
+                <small>{dialogueMode === "speaker" ? "手机免提" : dialogueMode === "hybrid" ? "耳机 + 手机" : "一人一只耳机"}</small>
               </span>
               <Icon name="chevron" />
             </AppButton>
@@ -125,8 +124,6 @@ export function Home({
           )}
           <div className="home-dialogue-actions">
             {!connected && <AppButton className="home-phone-start" onClick={() => {
-              window.localStorage.setItem("lingo.dialogue-mode", JSON.stringify("speaker"))
-              setLastMode("speaker")
               onStartPhone()
             }}>用手机开始对话</AppButton>}
             <AppButton className="home-mode-link" onClick={onChangeDialogueMode}>选择对话方式</AppButton>

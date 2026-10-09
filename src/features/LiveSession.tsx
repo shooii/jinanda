@@ -18,6 +18,7 @@ import {
 } from "@/lib/translate"
 import { useVocabulary } from "@/lib/store"
 import { SpeakerTalk } from "@/features/SpeakerTalk"
+import type { DialogueModeId } from "@/features/DialogueMode"
 
 type ShareTurn = {
   id: number
@@ -281,6 +282,7 @@ function TalkFlow({
   onToggle,
   onPlay,
   onOpenTone,
+  routeDescription,
 }: {
   t: (k: string) => string
   shared: Shared
@@ -290,6 +292,7 @@ function TalkFlow({
   onToggle: () => void
   onPlay: (id: number) => void
   onOpenTone: () => void
+  routeDescription: string
 }) {
   const canvasRef = useRef<HTMLDivElement>(null)
 
@@ -307,7 +310,7 @@ function TalkFlow({
 
   return (
     <main className="share-stage">
-      <p className="session-truth" role="status">{live ? "演示进行中 · 示例对话会自动出现" : "交互演示 · 点按麦克风查看示例对话"}<br />{shared.offline ? "离线模式仅为界面演示" : "声音输出：耳机模式（演示）"}</p>
+      <p className="session-truth" role="status">{live ? "演示进行中 · 示例对话会自动出现" : "交互演示 · 点按麦克风查看示例对话"}<br />{shared.offline ? "离线模式仅为界面演示" : routeDescription}</p>
       <div className="share-canvas" ref={canvasRef}>
         {turns.length === 0 ? (
           <p className="share-empty">
@@ -361,16 +364,14 @@ function TalkFlow({
 export function LiveSession({
   onClose,
   onFeature,
+  mode,
 }: {
   onClose: () => void
   onFeature?: (feature: FeatureId) => void
+  mode: DialogueModeId
 }) {
   const t = useT()
   const [uiLang] = useAppLanguage()
-  const [mode] = usePersistentState<"share" | "hybrid" | "speaker">(
-    "lingo.dialogue-mode",
-    "share",
-  )
   const [isListening, setIsListening] = useState(true)
   const [showSettings, setShowSettings] = useState(false)
   const [noSave, setNoSave] = useState(true)
@@ -485,7 +486,7 @@ export function LiveSession({
       </button>
       <button
         className="share-pair-swap"
-        aria-label={t("dialogue.modeShare")}
+        aria-label={t("dialogue.swapLang")}
         onClick={swapPair}
       >
         <Icon name="swap" size={16} />
@@ -526,6 +527,7 @@ export function LiveSession({
             )
           }}
           onOpenTone={() => setShareSheet("tone")}
+          routeDescription={isHybrid ? "我听耳机，对方听手机（演示）" : "双方各戴一只耳机（演示）"}
         />
       ) : null}
 

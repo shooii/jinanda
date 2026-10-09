@@ -6,6 +6,7 @@ import { transitionTo, usePersistentState } from "@/lib/core"
 import type { FeatureId } from "@/lib/core"
 import { CameraMode } from "@/features/CameraMode"
 import { DialogueMode } from "@/features/DialogueMode"
+import type { DialogueModeId } from "@/features/DialogueMode"
 import { LiveSession } from "@/features/LiveSession"
 import { MeetingMode } from "@/features/MeetingMode"
 import { TravelMode } from "@/features/TravelMode"
@@ -33,6 +34,7 @@ export default function App() {
   const [showMembership, setShowMembership] = useState(false)
   const [showDevices, setShowDevices] = useState(false)
   const [dialogueModeChosen, setDialogueModeChosen] = usePersistentState("lingo.dialogue-mode-chosen", false)
+  const [dialogueMode, setDialogueMode] = usePersistentState<DialogueModeId>("lingo.dialogue-mode", "share")
   const [onboarded, setOnboarded] = usePersistentState("lingo.onboarded", false)
   const [storedShortcuts, setShortcuts] = usePersistentState(
     "lingo.shortcuts",
@@ -84,6 +86,8 @@ export default function App() {
           />
         ) : activeFeature === "dialogue" ? (
           <DialogueMode
+            mode={dialogueMode}
+            onModeChange={setDialogueMode}
             onClose={() => transitionTo(() => setActiveFeature(null))}
             onStart={() =>
               transitionTo(() => {
@@ -130,6 +134,7 @@ export default function App() {
           />
         ) : showLive ? (
           <LiveSession
+            mode={dialogueMode}
             onClose={() => transitionTo(() => setShowLive(false))}
             onFeature={(feature) =>
               transitionTo(() => {
@@ -151,9 +156,11 @@ export default function App() {
                 })}
                 onChangeDialogueMode={() => transitionTo(() => setActiveFeature("dialogue"))}
                 onStartPhone={() => transitionTo(() => {
+                  setDialogueMode("speaker")
                   setDialogueModeChosen(true)
                   setShowLive(true)
                 })}
+                dialogueMode={dialogueMode}
               />
             ) : tab === "notes" ? (
               <Records />

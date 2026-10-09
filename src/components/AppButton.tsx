@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import type { ReactNode } from "react"
+import type { AriaRole, ReactNode } from "react"
 
 
 
@@ -40,6 +40,8 @@ export function AppButton({
   onClick,
   ariaLabel,
   ariaPressed,
+  ariaChecked,
+  role,
   disabled,
 }: {
   children: ReactNode
@@ -48,12 +50,16 @@ export function AppButton({
   ariaLabel?: string
   /** 用于「多选一」的选项芯片：让读屏也能知道当前选中项，不单靠颜色 */
   ariaPressed?: boolean
+  ariaChecked?: boolean
+  role?: AriaRole
   disabled?: boolean
 }) {
   return (
     <button
       aria-label={ariaLabel}
       aria-pressed={ariaPressed}
+      aria-checked={ariaChecked}
+      role={role}
       className={className}
       disabled={disabled}
       onClick={onClick}

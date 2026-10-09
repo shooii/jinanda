@@ -1,10 +1,17 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { AppButton, toast } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
 import { MiniBattery } from "@/components/BatteryPair"
 import { useDevices } from "@/lib/store"
 import type { DeviceStatus, PairedDevice } from "@/lib/store"
 import { useT } from "@/lib/i18n"
+import {
+  LinkError,
+  bluetoothSupported,
+  describeLinkError,
+  pairDevice as pairBluetoothDevice,
+  type LinkSession,
+} from "@/lib/device-link"
 
 
 type AddStep = "idle" | "searching" | "found" | "connecting" | "done"
@@ -19,8 +26,59 @@ export function DeviceManager({ onClose }: { onClose: () => void }) {
     setCurrent,
     removeDevice,
     addDevice,
+    applyReading,
   } = useDevices()
   const [adding, setAdding] = useState<AddStep>("idle")
+  /** 真实蓝牙直连会话；与本地设备列表是两件事，前者来自 GATT 读数 */
+  const [link, setLink] = useState<LinkSession | null>(null)
+  const [linking, setLinking] = useState(false)
+  const linkedId = useRef<string | null>(null)
+
+  /**
+   * 连接真实耳机：走系统蓝牙选择器 + 标准 GATT 服务，
+   * 拿到的设备名、型号与电量都是硬件真实读数。
+   */
+  const connectHardware = () => {
+    if (linking) return
+    setLinking(true)
+    void (async () => {
+      try {
+        const session = await pairBluetoothDevice({
+          onBattery: (level) => {
+            if (linkedId.current) applyReading(linkedId.current, { battery: level })
+          },
+          onDisconnect: () => {
+            if (linkedId.current) applyReading(linkedId.current, { status: "disconnected" })
+            setLink(null)
+            linkedId.current = null
+          },
+        })
+        const created = addDevice({
+          name: session.device.name,
+          model: session.device.model ?? session.device.id.slice(0, 8),
+        })
+        linkedId.current = created.id
+        applyReading(created.id, {
+          status: "connected",
+          ...(session.device.battery === null ? {} : { battery: session.device.battery }),
+        })
+        setLink(session)
+        toast(`${session.device.name} 已通过蓝牙连接`)
+      } catch (error) {
+        const reason = error instanceof LinkError ? error.reason : "failed"
+        toast(describeLinkError(reason))
+      } finally {
+        setLinking(false)
+      }
+    })()
+  }
+
+  const disconnectHardware = () => {
+    link?.disconnect()
+    if (linkedId.current) applyReading(linkedId.current, { status: "disconnected" })
+    linkedId.current = null
+    setLink(null)
+  }
 
   useEffect(() => {
     if (adding !== "searching") return
@@ -204,6 +262,44 @@ export function DeviceManager({ onClose }: { onClose: () => void }) {
               ))}
             </ul>
           )}
+
+          <section className="dm-hw">
+            <div className="dm-hw-head">
+              <span className="eyebrow">硬件直连</span>
+              <small>{bluetoothSupported() ? "读取标准 GATT 服务" : "当前浏览器不支持"}</small>
+            </div>
+            {link ? (
+              <div className="dm-hw-body">
+                <strong>{link.device.name}</strong>
+                <div className="dm-hw-rows">
+                  <span>
+                    电量 <b>{link.device.battery === null ? "—" : `${link.device.battery}%`}</b>
+                  </span>
+                  <span>
+                    型号 <b>{link.device.model ?? "—"}</b>
+                  </span>
+                  <span>
+                    固件 <b>{link.device.firmware ?? "—"}</b>
+                  </span>
+                  <span>
+                    厂商 <b>{link.device.manufacturer ?? "—"}</b>
+                  </span>
+                </div>
+                <AppButton className="dm-hw-action" onClick={disconnectHardware}>
+                  断开直连
+                </AppButton>
+              </div>
+            ) : (
+              <AppButton
+                className="dm-hw-action primary"
+                disabled={!bluetoothSupported() || linking}
+                onClick={connectHardware}
+              >
+                <Icon name="bluetooth" size={18} />
+                <span>{linking ? "正在连接…" : "通过蓝牙连接真实耳机"}</span>
+              </AppButton>
+            )}
+          </section>
 
           <AppButton className="dm-add" onClick={() => setAdding("searching")}>
             <Icon name="plus" size={18} />

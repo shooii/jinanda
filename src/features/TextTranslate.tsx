@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { AppButton, toast } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
 import type { IconName } from "@/components/Icon"
@@ -15,6 +15,7 @@ import {
 import { langOption, sentences, translatePhrase, applyTone, detectLang } from "@/lib/translate"
 import type { LangId, ToneId } from "@/lib/translate"
 import { useAppLanguage, useT } from "@/lib/i18n"
+import { prepareTranslation, speakText, speechSupport, translateText } from "@/lib/speech"
 
 type Side = "from" | "to"
 /** 源语言可以是具体语言，也可以是「检测语言」 */
@@ -63,10 +64,49 @@ export function TextTranslate({
       : to
 
   const result = useMemo(() => translatePhrase(input, effFrom, effTo), [input, effFrom, effTo])
-  const toneText = applyTone(result.text, effTo, tone)
+
+  /**
+   * 真实翻译：任意文本都交给端侧神经模型，输入停止后 450ms 触发。
+   * 模型不可用或还没返回时，先显示词典结果，保证界面不空着。
+   */
+  const [neural, setNeural] = useState<{ key: string; text: string } | null>(null)
+  const [pending, setPending] = useState(false)
+  const requestKey = `${effFrom}->${effTo}:${input.trim()}`
+  const neuralText = neural?.key === requestKey ? neural.text : ""
+
+  useEffect(() => {
+    const text = input.trim()
+    if (!text || effFrom === effTo || !speechSupport().translation) {
+      setNeural(null)
+      setPending(false)
+      return
+    }
+    let cancelled = false
+    setPending(true)
+    const timer = window.setTimeout(() => {
+      // 在用户输入后的手势窗口内发起，模型未下载时会开始下载
+      void prepareTranslation(effFrom, effTo)
+      void (async () => {
+        const out = await translateText(text, effFrom, effTo)
+        if (cancelled) return
+        setNeural(
+          out.engine === "neural"
+            ? { key: `${effFrom}->${effTo}:${text}`, text: out.text }
+            : null,
+        )
+        setPending(false)
+      })()
+    }, 450)
+    return () => {
+      cancelled = true
+      window.clearTimeout(timer)
+    }
+  }, [input, effFrom, effTo])
+
+  const toneText = neuralText || applyTone(result.text, effTo, tone)
   const hasInput = input.trim().length > 0
-  const canUseTranslation = hasInput && result.mode === "exact"
-  const modeNote = result.mode !== "exact"
+  const canUseTranslation = hasInput && (!!neuralText || result.mode === "exact")
+  const modeNote = hasInput && !neuralText && result.mode !== "exact" && !pending
 
   useEscapeKey(() => {
     if (picker) setPicker(null)
@@ -77,31 +117,40 @@ export function TextTranslate({
   const swap = () => {
     setFrom(effTo)
     setTo(effFrom)
-    // 双向对译：把当前译文带回输入框，符合「交换语言」的直觉
-    if (canUseTranslation) setInput(result.text)
+    // 换向后的模型也要在手势内预热
+    void prepareTranslation(effTo, effFrom)
+    // 双向对译：把当前「显示的译文」带回输入框，符合「交换语言」的直觉
+    if (canUseTranslation) setInput(toneText)
   }
 
   const pick = (side: Side, lang: FromLang) => {
+    let nextFrom: LangId = effFrom
+    let nextTo: LangId = effTo
     if (side === "from") {
-      if (lang !== "auto" && lang === to) setTo(effFrom)
+      if (lang !== "auto" && lang === to) {
+        setTo(effFrom)
+        nextTo = effFrom
+      }
       setFrom(lang)
+      if (lang !== "auto") nextFrom = lang
     } else {
-      if (lang === effFrom && from !== "auto") setFrom(to)
+      if (lang === effFrom && from !== "auto") {
+        setFrom(to)
+        nextFrom = to
+      }
       setTo(lang as LangId)
+      nextTo = lang as LangId
     }
+    void prepareTranslation(nextFrom, nextTo)
     setPicker(null)
   }
 
   const play = () => {
     if (!canUseTranslation) return
-    if (!("speechSynthesis" in window)) {
+    const handle = speakText(toneText, effTo)
+    if (!handle) {
       toast("当前设备不支持朗读")
-      return
     }
-    window.speechSynthesis.cancel()
-    const utterance = new SpeechSynthesisUtterance(toneText)
-    utterance.lang = effTo === "zh" ? "zh-CN" : effTo === "en" ? "en-US" : effTo
-    window.speechSynthesis.speak(utterance)
   }
 
   const clear = () => {
@@ -208,11 +257,21 @@ export function TextTranslate({
           value={input}
           rows={2}
           aria-label={tag}
-          onChange={(event) => setInput(event.target.value)}
+          onChange={(event) => {
+            setInput(event.target.value)
+            // 在按键手势内预热端侧模型：Chrome 只允许在手势中下载模型
+            void prepareTranslation(effFrom, effTo)
+          }}
         />
       ) : (
         <p className={`tt-lane-text readonly ${hasInput ? "" : "empty"}`}>
-          {hasInput ? (result.mode === "none" ? "暂无可靠译文" : toneText) : langOption(lang).native}
+          {hasInput
+            ? neuralText || result.mode !== "none"
+              ? toneText
+              : pending
+                ? "正在翻译…"
+                : "暂无可靠译文"
+            : langOption(lang).native}
         </p>
       )}
     </div>

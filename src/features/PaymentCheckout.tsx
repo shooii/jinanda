@@ -31,6 +31,8 @@ import {
 } from "@/lib/store"
 import type { Order } from "@/lib/store"
 import { SubscriptionManage } from "@/features/SubscriptionManage"
+import { verifyPurchase } from "@/lib/services/entitlements"
+import { reportError } from "@/lib/errors"
 
 
 
@@ -125,7 +127,23 @@ export function PaymentCheckout({
     })
     setOrder(entry)
     setPhase("done")
+    // 权益以服务端校验结果为准：客户端本地只记录「已付款」
+    void verifyPurchase({
+      channelId: channel.id,
+      planId,
+      receipt: `local-${id}`,
+      transactionId: id,
+    }).catch((error) => {
+      reportError(error, "manual", { where: "entitlement-verify" })
+      setOrder((prev) =>
+        prev ? { ...prev, status: "待校验" } : prev,
+      )
+    })
   }
+
+  /** 收尾只在处理流程结束时触发一次；用 ref 取最新实现，避免把整组状态塞进依赖 */
+  const completePurchaseRef = useRef(completePurchase)
+  completePurchaseRef.current = completePurchase
 
   useEffect(() => {
     if (phase !== "processing") return
@@ -135,7 +153,7 @@ export function PaymentCheckout({
       return () => window.clearTimeout(timer)
     }
     finished.current = true
-    completePurchase()
+    completePurchaseRef.current()
   }, [phase, step, steps.length])
 
   const startPayment = () => {

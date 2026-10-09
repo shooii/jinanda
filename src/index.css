@@ -10019,6 +10019,16 @@ html[data-theme="dark"] {
   color: oklch(1 0 0);
 }
 
+/* 识别中的实时字幕：整条虚线，译文位置先占一个「翻译中」 */
+.share-bubble.live {
+  border-style: dashed;
+  opacity: 0.92;
+}
+
+.share-bubble-dst.pending {
+  opacity: 0.6;
+}
+
 /* 底部：语气胶囊 + 大按钮 */
 .share-actions {
   display: grid;
@@ -10095,6 +10105,19 @@ html[data-theme="dark"] {
 
 .share-record.live .share-record-inner {
   background: oklch(0.64 0.16 250);
+}
+
+/* 真实拾音音量环：跟随麦克风电平扩散 */
+.share-record::after {
+  content: "";
+  position: absolute;
+  inset: -0.4rem;
+  border-radius: 50%;
+  border: 2px solid oklch(0.62 0.16 252);
+  opacity: calc(var(--mic-level, 0) * 0.7);
+  transform: scale(calc(1 + var(--mic-level, 0) * 0.32));
+  transition: opacity 90ms linear, transform 90ms linear;
+  pointer-events: none;
 }
 
 .share-record-square {
@@ -12646,6 +12669,17 @@ html[data-theme="dark"] {
   line-height: 1.5;
 }
 
+/* 识别中的实时字幕：整条用虚线，译文位置先占一个「翻译中」 */
+.speak-card.live {
+  border-style: dashed;
+  opacity: 0.9;
+}
+
+.speak-card-dst.pending {
+  color: var(--muted);
+  font-weight: 600;
+}
+
 .speak-play {
   flex-shrink: 0;
   width: 1.8rem;
@@ -12776,6 +12810,7 @@ html[data-theme="dark"] {
 }
 
 .speak-mic-dot {
+  position: relative;
   width: 3.6rem;
   height: 3.6rem;
   display: grid;
@@ -12785,6 +12820,18 @@ html[data-theme="dark"] {
   color: oklch(1 0 0);
   box-shadow: 0 0.5rem 1.2rem oklch(0.64 0.13 189 / 0.3);
   transition: transform 180ms ease;
+}
+
+/* 拾音音量环：直接跟随真实麦克风电平扩散，静音时不可见 */
+.speak-mic-pulse {
+  position: absolute;
+  inset: -0.32rem;
+  border-radius: 50%;
+  border: 2px solid var(--teal);
+  opacity: calc(var(--mic-level, 0) * 0.65);
+  transform: scale(calc(1 + var(--mic-level, 0) * 0.35));
+  transition: opacity 90ms linear, transform 90ms linear;
+  pointer-events: none;
 }
 
 .speak-mic small {
@@ -14494,3 +14541,346 @@ html[data-theme="dark"] {
     height: calc(100dvh - 4rem);
   }
 }
+/* ---- 顶层错误边界的兜底界面 ---- */
+.crash-screen {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: var(--bg);
+  color: var(--ink);
+  z-index: 4000;
+}
+
+.crash-card {
+  width: min(30rem, 100%);
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.6rem;
+  border-radius: 1.2rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: 0 1.5rem 4rem oklch(0.2 0.02 258 / 0.18);
+}
+
+.crash-card h1 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.crash-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.crash-detail {
+  margin: 0;
+  padding: 0.7rem 0.8rem;
+  max-height: 8rem;
+  overflow: auto;
+  border-radius: 0.7rem;
+  background: oklch(0.2 0.01 258 / 0.06);
+  color: var(--muted);
+  font-size: 0.78rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.crash-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+/* ---- 按需加载功能的占位 ---- */
+.route-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 60vh;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.route-loading-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--teal);
+  animation: route-loading-pulse 1s ease-in-out infinite;
+}
+
+@keyframes route-loading-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+/* ---- 离线提示条 ---- */
+.offline-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.9rem;
+  background: oklch(0.72 0.16 70);
+  color: oklch(0.25 0.05 70);
+  font-size: var(--fs-xs);
+  font-weight: 650;
+  text-align: center;
+}
+
+/* ---- 从右向左书写的语言 ---- */
+html[dir="rtl"] body {
+  text-align: right;
+}
+
+/* 桌面端品牌侧栏在 RTL 下应位于右侧 */
+html[dir="rtl"] .app-shell {
+  flex-direction: row-reverse;
+}
+
+/* 方向性图标镜像，避免箭头指向与阅读方向相反 */
+html[dir="rtl"] svg[data-icon="chevron"],
+html[dir="rtl"] svg[data-icon="skip-next"],
+html[dir="rtl"] svg[data-icon="skip-prev"],
+html[dir="rtl"] svg[data-icon="plane"] {
+  transform: scaleX(-1);
+}
+
+/* 对话气泡的贴边方向跟随阅读方向 */
+html[dir="rtl"] .share-bubble.me,
+html[dir="rtl"] .share-bubble.them {
+  align-self: flex-start;
+}
+
+html[dir="rtl"] .share-bubble.them {
+  align-self: flex-end;
+}
+
+/* ---- 设备管理：真实蓝牙直连 ---- */
+.dm-hw {
+  display: grid;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  padding: 0.95rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.dm-hw-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.dm-hw-head small {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+}
+
+.dm-hw-body {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.dm-hw-rows {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem 0.75rem;
+}
+
+.dm-hw-rows span {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.4rem;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+
+.dm-hw-rows b {
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.dm-hw-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.8rem;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.dm-hw-action.primary {
+  border-color: transparent;
+  background: var(--teal);
+  color: oklch(1 0 0);
+}
+
+.dm-hw-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 未连接账户服务时把状态点改成中性色，避免看起来像故障 */
+.service-footer i.local {
+  background: var(--muted);
+}
+
+.call-pair-card {
+  display: grid;
+  gap: 0.55rem;
+  padding: 1rem;
+  border-radius: 1.1rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.call-dial-blocked {
+  margin: 0;
+  color: oklch(0.62 0.14 70);
+  font-size: var(--fs-xs);
+  text-align: center;
+}
+
+.call-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.call-start {
+  display: grid;
+  gap: 0.7rem;
+  padding: 1rem;
+  border-radius: 1.1rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.call-joined {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin: 0.6rem 0 0;
+  padding: 0.55rem 0.9rem;
+  border-radius: 0.8rem;
+  background: oklch(0.72 0.13 165 / 0.16);
+  color: var(--teal);
+  font-size: var(--fs-sm);
+  font-weight: 650;
+}
+
+/* ---- 通话中：真实前置摄像头自画面 ---- */
+.call-stage {
+  position: relative;
+  overflow: hidden;
+}
+
+.call-selfview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* 前置摄像头镜像，符合照镜子的直觉 */
+  transform: scaleX(-1);
+  background: oklch(0.16 0.01 258);
+}
+
+.call-selfview.off {
+  display: none;
+}
+
+.call-voice-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.5rem;
+  color: oklch(1 0 0);
+  background: oklch(0.2 0.02 258);
+}
+
+.call-voice-stage strong {
+  font-size: var(--fs-md);
+}
+
+/* 分享按钮用绿色区分：它是进通话后的第一步操作 */
+.call-ctrl-btn.share {
+  background: oklch(0.66 0.16 150);
+  color: oklch(1 0 0);
+}
+
+/* ---- 通话中的分享目标列表 ---- */
+.call-share-list {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.35rem 0 0.6rem;
+}
+
+.call-share-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0.8rem 0.85rem;
+  border: 0;
+  border-radius: 0.8rem;
+  background: transparent;
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.call-share-row:active {
+  background: oklch(0.2 0.01 258 / 0.06);
+}
+
+.call-share-row strong {
+  flex: 1;
+  font-weight: 600;
+}
+
+.call-share-icon {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  flex: none;
+  border-radius: 0.6rem;
+  background: oklch(0.62 0.16 252 / 0.12);
+  color: var(--teal);
+}
+
+html[dir="rtl"] .call-share-row {
+  text-align: right;
+}
+

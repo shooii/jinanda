@@ -1,17 +1,19 @@
-import { useEffect, useRef, useState } from "react"
+import { useState, type CSSProperties } from "react"
 import { AppButton, toast } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
 import type { IconName } from "@/components/Icon"
 import { useEscapeKey, usePersistentState, useLangPair } from "@/lib/core"
 import type { FeatureId } from "@/lib/core"
 import { useAppLanguage, useT } from "@/lib/i18n"
+import { allLanguages, langOption, type LangId } from "@/lib/translate"
 import {
-  allLanguages,
-  langOption,
-  sentences,
-  translatePhrase,
-  type LangId,
-} from "@/lib/translate"
+  describeRecognitionError,
+  prepareTranslation,
+  speakText,
+  stopSpeaking,
+  translateText,
+} from "@/lib/speech"
+import { useLiveTranslate } from "@/lib/useLiveTranslate"
 
 type Side = "me" | "them"
 type ViewMode = "side" | "facing"
@@ -27,10 +29,6 @@ type Turn = {
 type Prefs = {
   play: boolean
 }
-
-/** 对话字幕：取句级词典下标（20 语同序），保证任何语言对都能得到准确译文 */
-const ME_LINES = [0, 7, 2]
-const THEM_LINES = [9, 5, 12]
 
 const defaultPrefs: Prefs = { play: false }
 
@@ -108,20 +106,25 @@ function MicButton({
   label,
   icon,
   active,
+  level = 0,
   onClick,
 }: {
   label: string
   icon: IconName
   active: boolean
+  /** 0–1 的真实麦克风音量，用于驱动拾音动效 */
+  level?: number
   onClick: () => void
 }) {
   return (
     <button
       className={`speak-mic ${active ? "active" : ""}`}
+      style={{ "--mic-level": level.toFixed(3) } as CSSProperties}
       onClick={onClick}
       aria-label={label}
     >
       <span className="speak-mic-dot">
+        <i className="speak-mic-pulse" />
         <Icon name={icon} size={23} />
       </span>
       <small>{label}</small>
@@ -150,53 +153,45 @@ export function SpeakerTalk({
   const [turns, setTurns] = usePersistentState<Turn[]>("lingo.speak-turns", [])
   const [menu, setMenu] = useState<"more" | null>(null)
   const [sheet, setSheet] = useState<null | "lang" | Side>(null)
-  const [listening, setListening] = useState<Side | null>(null)
   const [playingId, setPlayingId] = useState<number | null>(null)
-  const cursors = useRef<Record<Side, number>>({ me: 0, them: 0 })
+  /** 上一轮实际使用的翻译引擎，用于如实提示是否退回了本地词典 */
+  const [lastEngine, setLastEngine] = useState<"neural" | "dictionary" | null>(null)
 
-  const speak = (text: string, id: number, lang: LangId) => {
-    if (!("speechSynthesis" in window)) {
-      toast("当前设备不支持朗读")
-      return
-    }
-    window.speechSynthesis.cancel()
-    const utterance = new SpeechSynthesisUtterance(text)
-    utterance.lang = lang === "zh" ? "zh-CN" : lang === "en" ? "en-US" : lang
-    utterance.onend = () => setPlayingId(null)
-    utterance.onerror = () => setPlayingId(null)
-    setPlayingId(id)
-    window.speechSynthesis.speak(utterance)
-  }
+  /**
+   * 真实链路：麦克风采集 → 流式识别 → 翻译 → 朗读。
+   * 说完一句就落一条双语对话，按偏好自动朗读译文。
+   */
+  const live = useLiveTranslate({
+    meLang,
+    themLang,
+    autoSpeak: prefs.play,
+    mode: "pick",
+    onTurn: (turn) => {
+      setLastEngine(turn.engine)
+      setTurns((prev) => [...prev, turn])
+    },
+  })
+  const listening = live.activeSide
+
+  const statusText = live.error
+    ? describeRecognitionError(live.error, live.errorCode)
+    : live.status === "preparing"
+      ? "正在准备识别与翻译模型…"
+      : live.status === "translating"
+        ? "正在翻译…"
+        : live.status === "listening"
+          ? "正在聆听，说完会自动翻译"
+          : lastEngine === "dictionary"
+            ? "端侧翻译模型未就绪，上一句使用了本地词典"
+            : prefs.play
+              ? "点按麦克风开始说话 · 自动朗读已开启"
+              : "点按麦克风开始说话"
 
   useEscapeKey(() => {
     if (sheet) setSheet(null)
     else if (menu) setMenu(null)
     else onClose()
   })
-
-  // 点按麦克风：识别一句 → 追加一条双语对话
-  useEffect(() => {
-    if (!listening) return
-    const side = listening
-    const handle = window.setTimeout(() => {
-      const queue = side === "me" ? ME_LINES : THEM_LINES
-      const index = queue[cursors.current[side] % queue.length]
-      cursors.current[side] += 1
-      const from = side === "me" ? meLang : themLang
-      const to = side === "me" ? themLang : meLang
-      const list = sentences[from] ?? sentences.zh
-      const original = list[index] ?? list[0]
-      const translated =
-        from === to ? original : translatePhrase(original, from, to).text
-      const id = Date.now()
-      setTurns((prev) => [...prev, { id, who: side, original, translated }])
-      setListening(null)
-      if (prefs.play) {
-        speak(translated, id, to)
-      }
-    }, 1700)
-    return () => window.clearTimeout(handle)
-  }, [listening, meLang, themLang, prefs.play, setTurns])
 
   const langOf = (side: Side) => (side === "me" ? meLang : themLang)
   const shortName = (id: LangId) =>
@@ -213,23 +208,43 @@ export function SpeakerTalk({
   const pushText = (side: Side, text: string) => {
     const from = langOf(side)
     const to = side === "me" ? themLang : meLang
-    const translated =
-      from === to ? text : translatePhrase(text, from, to).text
-    setTurns((prev) => [
-      ...prev,
-      { id: Date.now(), who: side, original: text, translated },
-    ])
+    setActiveSide(side)
+    // 手输内容同样走真实翻译引擎
+    void prepareTranslation(from, to)
+    void (async () => {
+      const result =
+        from === to
+          ? { text, engine: "dictionary" as const }
+          : await translateText(text, from, to)
+      setTurns((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          who: side,
+          original: text,
+          translated: result.text,
+          engine: result.engine,
+        },
+      ])
+      if (prefs.play) speakText(result.text, to)
+    })()
   }
 
   const playTurn = (id: number) => {
     const turn = turns.find((item) => item.id === id)
     if (!turn) return
     if (playingId === id) {
-      window.speechSynthesis?.cancel()
+      stopSpeaking()
       setPlayingId(null)
       return
     }
-    speak(turn.translated, id, turn.who === "me" ? themLang : meLang)
+    const target = turn.who === "me" ? themLang : meLang
+    const handle = speakText(turn.translated, target, () => setPlayingId(null))
+    if (!handle) {
+      toast("当前设备不支持朗读")
+      return
+    }
+    setPlayingId(id)
   }
 
   const togglePref = (key: keyof Prefs) =>
@@ -237,34 +252,52 @@ export function SpeakerTalk({
 
   const clearTurns = () => {
     setTurns([])
-    cursors.current = { me: 0, them: 0 }
     setMenu(null)
     toast(t("speak.cleared"))
   }
 
   const startListening = (side: Side) => {
     setActiveSide(side)
-    if (listening) return
-    setListening(side)
+    // 再点同一侧＝停止；点另一侧＝切过去继续说
+    if (listening === side) {
+      live.stop()
+      return
+    }
+    if (live.status !== "idle") live.stop()
+    live.start(side)
   }
 
   // side 视图展示完整对话；面对面视图按 half 只展示朝向自己那一侧的话，
 // 避免同一条内容在上下两块屏里各出现一次。
 const canvasFor = (side: Side | null) => {
     const visible = side ? turns.filter((turn) => turn.who === side) : turns
+    // 正在拾音的那一侧才显示实时字幕
+    const interim =
+      live.interim && (side === null || side === live.activeSide) ? live.interim : ""
     return (
       <div className="speak-canvas">
-        {visible.length === 0 ? (
+        {visible.length === 0 && !interim ? (
           <p className="speak-empty">点按下方按钮，开始双语对话</p>
         ) : (
-          visible.map((turn) => (
-            <SpeakCard
-              key={turn.id}
-              turn={turn}
-              playing={playingId === turn.id}
-              onPlay={() => playTurn(turn.id)}
-            />
-          ))
+          <>
+            {visible.map((turn) => (
+              <SpeakCard
+                key={turn.id}
+                turn={turn}
+                playing={playingId === turn.id}
+                onPlay={() => playTurn(turn.id)}
+              />
+            ))}
+            {interim ? (
+              <article className={`speak-card live ${live.activeSide ?? "me"}`}>
+                <div className="speak-card-text">
+                  <p className="speak-card-src">{interim}</p>
+                  <span className="speak-card-rule" />
+                  <p className="speak-card-dst pending">正在翻译…</p>
+                </div>
+              </article>
+            ) : null}
+          </>
         )}
       </div>
     )
@@ -290,6 +323,7 @@ const canvasFor = (side: Side | null) => {
         <MicButton
           icon={listening === side ? "pause" : "mic"}
           active={listening === side}
+          level={listening === side ? live.level : 0}
           label={shortName(langOf(side))}
           onClick={() => startListening(side)}
         />
@@ -388,7 +422,7 @@ const canvasFor = (side: Side | null) => {
             <Icon name="more" size={18} />
           </AppButton>
         </header>
-        <p className="session-status" role="status">{listening ? "正在聆听并实时翻译" : prefs.play ? "自动朗读译文已开启" : "点按译文播放"}</p>
+        <p className="session-status" role="status">{statusText}</p>
         {menu === "more" ? morePopover : null}
       </div>
 
@@ -404,12 +438,14 @@ const canvasFor = (side: Side | null) => {
               <MicButton
                 icon={listening === "me" ? "pause" : "mic"}
                 active={listening === "me"}
+                level={listening === "me" ? live.level : 0}
                 label={shortName(meLang)}
                 onClick={() => startListening("me")}
               />
               <MicButton
                 icon={listening === "them" ? "pause" : "headphones"}
                 active={listening === "them"}
+                level={listening === "them" ? live.level : 0}
                 label={shortName(themLang)}
                 onClick={() => startListening("them")}
               />

@@ -473,6 +473,11 @@ export type UseDevicesResult = {
   setCurrent: (id: string) => void
   removeDevice: (id: string) => void
   addDevice: (input?: { name?: string; model?: string }) => PairedDevice
+  /** 用真实硬件读数（蓝牙电量 / 连接状态）更新设备条目 */
+  applyReading: (
+    id: string,
+    reading: { status?: DeviceStatus; battery?: number },
+  ) => void
 }
 
 export function useDevices(): UseDevicesResult {
@@ -610,6 +615,25 @@ export function useDevices(): UseDevicesResult {
     return created
   }, [])
 
+  /** 真实硬件读数回写：蓝牙电量推来时必须覆盖掉本地占位值 */
+  const applyReading = useCallback(
+    (id: string, reading: { status?: DeviceStatus; battery?: number }) => {
+      setDevicesState((items) =>
+        items.map((device) =>
+          device.id === id
+            ? {
+                ...device,
+                status: reading.status ?? device.status,
+                leftBattery: reading.battery ?? device.leftBattery,
+                rightBattery: reading.battery ?? device.rightBattery,
+              }
+            : device,
+        ),
+      )
+    },
+    [],
+  )
+
   const active: PairedDevice =
     devices.length > 0
       ? (devices.find((device) => device.current) ??
@@ -636,6 +660,7 @@ export function useDevices(): UseDevicesResult {
     setCurrent,
     removeDevice,
     addDevice,
+    applyReading,
   } as const
 }
 
@@ -721,7 +746,11 @@ export type Order = {
   total: string
   taxLabel: string
   time: string
-  status: "已付款" | "已退款"
+  /**
+   * 支付状态。权益以服务端校验收据为准，所以本地付完先落在「待校验」，
+   * 校验通过后才由服务端下发的权益状态驱动展示。
+   */
+  status: "已付款" | "已退款" | "待校验"
 }
 
 /** 全球支付账单记录 */

@@ -1,31 +1,77 @@
-import { useEffect, useRef, useState } from "react"
+import { lazy, Suspense, useEffect, useRef, useState } from "react"
 import { AppButton, AppToast } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
 import type { IconName } from "@/components/Icon"
 import { transitionTo, usePersistentState } from "@/lib/core"
 import type { FeatureId } from "@/lib/core"
-import { CameraMode } from "@/features/CameraMode"
-import { DialogueMode } from "@/features/DialogueMode"
 import type { DialogueModeId } from "@/features/DialogueMode"
-import { LiveSession } from "@/features/LiveSession"
-import { MeetingMode } from "@/features/MeetingMode"
-import { TravelMode } from "@/features/TravelMode"
-import { TextTranslate } from "@/features/TextTranslate"
-import { CallTranslate } from "@/features/CallTranslate"
-import { WatchMode } from "@/features/WatchMode"
-import { Coach } from "@/features/Coach"
-import { DeviceManager } from "@/features/DeviceManager"
-import { Onboarding } from "@/features/Onboarding"
-import { Phrasebook } from "@/features/Phrasebook"
 import { defaultShortcuts, mergeShortcuts } from "@/features/ShortcutEditor"
 import { Home } from "@/pages/Home"
-import { Membership } from "@/pages/Membership"
-import { Profile } from "@/pages/Profile"
-import { Records } from "@/pages/Records"
-import { SleepLibrary } from "@/pages/SleepLibrary"
 import { useT } from "@/lib/i18n"
 import { allLanguages } from "@/lib/translate"
+import { useOnlineStatus } from "@/lib/pwa"
+import { useDocumentLanguage } from "@/lib/locale"
 
+/**
+ * 首包只保留首页、导航与基础设施，其余页面按需加载。
+ * 之前所有功能都打进同一个 chunk（约 640 KB），首屏为此付出了不必要的下载量。
+ */
+const Onboarding = lazy(() =>
+  import("@/features/Onboarding").then((m) => ({ default: m.Onboarding })),
+)
+const DeviceManager = lazy(() =>
+  import("@/features/DeviceManager").then((m) => ({ default: m.DeviceManager })),
+)
+const DialogueMode = lazy(() =>
+  import("@/features/DialogueMode").then((m) => ({ default: m.DialogueMode })),
+)
+const LiveSession = lazy(() =>
+  import("@/features/LiveSession").then((m) => ({ default: m.LiveSession })),
+)
+const MeetingMode = lazy(() =>
+  import("@/features/MeetingMode").then((m) => ({ default: m.MeetingMode })),
+)
+const TravelMode = lazy(() =>
+  import("@/features/TravelMode").then((m) => ({ default: m.TravelMode })),
+)
+const CameraMode = lazy(() =>
+  import("@/features/CameraMode").then((m) => ({ default: m.CameraMode })),
+)
+const TextTranslate = lazy(() =>
+  import("@/features/TextTranslate").then((m) => ({ default: m.TextTranslate })),
+)
+const CallTranslate = lazy(() =>
+  import("@/features/CallTranslate").then((m) => ({ default: m.CallTranslate })),
+)
+const WatchMode = lazy(() =>
+  import("@/features/WatchMode").then((m) => ({ default: m.WatchMode })),
+)
+const Coach = lazy(() =>
+  import("@/features/Coach").then((m) => ({ default: m.Coach })),
+)
+const Phrasebook = lazy(() =>
+  import("@/features/Phrasebook").then((m) => ({ default: m.Phrasebook })),
+)
+const Records = lazy(() =>
+  import("@/pages/Records").then((m) => ({ default: m.Records })),
+)
+const SleepLibrary = lazy(() =>
+  import("@/pages/SleepLibrary").then((m) => ({ default: m.SleepLibrary })),
+)
+const Profile = lazy(() =>
+  import("@/pages/Profile").then((m) => ({ default: m.Profile })),
+)
+const Membership = lazy(() =>
+  import("@/pages/Membership").then((m) => ({ default: m.Membership })),
+)
+
+/** 功能页加载中的占位，避免切换时闪白 */
+const routeFallback = (
+  <div className="route-loading" role="status">
+    <span className="route-loading-dot" />
+    正在加载…
+  </div>
+)
 
 
 export default function App() {
@@ -45,6 +91,9 @@ export default function App() {
   const shortcuts = mergeShortcuts(storedShortcuts)
   const [activeFeature, setActiveFeature] = useState<FeatureId | null>(null)
   const t = useT()
+  const online = useOnlineStatus()
+  // 把界面语言同步到 <html lang / dir>，RTL 语言需要整份布局翻转
+  useDocumentLanguage()
 
   useEffect(() => {
     phoneRef.current?.scrollTo({ top: 0 })
@@ -58,6 +107,12 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      {!online && (
+        <div className="offline-banner" role="status">
+          <Icon name="globe" size={15} />
+          <span>当前离线 · 已缓存的页面与端侧模型仍可继续使用</span>
+        </div>
+      )}
       <aside className="desktop-story">
         <div className="story-brand">
           <span>L</span> LingoPods
@@ -83,6 +138,7 @@ export default function App() {
       </aside>
 
       <div className="phone-app" ref={phoneRef}>
+        <Suspense fallback={routeFallback}>
         {!onboarded ? (
           <Onboarding onClose={() => transitionTo(() => setOnboarded(true))} />
         ) : showDevices ? (
@@ -205,11 +261,14 @@ export default function App() {
             </nav>
           </>
         )}
-        {showMembership && (
-          <Membership
-            onClose={() => transitionTo(() => setShowMembership(false))}
-          />
-        )}
+        </Suspense>
+        <Suspense fallback={null}>
+          {showMembership && (
+            <Membership
+              onClose={() => transitionTo(() => setShowMembership(false))}
+            />
+          )}
+        </Suspense>
         <AppToast />
       </div>
     </div>

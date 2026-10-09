@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react"
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react"
 import { AppButton } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
 import { SwitchRow } from "@/components/SwitchRow"
@@ -10,13 +10,14 @@ import {
   detectLang,
   applyTone,
   detectGlossary,
-  sentences,
   translatePhrase,
   langOption,
   type LangId,
   type ToneId,
 } from "@/lib/translate"
 import { useVocabulary } from "@/lib/store"
+import { describeRecognitionError, speakText, stopSpeaking } from "@/lib/speech"
+import { useLiveTranslate, type LiveStatus } from "@/lib/useLiveTranslate"
 import { SpeakerTalk } from "@/features/SpeakerTalk"
 import type { DialogueModeId } from "@/features/DialogueMode"
 
@@ -26,10 +27,6 @@ type ShareTurn = {
   original: string
   translated: string
 }
-
-/** 一人一只耳机 · 对话字幕：取句级词典下标（20 语同序），任何语言对都能得到准确译文 */
-const SHARE_ME_LINES = [0, 7, 2]
-const SHARE_THEM_LINES = [9, 5, 12]
 
 type Shared = {
   t: (k: string) => string
@@ -279,6 +276,10 @@ function TalkFlow({
   turns,
   playingId,
   live,
+  status,
+  interim,
+  level,
+  errorText,
   onToggle,
   onPlay,
   onOpenTone,
@@ -289,6 +290,10 @@ function TalkFlow({
   turns: ShareTurn[]
   playingId: number | null
   live: boolean
+  status: LiveStatus
+  interim: string
+  level: number
+  errorText: string
   onToggle: () => void
   onPlay: (id: number) => void
   onOpenTone: () => void
@@ -308,31 +313,51 @@ function TalkFlow({
         ? t("tone.casual")
         : t("tone.neutral")
 
+  const statusText = errorText
+    ? errorText
+    : status === "preparing"
+      ? "正在准备识别与翻译模型…"
+      : status === "translating"
+        ? "正在翻译…"
+        : status === "listening"
+          ? "正在聆听，听到内容会自动判断是谁在说"
+          : "点按麦克风开始对话"
+
   return (
     <main className="share-stage">
-      <p className="session-status" role="status">{live ? "对话进行中 · 正在实时翻译" : "点按按钮开始对话"}<br />{shared.offline ? "离线模式已开启 · 使用端侧语言包" : routeDescription} · 点按气泡可朗读译文</p>
+      <p className="session-status" role="status">{statusText}<br />{shared.offline ? "离线模式已开启 · 使用端侧语言包" : routeDescription} · 点按气泡可朗读译文</p>
       <div className="share-canvas" ref={canvasRef}>
-        {turns.length === 0 ? (
+        {turns.length === 0 && !interim ? (
           <p className="share-empty">
             <Icon name="headphones" size={22} />
             {t("speak.tapToSpeak")}
           </p>
         ) : (
-          turns.map((turn) => (
-            <article key={turn.id} className={`share-bubble ${turn.who}`}>
-              <div className="share-bubble-text">
-                <p className="share-bubble-src">{turn.original}</p>
-                <p className="share-bubble-dst">{turn.translated}</p>
-              </div>
-              <button
-                className={`share-bubble-play ${playingId === turn.id ? "playing" : ""}`}
-                onClick={() => onPlay(turn.id)}
-                aria-label={turn.translated}
-              >
-                <Icon name={playingId === turn.id ? "pause" : "play"} size={13} />
-              </button>
-            </article>
-          ))
+          <>
+            {turns.map((turn) => (
+              <article key={turn.id} className={`share-bubble ${turn.who}`}>
+                <div className="share-bubble-text">
+                  <p className="share-bubble-src">{turn.original}</p>
+                  <p className="share-bubble-dst">{turn.translated}</p>
+                </div>
+                <button
+                  className={`share-bubble-play ${playingId === turn.id ? "playing" : ""}`}
+                  onClick={() => onPlay(turn.id)}
+                  aria-label={turn.translated}
+                >
+                  <Icon name={playingId === turn.id ? "pause" : "play"} size={13} />
+                </button>
+              </article>
+            ))}
+            {interim ? (
+              <article className="share-bubble live me">
+                <div className="share-bubble-text">
+                  <p className="share-bubble-src">{interim}</p>
+                  <p className="share-bubble-dst pending">正在翻译…</p>
+                </div>
+              </article>
+            ) : null}
+          </>
         )}
       </div>
 
@@ -344,6 +369,7 @@ function TalkFlow({
         </button>
         <button
           className={`share-record ${live ? "live" : ""}`}
+          style={{ "--mic-level": level.toFixed(3) } as CSSProperties}
           onClick={onToggle}
           aria-label={live ? t("session.paused") : t("speak.tapToSpeak")}
         >
@@ -394,49 +420,35 @@ export function LiveSession({
     `${convKey}-turns`,
     [],
   )
-  const [shareLive, setShareLive] = useState(false)
   const [sharePlayingId, setSharePlayingId] = useState<number | null>(null)
   const [shareSheet, setShareSheet] = useState<null | "me" | "them" | "tone">(
     null,
   )
-  const shareCursor = useRef<{ me: number; them: number }>({ me: 0, them: 0 })
-  const shareNext = useRef<"me" | "them">("them")
   const { entries: vocab } = useVocabulary()
+
+  /**
+   * 真实对话链路。面对面场景不预设谁在说，改用识别出的语种判断发言方：
+   * 听到中文就记到我这一侧，听到英文就记到对方那一侧，再译成另一侧语言。
+   */
+  const liveTalk = useLiveTranslate({
+    meLang: pair.me,
+    themLang: pair.them,
+    autoSpeak: false,
+    mode: "auto",
+    onTurn: (turn) => setShareTurns((prev) => [...prev, turn]),
+  })
+  const shareLive = liveTalk.status !== "idle"
 
   useEscapeKey(() => {
     if (shareSheet) setShareSheet(null)
     else if (showSettings) setShowSettings(false)
   })
 
-  // 面对面翻译：开启拾音后按「对方 → 我 → 对方…」流式追加双语气泡
-  useEffect(() => {
-    if (!isConversation || !shareLive) return
-    const tick = () => {
-      const side = shareNext.current
-      shareNext.current = side === "them" ? "me" : "them"
-      const from = side === "me" ? pair.me : pair.them
-      const to = side === "me" ? pair.them : pair.me
-      const queue = side === "me" ? SHARE_ME_LINES : SHARE_THEM_LINES
-      const index = queue[shareCursor.current[side] % queue.length]
-      shareCursor.current[side] += 1
-      const list = sentences[from] ?? sentences.zh
-      const original = list[index] ?? list[0]
-      const translated =
-        from === to ? original : translatePhrase(original, from, to).text
-      const id = Date.now()
-      setShareTurns((prev) => [...prev, { id, who: side, original, translated }])
-    }
-    tick()
-    const handle = window.setInterval(tick, 2900)
-    return () => window.clearInterval(handle)
-  }, [isConversation, shareLive, pair.me, pair.them, setShareTurns])
-
   const fullName = (id: LangId) =>
     uiLang === "zh" ? langOption(id).label : langOption(id).native
 
   const swapPair = () => {
     setPair({ me: pair.them, them: pair.me })
-    shareCursor.current = { me: 0, them: 0 }
   }
 
   // 手机免提对话：整屏交给苹果翻译风格的对话界面（自带顶栏 / 底栏）
@@ -507,23 +519,29 @@ export function LiveSession({
           turns={shareTurns}
           playingId={sharePlayingId}
           live={shareLive}
-          onToggle={() => setShareLive((value) => !value)}
+          status={liveTalk.status}
+          interim={liveTalk.interim}
+          level={liveTalk.level}
+          errorText={
+            liveTalk.error
+              ? describeRecognitionError(liveTalk.error, liveTalk.errorCode)
+              : ""
+          }
+          onToggle={() => (shareLive ? liveTalk.stop() : liveTalk.start("auto"))}
           onPlay={(id) => {
             const turn = shareTurns.find((item) => item.id === id)
-            if (!turn || !("speechSynthesis" in window)) return
+            if (!turn) return
             if (sharePlayingId === id) {
-              window.speechSynthesis.cancel()
+              stopSpeaking()
               setSharePlayingId(null)
               return
             }
-            window.speechSynthesis.cancel()
-            const utterance = new SpeechSynthesisUtterance(turn.translated)
             const target = turn.who === "me" ? pair.them : pair.me
-            utterance.lang = target === "zh" ? "zh-CN" : target === "en" ? "en-US" : target
-            utterance.onend = () => setSharePlayingId(null)
-            utterance.onerror = () => setSharePlayingId(null)
+            const handle = speakText(turn.translated, target, () =>
+              setSharePlayingId(null),
+            )
+            if (!handle) return
             setSharePlayingId(id)
-            window.speechSynthesis.speak(utterance)
           }}
           onOpenTone={() => setShareSheet("tone")}
           routeDescription={isHybrid ? "耳机 + 手机的呈现方式" : "双耳机的呈现方式"}
@@ -639,7 +657,6 @@ export function LiveSession({
                           ? { ...pair, me: option.id }
                           : { ...pair, them: option.id },
                       )
-                      shareCursor.current = { me: 0, them: 0 }
                       setShareSheet(null)
                     }}
                   >

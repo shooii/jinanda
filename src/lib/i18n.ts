@@ -139,6 +139,18 @@ const keyGroups: string[][] = [
   ['phrases.title', 'phrases.subtitle', 'phrases.tabPhrases', 'phrases.tabFav', 'phrases.placeholder', 'phrases.emptyPhrases', 'phrases.emptyFav', 'phrases.added', 'phrases.removed', 'phrases.favAdd', 'phrases.favRemove', 'phrases.delete', 'phrases.play'],
   // g30 观影模式（影片类型 / 声音来源 / 声音输出 / 音画同步 / 字幕）
   ['watch.genre', 'watch.gMovie', 'watch.gSeries', 'watch.gClass', 'watch.gLive', 'watch.srcMic', 'watch.srcMedia', 'watch.srcBt', 'watch.sound', 'watch.sndOriginal', 'watch.sndDub', 'watch.sndDubOnly', 'watch.sync', 'watch.syncAhead', 'watch.syncBehind', 'watch.captions', 'watch.capBilingual', 'watch.capTarget', 'watch.capSource', 'watch.capSize', 'watch.waiting', 'watch.listening', 'watch.lineCount', 'watch.export', 'watch.exported', 'watch.save', 'watch.saved', 'watch.clear', 'watch.aiNotice', 'watch.settings', 'watch.capSmall', 'watch.capNormal', 'watch.capLarge'],
+  // g31 音视频通话落地页（主操作＝通话翻译开关，拨号为次级入口）
+  [
+    "callx.armTitle", "callx.armOn", "callx.armOff", "callx.micReady", "callx.micDenied", "callx.micAsk", "callx.quotaReady", "callx.quotaMissing", "callx.quotaLocal", "callx.dialTitle", "callx.dialHint", "callx.pickContact", "callx.callVideo", "callx.callVoice", "callx.needToggle", "callx.needContact", "callx.needQuota", "callx.pairManual",
+  ],
+  // 追加：音视频通话：开始翻译对话与邀请入会
+  [
+    "callx.startTitle", "callx.startDetail", "callx.startVideo", "callx.startVoice", "callx.inviteTitle", "callx.inviteDetail", "callx.inviteCopy", "callx.inviteCopied", "callx.inviteNote", "callx.joinedBanner", "callx.peerWho",
+  ],
+  // 通话分享目标
+  [
+    "callx.shareSms", "callx.shareEmail", "callx.shareMore", "callx.shareCopyHint",
+  ],
 ]
 
 /** 每种语言按上述 11 组的顺序，组内用 | 分隔 */
@@ -175,6 +187,9 @@ const raw: Record<LangId, string[]> = {
     "对照原文|查看译文|正在识别并翻译…|正在对照原文|已将译文覆盖到原图|保留原有排版与文字位置|图片已保存到相册|已从相册选取图片|保存翻译图片|从相册选择图片|重新扫描|闪光灯|识别语言|翻译为",
     "常用语手册|常用表达 · 一点即译|常用语|收藏|输入一句常用语|还没有常用语|还没有收藏|已添加常用语|已删除|收藏|取消收藏|删除|朗读译文",
     "影片类型|电影|剧集|网课|直播|麦克风拾音|媒体音轨|蓝牙发射器|声音输出|原声 + 字幕|压低原声 + 配音|仅译文配音|音画同步|提前|延后|字幕|双语|仅译文|仅原文|字幕大小|正在等待影片声音…|正在识别影片原声|共 {n} 句|导出字幕|已导出 SRT 字幕|保存到记录|已保存到记录|清空|AI 实时生成|字幕与声音|小|标准|大",
+    "通话翻译|已开启 · 来电时自动显示双语字幕|已关闭 · 打开后通话中实时翻译|麦克风已就绪|需要麦克风权限|首次使用时会请求麦克风权限|会员权益已就绪|会员权益未生效 · 通话翻译不可用|本地模式 · 未连接账户服务|拨打电话|选定联系人后会锁定对方语言|选择联系人|视频通话|语音通话|请先打开通话翻译|请先选择联系人|请先开通会员权益|未选择联系人 · 语言可手动调整",
+    "开始翻译对话|双方各自用自己的设备，译文由设备朗读|视频对话|语音对话|邀请对方加入|对方用浏览器打开链接即可，无需安装|复制邀请链接|链接已复制，发给对方即可|链接只用于对齐双方语言，翻译在各自设备本地完成|已加入对方的翻译会话|对方是谁",
+    "短信|邮件|更多应用|内容已复制，请到该应用中粘贴发送",
   ],
   en: [
     "Translate|Records|Me|Main navigation",
@@ -208,6 +223,9 @@ const raw: Record<LangId, string[]> = {
     "Show original|Show translation|Recognizing and translating…|Comparing with the original|Translation overlaid on the image|Original layout and text positions kept|Image saved to gallery|Image picked from gallery|Save translated image|Pick from gallery|Scan again|Flash|Source language|Translate to",
     "Phrasebook|Everyday phrases, tap to translate|Phrases|Favorites|Type a phrase|No phrases yet|No favorites yet|Phrase added|Removed|Favorite|Unfavorite|Delete|Play translation",
     "Genre|Movie|Series|Lecture|Livestream|Microphone|Media audio|Bluetooth|Sound output|Original + captions|Lower original + dubbing|Dubbed only|Audio sync|Ahead|Behind|Captions|Bilingual|Translation only|Original only|Caption size|Waiting for audio…|Recognizing the soundtrack|{n} lines|Export captions|SRT exported|Save to records|Saved to records|Clear|AI generated in real time|Captions & sound|Small|Normal|Large",
+    "Call translation|On · subtitles appear automatically during calls|Off · turn on to translate calls live|Microphone ready|Microphone permission needed|You'll be asked for microphone access on first use|Plan active|No active plan · call translation unavailable|Local mode · account service not connected|Make a call|Choosing a contact sets their language|Choose a contact|Video call|Voice call|Turn on call translation first|Choose a contact first|An active plan is required|No contact selected · language can be changed manually",
+    "Start a translated conversation|Each side uses their own device; translations are spoken aloud|Video conversation|Voice conversation|Invite the other person|They just open the link in a browser — no install needed|Copy invite link|Link copied — send it to them|The link only aligns the two languages; translation runs locally on each device|Joined the inviter's translation session|Who you're talking to",
+    "SMS|Email|More apps|Copied — paste it into that app to send",
   ],
   es: [
     "Traducir|Registros|Yo|Navegación principal",
@@ -241,6 +259,9 @@ const raw: Record<LangId, string[]> = {
     "Mostrar original|Ver traducción|Reconociendo y traduciendo…|Comparando con el original|Traducción superpuesta en la imagen|Diseño y posiciones originales conservados|Imagen guardada en la galería|Imagen elegida de la galería|Guardar imagen traducida|Elegir de la galería|Escanear de nuevo|Flash|Idioma de origen|Traducir a",
     "Frases útiles|Frases cotidianas, un toque para traducir|Frases|Favoritos|Escribe una frase|Aún no hay frases|Aún no hay favoritos|Frase añadida|Eliminado|Favorito|Quitar de favoritos|Eliminar|Reproducir traducción",
     "Tipo|Película|Serie|Clase|Directo|Micrófono|Audio multimedia|Bluetooth|Salida de sonido|Original + subtítulos|Original atenuado + doblaje|Solo doblaje|Sincronización|Adelantar|Retrasar|Subtítulos|Bilingüe|Solo traducción|Solo original|Tamaño del subtítulo|Esperando el audio…|Reconociendo la banda sonora|{n} líneas|Exportar subtítulos|SRT exportado|Guardar en registros|Guardado en registros|Vaciar|Generado por IA en tiempo real|Subtítulos y sonido|Pequeño|Normal|Grande",
+    "",
+    "",
+    "",
   ],
   ja: [
     "翻訳|記録|マイ|メインナビ",
@@ -274,6 +295,9 @@ const raw: Record<LangId, string[]> = {
     "原文と比較|訳文を表示|認識して翻訳中…|原文と照合中|訳文を画像に重ねました|元のレイアウトと位置を保持|画像をアルバムに保存しました|アルバムから画像を選択しました|翻訳画像を保存|アルバムから選択|再スキャン|フラッシュ|認識する言語|翻訳先",
     "フレーズ集|よく使う表現をワンタップで翻訳|フレーズ|お気に入り|フレーズを入力|フレーズがありません|お気に入りがありません|フレーズを追加しました|削除しました|お気に入り|お気に入り解除|削除|訳文を読み上げ",
     "ジャンル|映画|ドラマ|授業|配信|マイク|メディア音声|Bluetooth|音声出力|原音 + 字幕|原音を下げて吹替|吹替のみ|音画同期|早める|遅らせる|字幕|二か国語|訳のみ|原文のみ|字幕サイズ|音声を待っています…|原音を認識しています|{n} 行|字幕を書き出し|SRT を書き出しました|記録に保存|記録に保存しました|クリア|AI がリアルタイム生成|字幕と音声|小|標準|大",
+    "",
+    "",
+    "",
   ],
   fr: [
     "Traduire|Historique|Moi|Navigation principale",
@@ -307,6 +331,9 @@ const raw: Record<LangId, string[]> = {
     "Voir l'original|Voir la traduction|Reconnaissance et traduction…|Comparaison avec l'original|Traduction superposée à l'image|Mise en page et positions conservées|Image enregistrée dans la galerie|Image choisie dans la galerie|Enregistrer l'image traduite|Choisir dans la galerie|Rescanner|Flash|Langue source|Traduire vers",
     "Phrases utiles|Expressions courantes, un appui pour traduire|Phrases|Favoris|Saisir une phrase|Aucune phrase|Aucun favori|Phrase ajoutée|Supprimé|Favori|Retirer des favoris|Supprimer|Lire la traduction",
     "Genre|Film|Série|Cours|Direct|Micro|Audio multimédia|Bluetooth|Sortie audio|Original + sous-titres|Original atténué + doublage|Doublage seul|Synchro audio|Avancer|Retarder|Sous-titres|Bilingue|Traduction seule|Original seul|Taille des sous-titres|En attente de l'audio…|Reconnaissance de la bande-son|{n} lignes|Exporter les sous-titres|SRT exporté|Enregistrer|Enregistré|Effacer|Généré par IA en direct|Sous-titres et son|Petit|Normal|Grand",
+    "",
+    "",
+    "",
   ],
   ko: [
     "번역|기록|마이|주요 탐색",
@@ -340,6 +367,9 @@ const raw: Record<LangId, string[]> = {
     "원문 대조|번역 보기|인식 및 번역 중…|원문과 대조 중|번역을 이미지에 덮었습니다|원본 레이아웃과 위치 유지|이미지를 앨범에 저장했습니다|앨범에서 이미지를 선택했습니다|번역 이미지 저장|앨범에서 선택|다시 스캔|플래시|인식 언어|번역 대상",
     "회화 표현집|자주 쓰는 표현을 눌러 바로 번역|표현|즐겨찾기|표현을 입력하세요|표현이 없습니다|즐겨찾기가 없습니다|표현을 추가했습니다|삭제했습니다|즐겨찾기|즐겨찾기 해제|삭제|번역 읽기",
     "장르|영화|드라마|강의|라이브|마이크|미디어 오디오|블루투스|소리 출력|원음 + 자막|원음 낮추고 더빙|더빙만|음향 동기화|앞으로|뒤로|자막|이중 언어|번역만|원문만|자막 크기|소리를 기다리는 중…|원음을 인식하는 중|{n}줄|자막 내보내기|SRT 내보내기 완료|기록에 저장|기록에 저장했습니다|비우기|AI 실시간 생성|자막과 소리|작게|보통|크게",
+    "",
+    "",
+    "",
   ],
   de: [
     "Übersetzen|Verlauf|Ich|Hauptnavigation",
@@ -373,6 +403,9 @@ const raw: Record<LangId, string[]> = {
     "Original anzeigen|Übersetzung anzeigen|Erkennen und übersetzen…|Vergleich mit dem Original|Übersetzung im Bild überlagert|Layout und Textpositionen beibehalten|Bild in Galerie gespeichert|Bild aus Galerie gewählt|Übersetztes Bild speichern|Aus Galerie wählen|Erneut scannen|Blitz|Ausgangssprache|Übersetzen nach",
     "Phrasenbuch|Alltagsphrasen, ein Tipp zum Übersetzen|Phrasen|Favoriten|Phrase eingeben|Noch keine Phrasen|Noch keine Favoriten|Phrase hinzugefügt|Gelöscht|Favorit|Aus Favoriten entfernen|Löschen|Übersetzung abspielen",
     "Genre|Film|Serie|Vorlesung|Livestream|Mikrofon|Medien-Audio|Bluetooth|Tonausgabe|Original + Untertitel|Original leiser + Vertonung|Nur Vertonung|Audio-Sync|Vorziehen|Verzögern|Untertitel|Zweisprachig|Nur Übersetzung|Nur Original|Untertitelgröße|Warte auf Ton…|Erkenne Tonspur|{n} Zeilen|Untertitel exportieren|SRT exportiert|In Aufzeichnungen speichern|Gespeichert|Leeren|KI-Erzeugung in Echtzeit|Untertitel & Ton|Klein|Normal|Groß",
+    "",
+    "",
+    "",
   ],
   pt: [
     "Traduzir|Registros|Eu|Navegação principal",
@@ -406,6 +439,9 @@ const raw: Record<LangId, string[]> = {
     "Ver original|Ver tradução|Reconhecendo e traduzindo…|Comparando com o original|Tradução sobreposta na imagem|Layout e posições mantidos|Imagem salva na galeria|Imagem escolhida da galeria|Salvar imagem traduzida|Escolher da galeria|Escanear novamente|Flash|Idioma de origem|Traduzir para",
     "Frases úteis|Frases do dia a dia, toque para traduzir|Frases|Favoritos|Digite uma frase|Ainda não há frases|Ainda não há favoritos|Frase adicionada|Removido|Favorito|Remover dos favoritos|Excluir|Reproduzir tradução",
     "Gênero|Filme|Série|Aula|Ao vivo|Microfone|Áudio de mídia|Bluetooth|Saída de som|Original + legendas|Original reduzido + dublagem|Apenas dublagem|Sincronização|Adiantar|Atrasar|Legendas|Bilíngue|Apenas tradução|Apenas original|Tamanho da legenda|Aguardando o áudio…|Reconhecendo a trilha|{n} linhas|Exportar legendas|SRT exportado|Salvar nos registros|Salvo nos registros|Limpar|Gerado por IA em tempo real|Legendas e som|Pequeno|Normal|Grande",
+    "",
+    "",
+    "",
   ],
   ru: [
     "Перевод|Записи|Я|Основная навигация",
@@ -439,6 +475,9 @@ const raw: Record<LangId, string[]> = {
     "Показать оригинал|Показать перевод|Распознавание и перевод…|Сравнение с оригиналом|Перевод наложен на изображение|Макет и позиции сохранены|Изображение сохранено в галерее|Изображение выбрано из галереи|Сохранить переведённое изображение|Выбрать из галереи|Сканировать снова|Вспышка|Исходный язык|Перевести на",
     "Разговорник|Частые фразы — одно нажатие для перевода|Фразы|Избранное|Введите фразу|Фраз пока нет|В избранном пусто|Фраза добавлена|Удалено|В избранное|Убрать из избранного|Удалить|Воспроизвести перевод",
     "Жанр|Фильм|Сериал|Лекция|Прямой эфир|Микрофон|Аудио медиа|Bluetooth|Вывод звука|Оригинал + субтитры|Оригинал тише + озвучка|Только озвучка|Синхронизация|Раньше|Позже|Субтитры|Двуязычные|Только перевод|Только оригинал|Размер субтитров|Ожидание звука…|Распознаю звуковую дорожку|{n} строк|Экспорт субтитров|SRT экспортирован|Сохранить в записи|Сохранено в записях|Очистить|Сгенерировано ИИ в реальном времени|Субтитры и звук|Маленький|Обычный|Большой",
+    "",
+    "",
+    "",
   ],
   it: [
     "Tradurre|Cronologia|Io|Navigazione principale",
@@ -472,6 +511,9 @@ const raw: Record<LangId, string[]> = {
     "Mostra originale|Vedi traduzione|Riconoscimento e traduzione…|Confronto con l'originale|Traduzione sovrapposta all'immagine|Layout e posizioni originali mantenuti|Immagine salvata nella galleria|Immagine scelta dalla galleria|Salva immagine tradotta|Scegli dalla galleria|Scansiona di nuovo|Flash|Lingua di origine|Traduci in",
     "Frasario|Frasi comuni, un tocco per tradurre|Frasi|Preferiti|Inserisci una frase|Nessuna frase|Nessun preferito|Frase aggiunta|Eliminato|Preferito|Rimuovi dai preferiti|Elimina|Riproduci traduzione",
     "Genere|Film|Serie|Lezione|Diretta|Microfono|Audio multimediale|Bluetooth|Uscita audio|Originale + sottotitoli|Originale attenuato + doppiaggio|Solo doppiaggio|Sincronizzazione audio|Anticipa|Ritarda|Sottotitoli|Bilingue|Solo traduzione|Solo originale|Dimensione sottotitoli|In attesa dell'audio…|Riconosco la colonna sonora|{n} righe|Esporta sottotitoli|SRT esportato|Salva nei record|Salvato nei record|Cancella|Generato dall'IA in tempo reale|Sottotitoli e audio|Piccolo|Normale|Grande",
+    "",
+    "",
+    "",
   ],
   nl: [
     "Vertalen|Geschiedenis|Ik|Hoofdnavigatie",
@@ -505,6 +547,9 @@ const raw: Record<LangId, string[]> = {
     "Origineel tonen|Vertaling tonen|Herkennen en vertalen…|Vergelijken met origineel|Vertaling over de afbeelding gelegd|Oorspronkelijke lay-out en posities behouden|Afbeelding opgeslagen in galerij|Afbeelding gekozen uit galerij|Vertaalde afbeelding opslaan|Kies uit galerij|Opnieuw scannen|Flits|Brontaal|Vertalen naar",
     "Zinnenboek|Alledaagse zinnen, tik om te vertalen|Zinnen|Favorieten|Voer een zin in|Nog geen zinnen|Nog geen favorieten|Zin toegevoegd|Verwijderd|Favoriet|Uit favorieten|Verwijderen|Vertaling afspelen",
     "Genre|Film|Serie|College|Livestream|Microfoon|Media-audio|Bluetooth|Geluidsuitvoer|Origineel + ondertiteling|Origineel zachter + nasynchronisatie|Alleen nasynchronisatie|Audiosynchronisatie|Vervroegen|Vertragen|Ondertiteling|Tweetalig|Alleen vertaling|Alleen origineel|Ondertitelgrootte|Wachten op geluid…|Soundtrack herkennen|{n} regels|Ondertitels exporteren|SRT geëxporteerd|Opslaan in opnames|Opgeslagen in opnames|Wissen|Door AI in realtime gegenereerd|Ondertitels en geluid|Klein|Normaal|Groot",
+    "",
+    "",
+    "",
   ],
   pl: [
     "Tłumacz|Historia|Ja|Nawigacja główna",
@@ -538,6 +583,9 @@ const raw: Record<LangId, string[]> = {
     "Pokaż oryginał|Pokaż tłumaczenie|Rozpoznawanie i tłumaczenie…|Porównywanie z oryginałem|Tłumaczenie nałożone na obraz|Zachowano układ i pozycje|Obraz zapisany w galerii|Obraz wybrany z galerii|Zapisz przetłumaczony obraz|Wybierz z galerii|Skanuj ponownie|Lampa|Język źródłowy|Tłumacz na",
     "Rozmówki|Codzienne zwroty, dotknij, aby przetłumaczyć|Zwroty|Ulubione|Wpisz zwrot|Brak zwrotów|Brak ulubionych|Dodano zwrot|Usunięto|Ulubione|Usuń z ulubionych|Usuń|Odtwórz tłumaczenie",
     "Gatunek|Film|Serial|Wykład|Transmisja na żywo|Mikrofon|Dźwięk multimediów|Bluetooth|Wyjście dźwięku|Oryginał + napisy|Oryginał ciszej + dubbing|Tylko dubbing|Sync audio|Przyspiesz|Opóźnij|Napisy|Dwujęzyczne|Tylko tłumaczenie|Tylko oryginał|Rozmiar napisów|Oczekiwanie na dźwięk…|Rozpoznawanie ścieżki|{n} linii|Eksportuj napisy|Wyeksportowano SRT|Zapisz w nagraniach|Zapisano w nagraniach|Wyczyść|Generowane przez AI na żywo|Napisy i dźwięk|Mały|Normalny|Duży",
+    "",
+    "",
+    "",
   ],
   sv: [
     "Översätt|Historik|Jag|Huvudnavigering",
@@ -571,6 +619,9 @@ const raw: Record<LangId, string[]> = {
     "Visa original|Visa översättning|Känner igen och översätter…|Jämför med originalet|Översättning överlagd på bilden|Ursprunglig layout och positioner behålls|Bilden sparad i galleriet|Bild vald från galleriet|Spara översatt bild|Välj från galleriet|Skanna igen|Blixt|Källspråk|Översätt till",
     "Frasbok|Vardagsfraser, tryck för att översätta|Fraser|Favoriter|Ange en fras|Inga fraser ännu|Inga favoriter ännu|Fras tillagd|Borttagen|Favorit|Ta bort favorit|Ta bort|Spela upp översättning",
     "Genre|Film|Serie|Föreläsning|Direktsändning|Mikrofon|Medieljud|Bluetooth|Ljudutgång|Original + undertexter|Sänkt original + dubbning|Endast dubbning|Ljudsynk|Tidigare|Senare|Undertexter|Tvåspråkig|Endast översättning|Endast original|Undertextstorlek|Väntar på ljud…|Känner igen ljudspåret|{n} rader|Exportera undertexter|SRT exporterad|Spara i inspelningar|Sparad i inspelningar|Rensa|AI-genererat i realtid|Undertexter och ljud|Liten|Normal|Stor",
+    "",
+    "",
+    "",
   ],
   tr: [
     "Çevir|Kayıtlar|Ben|Ana gezinme",
@@ -604,6 +655,9 @@ const raw: Record<LangId, string[]> = {
     "Orijinali göster|Çeviriyi göster|Tanınıyor ve çevriliyor…|Orijinalle karşılaştırılıyor|Çeviri görüntüye bindirildi|Özgün düzen ve konumlar korundu|Görsel galeriye kaydedildi|Galeriden görsel seçildi|Çevrilmiş görseli kaydet|Galeriden seç|Yeniden tara|Flaş|Kaynak dil|Şuna çevir",
     "Cümle kitabı|Günlük ifadeler, çevirmek için dokunun|İfadeler|Favoriler|Bir ifade yazın|Henüz ifade yok|Henüz favori yok|İfade eklendi|Kaldırıldı|Favori|Favoriden çıkar|Sil|Çeviriyi oynat",
     "Tür|Film|Dizi|Ders|Canlı yayın|Mikrofon|Medya sesi|Bluetooth|Ses çıkışı|Orijinal + altyazı|Orijinali kıs + dublaj|Yalnızca dublaj|Ses senkronizasyonu|Öne al|Geciktir|Altyazı|İki dilli|Yalnızca çeviri|Yalnızca orijinal|Altyazı boyutu|Ses bekleniyor…|Film sesi tanınıyor|{n} satır|Altyazıyı dışa aktar|SRT dışa aktarıldı|Kayıtlara kaydet|Kayıtlara kaydedildi|Temizle|Gerçek zamanlı AI üretimi|Altyazı ve ses|Küçük|Normal|Büyük",
+    "",
+    "",
+    "",
   ],
   id: [
     "Terjemah|Riwayat|Saya|Navigasi utama",
@@ -637,6 +691,9 @@ const raw: Record<LangId, string[]> = {
     "Tampilkan asli|Lihat terjemahan|Mengenali dan menerjemahkan…|Membandingkan dengan asli|Terjemahan ditempel di gambar|Tata letak dan posisi asli dipertahankan|Gambar disimpan ke galeri|Gambar dipilih dari galeri|Simpan gambar terjemahan|Pilih dari galeri|Pindai ulang|Lampu kilat|Bahasa sumber|Terjemahkan ke",
     "Buku frasa|Frasa sehari-hari, ketuk untuk terjemah|Frasa|Favorit|Ketik frasa|Belum ada frasa|Belum ada favorit|Frasa ditambahkan|Dihapus|Favorit|Hapus favorit|Hapus|Putar terjemahan",
     "Genre|Film|Seri|Kuliah|Live|Mikrofon|Audio media|Bluetooth|Keluaran suara|Asli + subtitle|Asli dipelankan + dubbing|Hanya dubbing|Sinkron audio|Lebih awal|Lebih lambat|Subtitle|Dua bahasa|Hanya terjemahan|Hanya teks asli|Ukuran subtitle|Menunggu suara…|Mengenali audio film|{n} baris|Ekspor subtitle|SRT diekspor|Simpan ke rekaman|Tersimpan di rekaman|Kosongkan|Dihasilkan AI secara real time|Subtitle dan suara|Kecil|Normal|Besar",
+    "",
+    "",
+    "",
   ],
   ms: [
     "Terjemah|Rekod|Saya|Navigasi utama",
@@ -670,6 +727,9 @@ const raw: Record<LangId, string[]> = {
     "Tunjuk asal|Lihat terjemahan|Mengecam dan menterjemah…|Membandingkan dengan asal|Terjemahan ditindih pada imej|Susun atur dan kedudukan asal dikekalkan|Imej disimpan ke galeri|Imej dipilih dari galeri|Simpan imej terjemahan|Pilih dari galeri|Imbas semula|Denyar|Bahasa sumber|Terjemah ke",
     "Buku frasa|Frasa harian, ketik untuk terjemah|Frasa|Kegemaran|Taip frasa|Belum ada frasa|Belum ada kegemaran|Frasa ditambah|Dipadam|Kegemaran|Buang kegemaran|Padam|Mainkan terjemahan",
     "Genre|Filem|Siri|Kuliah|Langsung|Mikrofon|Audio media|Bluetooth|Output bunyi|Asli + sari kata|Asli diperlankan + alih suara|Alih suara sahaja|Segerak audio|Awal|Lambat|Sari kata|Dua bahasa|Terjemahan sahaja|Teks asli sahaja|Saiz sari kata|Menunggu bunyi…|Mengecam audio filem|{n} baris|Eksport sari kata|SRT dieksport|Simpan ke rekod|Disimpan ke rekod|Kosongkan|Dijana AI masa nyata|Sari kata dan bunyi|Kecil|Normal|Besar",
+    "",
+    "",
+    "",
   ],
   th: [
     "แปล|ประวัติ|ฉัน|การนำทางหลัก",
@@ -703,6 +763,9 @@ const raw: Record<LangId, string[]> = {
     "ดูต้นฉบับ|ดูคำแปล|กำลังรู้จำและแปล…|กำลังเทียบกับต้นฉบับ|ซ้อนคำแปลบนภาพแล้ว|คงรูปแบบและตำแหน่งเดิมไว้|บันทึกภาพลงอัลบั้มแล้ว|เลือกภาพจากอัลบั้มแล้ว|บันทึกภาพแปล|เลือกจากอัลบั้ม|สแกนอีกครั้ง|แฟลช|ภาษาต้นทาง|แปลเป็น",
     "หนังสือวลี|วลีใช้บ่อย แตะเพื่อแปล|วลี|รายการโปรด|พิมพ์วลี|ยังไม่มีวลี|ยังไม่มีรายการโปรด|เพิ่มวลีแล้ว|ลบแล้ว|โปรด|เลิกโปรด|ลบ|เล่นคำแปล",
     "ประเภท|ภาพยนตร์|ซีรีส์|คอร์สเรียน|ไลฟ์สด|ไมโครโฟน|เสียงจากมีเดีย|บลูทูธ|การออกเสียง|ต้นฉบับ + ซับไตเติล|ลดเสียงต้นฉบับ + พากย์|พากย์เท่านั้น|ซิงค์เสียง|เร็วขึ้น|ช้าลง|ซับไตเติล|สองภาษา|เฉพาะคำแปล|เฉพาะต้นฉบับ|ขนาดซับไตเติล|กำลังรอเสียง…|กำลังรู้จำเสียงภาพยนตร์|{n} บรรทัด|ส่งออกซับไตเติล|ส่งออก SRT แล้ว|บันทึกลงบันทึก|บันทึกลงบันทึกแล้ว|ล้างข้อมูล|สร้างโดย AI แบบเรียลไทม์|ซับไตเติลและเสียง|เล็ก|ปกติ|ใหญ่",
+    "",
+    "",
+    "",
   ],
   vi: [
     "Dịch|Lịch sử|Tôi|Điều hướng chính",
@@ -736,6 +799,9 @@ const raw: Record<LangId, string[]> = {
     "Xem bản gốc|Xem bản dịch|Đang nhận dạng và dịch…|Đang đối chiếu với bản gốc|Đã phủ bản dịch lên ảnh|Giữ nguyên bố cục và vị trí|Đã lưu ảnh vào thư viện|Đã chọn ảnh từ thư viện|Lưu ảnh dịch|Chọn từ thư viện|Quét lại|Đèn flash|Ngôn ngữ nguồn|Dịch sang",
     "Sổ tay mẫu câu|Câu thường dùng, chạm để dịch|Mẫu câu|Yêu thích|Nhập một mẫu câu|Chưa có mẫu câu|Chưa có mục yêu thích|Đã thêm mẫu câu|Đã xóa|Yêu thích|Bỏ yêu thích|Xóa|Phát bản dịch",
     "Thể loại|Phim|Phim bộ|Bài giảng|Phát trực tiếp|Mic|Âm thanh media|Bluetooth|Đầu ra âm thanh|Gốc + phụ đề|Giảm âm gốc + lồng tiếng|Chỉ lồng tiếng|Đồng bộ âm thanh|Sớm hơn|Muộn hơn|Phụ đề|Song ngữ|Chỉ bản dịch|Chỉ bản gốc|Cỡ phụ đề|Đang chờ âm thanh…|Đang nhận diện âm thanh phim|{n} dòng|Xuất phụ đề|Đã xuất SRT|Lưu vào bản ghi|Đã lưu vào bản ghi|Xóa|Do AI tạo theo thời gian thực|Phụ đề và âm thanh|Nhỏ|Bình thường|Lớn",
+    "",
+    "",
+    "",
   ],
   ar: [
     "ترجمة|السجلات|أنا|التنقل الرئيسي",
@@ -769,6 +835,9 @@ const raw: Record<LangId, string[]> = {
     "عرض الأصل|عرض الترجمة|التعرف والترجمة…|مقارنة مع الأصل|تم تركيب الترجمة على الصورة|الحفاظ على التخطيط والمواضع الأصلية|تم حفظ الصورة في المعرض|تم اختيار الصورة من المعرض|حفظ الصورة المترجمة|اختيار من المعرض|إعادة المسح|الفلاش|لغة المصدر|الترجمة إلى",
     "كتاب العبارات|عبارات يومية، انقر للترجمة|العبارات|المفضلة|اكتب عبارة|لا توجد عبارات بعد|لا توجد مفضلات بعد|تمت إضافة العبارة|تم الحذف|مفضلة|إزالة من المفضلة|حذف|تشغيل الترجمة",
     "النوع|فيلم|مسلسل|درس|بث مباشر|الميكروفون|صوت الوسائط|بلوتوث|مخرج الصوت|الأصلي + ترجمة|خفض الأصلي + دبلجة|دبلجة فقط|مزامنة الصوت|تقديم|تأخير|الترجمة|ثنائي اللغة|الترجمة فقط|النص الأصلي فقط|حجم الترجمة|في انتظار الصوت…|جارٍ التعرف على الصوت|{n} سطر|تصدير الترجمة|تم تصدير SRT|حفظ في السجلات|تم الحفظ في السجلات|مسح|أنتجته الذكاء الاصطناعي فورياً|الترجمة والصوت|صغير|عادي|كبير",
+    "",
+    "",
+    "",
   ],
   hi: [
     "अनुवाद|रिकॉर्ड|मैं|मुख्य नेविगेशन",
@@ -802,6 +871,9 @@ const raw: Record<LangId, string[]> = {
     "मूल दिखाएँ|अनुवाद देखें|पहचान और अनुवाद हो रहा है…|मूल से मिलान हो रहा है|अनुवाद छवि पर लगाया गया|मूल लेआउट और स्थान सुरक्षित|छवि गैलरी में सहेजी गई|गैलरी से छवि चुनी गई|अनुवादित छवि सहेजें|गैलरी से चुनें|फिर स्कैन करें|फ़्लैश|स्रोत भाषा|इसमें अनुवाद करें",
     "वाक्यांश पुस्तिका|रोज़मर्रा के वाक्य, अनुवाद के लिए टैप करें|वाक्यांश|पसंदीदा|एक वाक्यांश लिखें|अभी कोई वाक्यांश नहीं|अभी कोई पसंदीदा नहीं|वाक्यांश जोड़ा गया|हटा दिया गया|पसंदीदा|पसंदीदा हटाएँ|हटाएँ|अनुवाद चलाएँ",
     "शैली|फ़िल्म|सीरीज़|पाठ|लाइव|माइक्रोफ़ोन|मीडिया ऑडियो|ब्लूटूथ|ध्वनि आउटपुट|मूल + उपशीर्षक|मूल धीमा + डबिंग|केवल डबिंग|ऑडियो सिंक|पहले|बाद में|उपशीर्षक|द्विभाषी|केवल अनुवाद|केवल मूल|उपशीर्षक आकार|ध्वनि की प्रतीक्षा…|फ़िल्म की ध्वनि पहचानी जा रही है|{n} पंक्तियाँ|उपशीर्षक निर्यात करें|SRT निर्यात हो गया|रिकॉर्ड में सहेजें|रिकॉर्ड में सहेज लिया|साफ़ करें|AI द्वारा रीयल-टाइम में निर्मित|उपशीर्षक और ध्वनि|छोटा|सामान्य|बड़ा",
+    "",
+    "",
+    "",
   ],
 }
 
@@ -856,4 +928,35 @@ export function useT() {
     (key: string): string => table[key] ?? strings.zh[key] ?? key,
     [table],
   )
+}
+
+/** 非 hook 环境的查表入口（在纯逻辑与测试中使用） */
+export function translateKey(lang: LangId, key: string): string {
+  const table = strings[lang] ?? strings.zh
+  return table[key] ?? strings.zh[key] ?? key
+}
+
+/**
+ * 翻译完整度：逐语言列出「该语言没填、会回退到中文」的键。
+ *
+ * i18n 用的是位置数组，漏填不会有编译错误，所以留一个可被测试与脚本调用的
+ * 自检入口。返回空数组表示该语言覆盖完整。
+ */
+export function i18nCoverage(): { lang: LangId; missing: string[] }[] {
+  return appLanguages.map((lang) => {
+    const groups = raw[lang] ?? []
+    const missing: string[] = []
+    keyGroups.forEach((keys, groupIndex) => {
+      const parts = (groups[groupIndex] ?? "").split("|")
+      keys.forEach((key, keyIndex) => {
+        if (!(parts[keyIndex] ?? "").trim()) missing.push(key)
+      })
+    })
+    return { lang, missing }
+  })
+}
+
+/** 全部文案键，供测试遍历 */
+export function allTranslationKeys(): string[] {
+  return keyGroups.flat()
 }

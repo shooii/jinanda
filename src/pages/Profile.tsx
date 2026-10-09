@@ -36,6 +36,7 @@ import {
 import type { DevicePrefs, PrivacyPrefs } from "@/lib/store"
 import { allLanguages, langOption } from "@/lib/translate"
 import { useAppLanguage, useT } from "@/lib/i18n"
+import { useOutbox } from "@/lib/services/outbox"
 
 
 type PanelId =
@@ -79,6 +80,7 @@ export function Profile({
   onSleep: () => void
   onPhrasebook: () => void
 }) {
+  const sync = useOutbox()
   const [panel, setPanel] = useState<PanelId>(null)
   const [overlay, setOverlay] = useState<OverlayId>(null)
   const [legalDoc, setLegalDoc] = useState<LegalDocId>("privacy")
@@ -312,6 +314,12 @@ export function Profile({
       <div className="service-footer">
         <span>
           <i /> 翻译与设备服务运行正常
+        </span>
+        <span>
+          <i className={sync.serverConfigured ? "" : "local"} />
+          {sync.serverConfigured
+            ? `账户服务已连接 · 待同步 ${sync.pending} 条`
+            : "本地模式 · 未连接账户服务"}
         </span>
         <div>
           <AppButton

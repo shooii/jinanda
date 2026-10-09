@@ -24,6 +24,41 @@ export type LangId =
   | "ar"
   | "hi"
 
+/**
+ * 语言 → BCP-47 标签。
+ * 语音识别、机器翻译与语音合成三处都需要，统一放在语言数据旁，
+ * 避免各模块各写一份而对不上。
+ */
+const BCP47: Record<LangId, string> = {
+  zh: "zh-CN",
+  en: "en-US",
+  es: "es-ES",
+  ja: "ja-JP",
+  fr: "fr-FR",
+  ko: "ko-KR",
+  de: "de-DE",
+  pt: "pt-BR",
+  ru: "ru-RU",
+  it: "it-IT",
+  nl: "nl-NL",
+  pl: "pl-PL",
+  sv: "sv-SE",
+  tr: "tr-TR",
+  id: "id-ID",
+  ms: "ms-MY",
+  th: "th-TH",
+  vi: "vi-VN",
+  ar: "ar-SA",
+  hi: "hi-IN",
+}
+
+export const bcp47 = (lang: LangId) => BCP47[lang] ?? lang
+
+/** 从右向左书写的语言 */
+const RTL_LANGUAGES: LangId[] = ["ar"]
+
+export const isRtlLanguage = (lang: LangId) => RTL_LANGUAGES.includes(lang)
+
 /** 翻译语言清单：native 为该语言自身的文字，label 为中文名称 */
 export type LanguageOption = {
   id: LangId

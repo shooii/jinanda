@@ -4936,6 +4936,8 @@ button:focus-visible {
   --lime-soft: oklch(0.94 0.035 252);
   --teal: oklch(0.62 0.19 252);
   --orange: oklch(0.62 0.19 252);
+  /* 告警语义色：--orange 在本主题里被别名成了品牌蓝，不能用来表达「低电量」 */
+  --warn: oklch(0.58 0.19 25);
   --shadow: 0 1.5rem 4rem oklch(0.14 0.015 258 / 0.13);
   --glass: oklch(1 0 0 / 0.72);
   --font-system:
@@ -6799,6 +6801,7 @@ button:active {
   --lime-soft: oklch(0.3 0.05 255);
   --teal: oklch(0.66 0.18 255);
   --orange: oklch(0.66 0.18 255);
+  --warn: oklch(0.72 0.17 38);
   --glass: oklch(0.22 0.008 258 / 0.76);
   --shadow: 0 1.5rem 4rem oklch(0 0 0 / 0.45);
 }
@@ -7029,11 +7032,15 @@ html[data-theme="dark"] {
 }
 
 .mini-battery.low .mini-battery-shell {
-  border-color: var(--orange);
+  border-color: var(--warn);
 }
 
 .mini-battery.low .mini-battery-shell > em {
-  background: var(--orange);
+  background: var(--warn);
+}
+
+.mini-battery.low > b {
+  color: var(--warn);
 }
 
 .mini-battery > b {
@@ -10901,44 +10908,65 @@ html[data-theme="dark"] {
   background: var(--lime);
 }
 
-/* 设备面板 · P2 增强（云端同步 / 固件更新 / 降噪模式） */
+/* 设备偏好面板 · 固件更新 / 降噪模式
+   与上方开关卡、下方「按键设置…」列表共用同一套卡片语言：
+   --surface 底 + --line 描边 + --radius-md + 0.75rem 内边距。
+   注意不要再套一层带底色的容器（旧版用 --surface-soft 造成「卡中卡」色差）。 */
 .device-enhance {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin: 0.5rem 0 0.75rem;
-  padding: 0.85rem;
-  border: 1px solid var(--line);
-  border-radius: 1rem;
-  background: var(--surface-soft);
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
 }
 
 .enhance-block {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.6rem;
+  padding: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
 }
 
 .enhance-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.6rem;
+}
+
+.enhance-copy {
+  min-width: 0;
 }
 
 .enhance-copy strong {
   display: block;
-  font-size: var(--fs-sm, 0.92rem);
-  color: var(--ink, inherit);
+  font-size: var(--fs-xs);
+  color: var(--ink);
 }
 
 .enhance-copy small {
+  display: block;
+  margin-top: 0.15rem;
   color: var(--muted);
-  font-size: var(--fs-2xs, 0.72rem);
+  font-size: var(--fs-2xs);
 }
 
+/* 次要动作：描边胶囊，与卡片同一套圆角/描边体系，不再用裸文字按钮 */
 .enhance-action {
-  align-self: flex-start;
+  flex: none;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 999rem;
+  color: var(--ink);
+  background: var(--paper);
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.enhance-action:disabled {
+  opacity: 0.5;
 }
 
 .enhance-status {
@@ -10947,39 +10975,14 @@ html[data-theme="dark"] {
   gap: 0.3rem;
   margin: 0;
   color: var(--teal);
-  font-size: var(--fs-2xs, 0.72rem);
+  font-size: var(--fs-2xs);
 }
 
 .enhance-title {
-  font-size: var(--fs-sm, 0.92rem);
-  color: var(--ink, inherit);
-}
-
-.enhance-block > i {
-  width: 2.2rem;
-  height: 1.25rem;
-  padding: 0.15rem;
-  border-radius: 999rem;
-  background: var(--line);
-  cursor: pointer;
-  flex: none;
-}
-
-.enhance-block > i b {
   display: block;
-  width: 0.95rem;
-  height: 0.95rem;
-  border-radius: 50%;
-  background: var(--surface);
-  transition: transform 180ms ease;
-}
-
-.enhance-block > i.toggle-on {
-  background: var(--teal);
-}
-
-.enhance-block > i.toggle-on b {
-  transform: translateX(0.95rem);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--ink);
 }
 
 .anc-options {
@@ -10988,21 +10991,27 @@ html[data-theme="dark"] {
   gap: 0.5rem;
 }
 
+/* 选项芯片：浅灰底表示「可选」，选中态靠 teal 描边 + 淡染底 + teal 字
+   （旧版是透明底 + 灰色描边 + 右侧勾，读起来像空输入框/下拉框） */
 .anc-chip {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.4rem;
-  padding: 0.55rem 0.75rem;
+  justify-content: center;
+  min-height: 2.4rem;
+  padding: 0.45rem 0.6rem;
   border: 1px solid var(--line);
-  border-radius: 0.75rem;
-  background: transparent;
-  color: var(--ink, inherit);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  background: color-mix(in oklab, var(--line) 55%, var(--paper));
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  text-align: center;
 }
 
 .anc-chip.selected {
   border-color: var(--teal);
   color: var(--teal);
+  background: color-mix(in oklab, var(--teal) 13%, var(--surface));
 }
 
 /* ============================================================
@@ -14019,4 +14028,42 @@ html[data-theme="dark"] {
 
 .watch-sub button:disabled {
   opacity: 0.45;
+}
+
+/* ============ 顶栏设备胶囊：左右耳分别显示电量 ============ */
+.pill-batt {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  padding-left: 0.45rem;
+  border-left: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 未连接时电量是「上次记录」，压低对比度避免被当成实时读数 */
+.pill-batt.offline {
+  opacity: 0.5;
+}
+
+.pill-batt-cell {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.15rem;
+  color: var(--ink);
+  font-size: var(--fs-2xs);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.pill-batt-cell > i {
+  color: var(--muted);
+  font-size: 0.6rem;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.pill-batt-cell.low,
+.pill-batt-cell.low > i {
+  color: var(--warn);
 }

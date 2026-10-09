@@ -39,17 +39,21 @@ export function AppButton({
   className = "",
   onClick,
   ariaLabel,
+  ariaPressed,
   disabled,
 }: {
   children: ReactNode
   className?: string
   onClick?: () => void
   ariaLabel?: string
+  /** 用于「多选一」的选项芯片：让读屏也能知道当前选中项，不单靠颜色 */
+  ariaPressed?: boolean
   disabled?: boolean
 }) {
   return (
     <button
       aria-label={ariaLabel}
+      aria-pressed={ariaPressed}
       className={className}
       disabled={disabled}
       onClick={onClick}

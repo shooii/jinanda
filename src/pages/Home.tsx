@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { AppButton } from "@/components/AppButton"
+import { PillBattery } from "@/components/BatteryPair"
 import { Icon } from "@/components/Icon"
 import { LangPicker } from "@/components/LangPicker"
 import { ShortcutEditor } from "@/features/ShortcutEditor"
@@ -29,8 +30,12 @@ export function Home({
   const enabled = shortcuts.filter((item) => item.enabled)
   const { active } = useDevices()
   const t = useT()
-  const batteryAvg = Math.round((active.leftBattery + active.rightBattery) / 2)
   const connected = active.status === "connected"
+  /** 左右耳 + 充电盒的完整电量，仅在 aria / 长按提示里出现 */
+  const batterySummary = t("devices.batterySummary")
+    .replace("{left}", String(active.leftBattery))
+    .replace("{right}", String(active.rightBattery))
+    .replace("{case}", String(active.caseBattery))
 
   const modeOf = (id: string): FeatureId =>
     id === "face" ? "dialogue" : id === "text" ? "text" : (id as FeatureId)
@@ -40,14 +45,19 @@ export function Home({
       <header className="topbar home-topbar">
         <h1 className="home-title">{t("nav.translate")}</h1>
         <AppButton
-          ariaLabel={t("profile.deviceSettings")}
+          ariaLabel={`${t("profile.deviceSettings")} · ${batterySummary}`}
           className="device-pill"
           onClick={onConnect}
         >
           <span className={`connected-dot conn-dot ${active.status}`} />
           <Icon name="headphones" size={18} />
           <span className="device-pill-name">{active.name}</span>
-          <span>{batteryAvg}%</span>
+          <PillBattery
+            left={active.leftBattery}
+            right={active.rightBattery}
+            title={batterySummary}
+            offline={!connected}
+          />
         </AppButton>
       </header>
 

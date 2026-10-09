@@ -181,15 +181,15 @@ export function Profile({
           <div className="device-battery-grid">
             <span>
               <small>{t("profile.earLeft")}</small>
-              <MiniBattery level={active.leftBattery} side="L" />
+              <MiniBattery level={active.leftBattery} label="L" />
             </span>
             <span>
               <small>{t("profile.earRight")}</small>
-              <MiniBattery level={active.rightBattery} side="R" />
+              <MiniBattery level={active.rightBattery} label="R" />
             </span>
             <span>
               <small>{t("profile.earCase")}</small>
-              <MiniBattery level={active.caseBattery} side="盒" />
+              <MiniBattery level={active.caseBattery} label={t("devices.caseTag")} />
             </span>
           </div>
         </div>
@@ -612,14 +612,14 @@ export function Profile({
                         <strong>{t("ota.title")}</strong>
                         <small>{`${t("ota.version")} 2.4.1`}</small>
                       </div>
+                      <AppButton
+                        className="enhance-action"
+                        disabled={otaBusy}
+                        onClick={runOta}
+                      >
+                        {otaLabel()}
+                      </AppButton>
                     </div>
-                    <AppButton
-                      className="text-button enhance-action"
-                      disabled={otaBusy}
-                      onClick={runOta}
-                    >
-                      {otaLabel()}
-                    </AppButton>
                     {otaState === "done" && (
                       <p className="enhance-status">
                         <Icon name="check" size={14} /> {t("ota.done")}
@@ -633,13 +633,14 @@ export function Profile({
                       {ancModes.map((mode) => (
                         <AppButton
                           key={mode}
+                          ariaLabel={t(`anc.${mode}`)}
+                          ariaPressed={anc === mode}
                           className={`anc-chip ${
                             anc === mode ? "selected" : ""
                           }`}
                           onClick={() => setAnc(mode)}
                         >
                           <span>{t(`anc.${mode}`)}</span>
-                          {anc === mode && <Icon name="check" size={14} />}
                         </AppButton>
                       ))}
                     </div>

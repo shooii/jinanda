@@ -117,9 +117,9 @@ export function DeviceManager({ onClose }: { onClose: () => void }) {
               </div>
             </div>
             <div className="dm-battery">
-              <MiniBattery level={active.leftBattery} side="L" />
-              <MiniBattery level={active.rightBattery} side="R" />
-              <MiniBattery level={active.caseBattery} side="盒" />
+              <MiniBattery level={active.leftBattery} label="L" />
+              <MiniBattery level={active.rightBattery} label="R" />
+              <MiniBattery level={active.caseBattery} label={t("devices.caseTag")} />
             </div>
           </section>
 

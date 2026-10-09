@@ -10,6 +10,16 @@ type LangPickerProps = {
   value: LangId
   onPick: (lang: LangId) => void
   onClose: () => void
+  /**
+   * 源语言侧可选：传入后在最上方显示「检测语言」入口。
+   * 目标语言侧不传，避免出现「翻译成自动检测」这种无意义选项。
+   */
+  detect?: {
+    label: string
+    hint: string
+    active: boolean
+    onPick: () => void
+  }
 }
 
 /**
@@ -22,6 +32,7 @@ export function LangPicker({
   value,
   onPick,
   onClose,
+  detect,
 }: LangPickerProps) {
   if (!open) return null
   return (
@@ -38,6 +49,21 @@ export function LangPicker({
           <h2>{langOption(value).native}</h2>
         </header>
         <div className="call-picker-list">
+          {detect ? (
+            <AppButton
+              className={detect.active ? "selected auto" : "auto"}
+              onClick={detect.onPick}
+            >
+              <span className="language-code">
+                <Icon name="sparkles" size={16} />
+              </span>
+              <span>
+                <strong>{detect.label}</strong>
+                <small>{detect.hint}</small>
+              </span>
+              {detect.active && <Icon name="check" />}
+            </AppButton>
+          ) : null}
           {allLanguages.map((item) => {
             const on = value === item.id
             return (

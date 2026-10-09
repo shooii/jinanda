@@ -4,7 +4,7 @@ import type { ChannelId } from "@/lib/payments"
 
 
 
-export type RecordType = "对话" | "会议" | "拍照" | "文本" | "通话"
+export type RecordType = "对话" | "会议" | "拍照" | "文本" | "通话" | "观影"
 
 /** 通话类记录额外携带的信息，用于列表图标与详情页播报 */
 export type CallRecordMeta = {
@@ -119,7 +119,28 @@ export function useSavedRecords() {
     [setRecords],
   )
 
-  return [records, addRecord] as const
+  const removeRecord = useCallback(
+    (id: string) => {
+      setRecords((items) => items.filter((item) => item.id !== id))
+    },
+    [setRecords],
+  )
+
+  return [records, addRecord, removeRecord] as const
+}
+
+/**
+ * 已删除的内置示例记录 id。
+ * 示例记录来自 `sampleRecords` 常量，每次渲染都会重新拼进列表，
+ * 删除后必须单独记下来，否则刷新就会「复活」。
+ */
+export function useHiddenRecords() {
+  return usePersistentState<string[]>("lingo.records-hidden", [])
+}
+
+/** 生成一组随机的初始 id，用于常用语/收藏条目的键 */
+function makeId(prefix: string) {
+  return `${prefix}-${Date.now().toString(36)}-${Math.floor(Math.random() * 900 + 100)}`
 }
 
 export const defaultPhrases = [
@@ -128,9 +149,119 @@ export const defaultPhrases = [
   "可以帮我叫一辆出租车吗？",
 ]
 
-/** 常用语手册（翻译页可增删改） */
+/**
+ * 常用语手册：用户可增删改的常用表达清单（统一以中文存储，展示时按目标语言翻译）。
+ * 首次读取时把历史文本数组迁移为带 id 的条目。
+ */
+export type PhraseEntry = {
+  id: string
+  /** 常用语原文 */
+  text: string
+}
+
 export function usePhrases() {
-  return usePersistentState<string[]>("lingo.phrases", defaultPhrases)
+  const [items, setItems] = usePersistentState<Array<PhraseEntry | string>>(
+    "lingo.phrases",
+    () => defaultPhrases.map((text) => ({ id: makeId("p"), text })),
+  )
+
+  // 兼容历史数据：旧版本存的是 string[]，直接拿来渲染会取不到 id
+  const phrases: PhraseEntry[] = items.map((item, index) =>
+    typeof item === "string" ? { id: `legacy-${index}`, text: item } : item,
+  )
+
+  const addPhrase = useCallback(
+    (text: string) => {
+      const value = text.trim()
+      if (!value) return false
+      setItems((list) => [{ id: makeId("p"), text: value }, ...list])
+      return true
+    },
+    [setItems],
+  )
+
+  const removePhrase = useCallback(
+    (id: string) => {
+      setItems((list) => {
+        // 先补齐历史 string[] 数据的 id，再按 id 删除，避免旧条目删不掉
+        const normalized = list.map((item, index) =>
+          typeof item === "string"
+            ? { id: `legacy-${index}`, text: item }
+            : item,
+        )
+        return normalized.filter((item) => item.id !== id)
+      })
+    },
+    [setItems],
+  )
+
+  return { phrases, addPhrase, removePhrase } as const
+}
+
+/** 收藏夹条目：一条原文 + 一条译文 */
+export type FavoriteEntry = {
+  id: string
+  original: string
+  translated: string
+  /** 源语言短名，如「中文」 */
+  from: string
+  /** 目标语言短名，如「英语」 */
+  to: string
+  time: string
+}
+
+/** 收藏夹：跨页面共享（记录详情、文本翻译、手册页都可收藏/取消） */
+export function useFavorites() {
+  const [items, setItems] = usePersistentState<FavoriteEntry[]>(
+    "lingo.favorites",
+    [],
+  )
+
+  const hasFavorite = useCallback(
+    (original: string, translated: string) =>
+      items.some(
+        (item) => item.original === original && item.translated === translated,
+      ),
+    [items],
+  )
+
+  /** 收藏 / 取消收藏，返回操作后是否处于「已收藏」状态 */
+  const toggleFavorite = useCallback(
+    (input: Omit<FavoriteEntry, "id" | "time">) => {
+      const exists = items.some(
+        (item) =>
+          item.original === input.original &&
+          item.translated === input.translated,
+      )
+      if (exists) {
+        setItems((list) =>
+          list.filter(
+            (item) =>
+              !(
+                item.original === input.original &&
+                item.translated === input.translated
+              ),
+          ),
+        )
+        return false
+      }
+      setItems((list) => [
+        { id: makeId("f"), time: nowLabel(), ...input },
+        ...list,
+      ])
+      return true
+    },
+    [items, setItems],
+  )
+
+  const removeFavorite = useCallback(
+    (id: string) => {
+      setItems((list) => list.filter((item) => item.id !== id))
+    },
+    [setItems],
+  )
+
+  return { favorites: items, hasFavorite, toggleFavorite, removeFavorite } as const
 }
 
 export type VocabularyEntry = {

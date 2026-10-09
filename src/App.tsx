@@ -15,6 +15,7 @@ import { WatchMode } from "@/features/WatchMode"
 import { Coach } from "@/features/Coach"
 import { DeviceManager } from "@/features/DeviceManager"
 import { Onboarding } from "@/features/Onboarding"
+import { Phrasebook } from "@/features/Phrasebook"
 import { defaultShortcuts, mergeShortcuts } from "@/features/ShortcutEditor"
 import { Home } from "@/pages/Home"
 import { Membership } from "@/pages/Membership"
@@ -121,6 +122,10 @@ export default function App() {
           <Coach
             onClose={() => transitionTo(() => setActiveFeature(null))}
           />
+        ) : activeFeature === "phrasebook" ? (
+          <Phrasebook
+            onClose={() => transitionTo(() => setActiveFeature(null))}
+          />
         ) : showLive ? (
           <LiveSession
             onClose={() => transitionTo(() => setShowLive(false))}
@@ -149,6 +154,9 @@ export default function App() {
                 onConnect={() => transitionTo(() => setShowDevices(true))}
                 onMembership={() => transitionTo(() => setShowMembership(true))}
                 onSleep={() => transitionTo(() => setTab("sleep"))}
+                onPhrasebook={() =>
+                  transitionTo(() => setActiveFeature("phrasebook"))
+                }
               />
             ) : (
               <main className="empty-view">

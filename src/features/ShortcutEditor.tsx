@@ -21,6 +21,7 @@ export const defaultShortcuts: Shortcut[] = [
   { id: "travel", icon: "plane", enabled: true },
   { id: "camera", icon: "camera", enabled: true },
   { id: "call", icon: "phone", enabled: true },
+  { id: "phrasebook", icon: "message", enabled: true },
   { id: "text", icon: "notes", enabled: false },
   { id: "watch", icon: "monitor", enabled: false },
   { id: "coach", icon: "sparkles", enabled: false },

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { AppButton, toast } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
 import type { IconName } from "@/components/Icon"
@@ -7,6 +7,8 @@ import {
   downloadText,
   recordToText,
   sampleRecords,
+  useFavorites,
+  useHiddenRecords,
   useSavedRecords,
 } from "@/lib/store"
 import type { SavedRecord } from "@/lib/store"
@@ -29,26 +31,39 @@ const FILTERS = [
   { id: "会议", key: "records.filterMeeting" },
   { id: "拍照", key: "records.filterPhoto" },
   { id: "文本", key: "records.filterText" },
+  { id: "观影", key: "records.filterWatch" },
 ] as const
 
 export function Records() {
   const [filter, setFilter] = useState("全部")
-  const [saved] = useSavedRecords()
+  const [saved, , removeRecord] = useSavedRecords()
+  const [hidden, setHidden] = useHiddenRecords()
   const [playing, setPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
   const [selected, setSelected] = useState<SavedRecord | null>(null)
-  const records: SavedRecord[] = [...saved, ...sampleRecords]
+  const [query, setQuery] = useState("")
+  const [confirming, setConfirming] = useState(false)
+  const { hasFavorite, toggleFavorite } = useFavorites()
+  const records: SavedRecord[] = useMemo(
+    () =>
+      [...saved, ...sampleRecords].filter(
+        (record) => !hidden.includes(record.id),
+      ),
+    [saved, hidden],
+  )
   const t = useT()
   const typeLabel = (type: string): string => {
     if (type === "会议") return t("records.tMeeting")
     if (type === "拍照") return t("records.tPhoto")
     if (type === "文本") return t("records.tText")
     if (type === "通话") return t("records.tCall")
+    if (type === "观影") return t("records.tWatch")
     return t("records.tDialogue")
   }
 
   useEscapeKey(() => {
-    if (selected) {
+    if (confirming) setConfirming(false)
+    else if (selected) {
       setSelected(null)
       setPlaying(false)
       setProgress(0)
@@ -79,10 +94,53 @@ export function Records() {
     setPlaying(true)
   }
 
-  const visibleRecords =
-    filter === "全部"
-      ? records
-      : records.filter((record) => record.type === filter)
+  const keyword = query.trim().toLowerCase()
+  const visibleRecords = records
+    .filter((record) => filter === "全部" || record.type === filter)
+    .filter((record) => {
+      if (!keyword) return true
+      const haystack = [
+        record.title,
+        record.meta,
+        record.summary,
+        ...record.lines.flatMap((line) => [line.original, line.translated]),
+      ]
+        .join(" ")
+        .toLowerCase()
+      return haystack.includes(keyword)
+    })
+
+  /** 详情页「收藏」用的原文 / 译文（取首条转写，没有则退回摘要） */
+  const detailLine = selected?.lines[0]
+  const favOriginal = detailLine?.original ?? selected?.title ?? ""
+  const favTranslated = detailLine?.translated ?? selected?.summary ?? ""
+  const detailFavorited = hasFavorite(favOriginal, favTranslated)
+
+  const favoriteSelected = () => {
+    if (!selected) return
+    const on = toggleFavorite({
+      original: favOriginal,
+      translated: favTranslated,
+      from: typeLabel(selected.type),
+      to: selected.meta,
+    })
+    toast(on ? t("phrases.favAdd") : t("phrases.favRemove"))
+  }
+
+  const deleteSelected = () => {
+    if (!selected) return
+    // 示例记录来自常量，删除后需单独记下，否则刷新会复活
+    if (selected.id.startsWith("sample-")) {
+      setHidden((ids) => [...ids, selected.id])
+    } else {
+      removeRecord(selected.id)
+    }
+    toast(t("records.deleted"))
+    setSelected(null)
+    setConfirming(false)
+    setPlaying(false)
+    setProgress(0)
+  }
 
   return (
     <main className="tab-page records-page">
@@ -96,15 +154,35 @@ export function Records() {
           disabled={records.length === 0}
           onClick={() => {
             downloadText(
-              "LingoPods-全部记录.txt",
+              "LingoPods-records.txt",
               records.map((record) => recordToText(record)).join("\n\n"),
             )
-            toast("已导出全部记录")
+            toast(t("records.exportedAll"))
           }}
         >
           <Icon name="plane" />
         </AppButton>
       </header>
+
+      <div className="records-search">
+        <Icon name="notes" size={16} />
+        <input
+          aria-label={t("records.searchPlaceholder")}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder={t("records.searchPlaceholder")}
+          type="search"
+          value={query}
+        />
+        {query ? (
+          <AppButton
+            ariaLabel={t("records.cancel")}
+            className="records-search-clear"
+            onClick={() => setQuery("")}
+          >
+            <Icon name="close" size={15} />
+          </AppButton>
+        ) : null}
+      </div>
 
       <div className="filter-row">
         {FILTERS.map((item) => (
@@ -121,7 +199,7 @@ export function Records() {
       <section className="record-list">
         {visibleRecords.length === 0 ? (
           <p className="empty-tip">
-            {t("records.emptyFilter")}
+            {keyword ? t("records.searchEmpty") : t("records.emptyFilter")}
           </p>
         ) : (
           visibleRecords.map((record) => (
@@ -155,7 +233,7 @@ export function Records() {
             className="record-detail"
             role="dialog"
             aria-modal="true"
-            aria-label="翻译记录详情"
+            aria-label={t("records.detailAria")}
           >
             <div className="sheet-handle" />
             <header>
@@ -249,10 +327,46 @@ export function Records() {
                     `${selected.title}.txt`,
                     recordToText(selected),
                   )
-                  toast(`已导出「${selected.title}.txt」`)
+                  toast(`${selected.title} · ${t("records.export")}`)
                 }}
               >
                 <Icon name="notes" /> {t("records.export")}
+              </AppButton>
+              <AppButton
+                className={detailFavorited ? "favorited" : ""}
+                onClick={favoriteSelected}
+              >
+                <Icon name="sparkles" />
+                <span>
+                  {detailFavorited
+                    ? t("phrases.favRemove")
+                    : t("phrases.favAdd")}
+                </span>
+              </AppButton>
+              <AppButton className="danger" onClick={() => setConfirming(true)}>
+                <Icon name="close" />
+                <span>{t("records.delete")}</span>
+              </AppButton>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {selected && confirming && (
+        <div className="record-detail-backdrop">
+          <div
+            className="record-confirm"
+            role="alertdialog"
+            aria-modal="true"
+            aria-label={t("records.delete")}
+          >
+            <p>{t("records.deleteConfirm")}</p>
+            <div>
+              <AppButton onClick={() => setConfirming(false)}>
+                {t("records.cancel")}
+              </AppButton>
+              <AppButton className="danger" onClick={deleteSelected}>
+                {t("records.delete")}
               </AppButton>
             </div>
           </div>

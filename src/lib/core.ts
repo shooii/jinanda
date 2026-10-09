@@ -12,6 +12,7 @@ export type FeatureId =
   | "call"
   | "watch"
   | "coach"
+  | "phrasebook"
 
 export function usePersistentState<T>(key: string, initial: T | (() => T)) {
   const [value, setValue] = useState<T>(() => {

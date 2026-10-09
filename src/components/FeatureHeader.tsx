@@ -1,7 +1,6 @@
 import { AppButton } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
-
-
+import { useT } from "@/lib/i18n"
 
 export function FeatureHeader({
   title,
@@ -12,10 +11,11 @@ export function FeatureHeader({
   subtitle: string
   onClose: () => void
 }) {
+  const t = useT()
   return (
     <header className="feature-header">
       <AppButton
-        ariaLabel="返回首页"
+        ariaLabel={t("speak.back")}
         className="feature-back"
         onClick={onClose}
       >

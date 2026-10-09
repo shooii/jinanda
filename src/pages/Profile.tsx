@@ -72,10 +72,12 @@ export function Profile({
   onConnect,
   onMembership,
   onSleep,
+  onPhrasebook,
 }: {
   onConnect: () => void
   onMembership: () => void
   onSleep: () => void
+  onPhrasebook: () => void
 }) {
   const [panel, setPanel] = useState<PanelId>(null)
   const [overlay, setOverlay] = useState<OverlayId>(null)
@@ -248,6 +250,16 @@ export function Profile({
           <div>
             <strong>{t("profile.vocabulary")}</strong>
             <small>{t("profile.vocabularyDetail")}</small>
+          </div>
+          <Icon name="chevron" />
+        </AppButton>
+        <AppButton onClick={onPhrasebook}>
+          <span>
+            <Icon name="message" />
+          </span>
+          <div>
+            <strong>{t("feature.phrasebook")}</strong>
+            <small>{t("feature.phrasebookDetail")}</small>
           </div>
           <Icon name="chevron" />
         </AppButton>

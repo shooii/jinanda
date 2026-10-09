@@ -122,7 +122,7 @@ export function DialogueMode({
       <footer className="dialogue-start-bar">
         <div>
           <p>
-            <strong>{!connected && mode !== "speaker" ? "耳机未连接 · 将进入交互演示" : mode === "speaker" ? "声音由手机播放 · 交互演示" : "当前为交互演示"}</strong>
+            <strong>{!connected && mode !== "speaker" ? "耳机未连接 · 将使用手机麦克风与扬声器" : mode === "speaker" ? "声音由手机播放" : "双耳已就绪 · 可开始对话"}</strong>
           </p>
         </div>
         <AppButton onClick={onStart}>

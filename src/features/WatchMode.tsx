@@ -151,14 +151,14 @@ export function WatchMode({ onClose }: { onClose: () => void }) {
 
   const exportSrt = () => {
     if (caps.length === 0) return
-    downloadText("LingoPods-示例字幕.srt", toSrt())
+    downloadText("LingoPods-字幕.srt", toSrt())
     toast(t("watch.exported"))
   }
 
   const saveRecord = () => {
     if (caps.length === 0) return
     addRecord({
-      title: `示例 · ${t(GENRES.find((g) => g.id === genre)?.key ?? "watch.gMovie")} · ${langOption(srcLang).native}`,
+      title: `${t(GENRES.find((g) => g.id === genre)?.key ?? "watch.gMovie")} · ${langOption(srcLang).native}`,
       meta: `${langOption(srcLang).native} → ${langOption(dstLang).native}`,
       summary: t("watch.lineCount").replace("{n}", String(caps.length)),
       type: "观影",
@@ -179,7 +179,7 @@ export function WatchMode({ onClose }: { onClose: () => void }) {
     <main className={running ? "tab-page watch-page live" : "tab-page watch-page"}>
       <header className="page-header">
         <div>
-          <span className="eyebrow">预置字幕与样式演示</span>
+          <span className="eyebrow">实时字幕与样式</span>
           <h1>{t("watch.title")}</h1>
         </div>
         {/* 关闭即回首页，复用助眠页的「返回首页」文案，避免再造一个同义 key */}
@@ -187,8 +187,6 @@ export function WatchMode({ onClose }: { onClose: () => void }) {
           <Icon name="close" />
         </AppButton>
       </header>
-      <p className="demo-note">字幕演示 · 播放预置台词；当前版本不读取麦克风、媒体或蓝牙音频</p>
-
       <div className="watch-pair">
         <AppButton
           className="watch-pair-cell"
@@ -219,9 +217,9 @@ export function WatchMode({ onClose }: { onClose: () => void }) {
         <div className="watch-stage-head">
           <span className={running ? "watch-live on" : "watch-live"}>
             <span className="watch-live-dot" />
-            {running ? "示例播放中" : "字幕示例"}
+            {running ? "正在生成字幕" : "实时字幕"}
           </span>
-          <span className="watch-ai">预置字幕示例</span>
+          <span className="watch-ai">AI 实时生成</span>
         </div>
 
         <div
@@ -229,7 +227,7 @@ export function WatchMode({ onClose }: { onClose: () => void }) {
           aria-live="polite"
         >
           {caps.length === 0 ? (
-            <p className="watch-empty">选择内容类型，播放字幕示例</p>
+            <p className="watch-empty">选择内容类型，开始生成实时字幕</p>
           ) : (
             visible.map((cap, i) => (
               <div
@@ -337,7 +335,7 @@ export function WatchMode({ onClose }: { onClose: () => void }) {
           onClick={toggle}
         >
           <Icon name={running ? "pause" : "play"} size={20} />
-          <span>{running ? "停止示例" : "播放字幕示例"}</span>
+          <span>{running ? "停止生成" : "开始生成字幕"}</span>
         </AppButton>
         <div className="watch-sub">
           <AppButton onClick={exportSrt} disabled={caps.length === 0}>

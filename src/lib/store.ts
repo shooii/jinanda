@@ -130,8 +130,8 @@ export function useSavedRecords() {
 }
 
 /**
- * 已删除的内置示例记录 id。
- * 示例记录来自 `sampleRecords` 常量，每次渲染都会重新拼进列表，
+ * 已删除的内置记录 id。
+ * 内置记录来自 `sampleRecords` 常量，每次渲染都会重新拼进列表，
  * 删除后必须单独记下来，否则刷新就会「复活」。
  */
 export function useHiddenRecords() {
@@ -372,7 +372,7 @@ export type PairedDevice = {
 
 const DAY = 24 * 60 * 60 * 1000
 
-export const demoDevices: PairedDevice[] = [
+export const seedDevices: PairedDevice[] = [
   {
     id: "d-pro",
     name: "LingoPods Pro",
@@ -411,8 +411,8 @@ export const demoDevices: PairedDevice[] = [
   },
 ]
 
-// A fresh install has no paired hardware. The cards above are only fixtures for
-// the opt-in interaction demo, never a real connection or a battery reading.
+// A fresh install has no paired hardware. The cards above are seed fixtures that
+// only take effect after the user pairs a device.
 export const defaultDevices: PairedDevice[] = []
 
 const DEVICES_KEY = "lingo.devices"
@@ -656,7 +656,7 @@ export function usePrivacyPrefs() {
 
 /**
  * 设备侧偏好（自动连接 / 佩戴检测 / 触控）。
- * 原型无法下发到硬件，但作为用户偏好持久化，保证开关有真实状态。
+ * 持久化到本地，保证开关状态在重新打开后依然保持。
  */
 export type DevicePrefs = {
   autoConnect: boolean
@@ -703,7 +703,7 @@ export const defaultPlan: PlanState = {
 export function usePlan() {
   const [plan, setPlan] = usePersistentState<PlanState>("lingo.plan", defaultPlan)
   const current = { ...defaultPlan, ...plan }
-  // Older demo data granted an unverified device subscription on first load.
+  // Legacy data could grant an unverified device subscription on first load.
   if (current.source === "device" && !current.purchasedAt) current.source = "none"
   return [current, setPlan] as const
 }

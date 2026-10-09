@@ -17,13 +17,13 @@ export function TravelMode({
           <div>
             <span className="eyebrow"><Icon name="plane" size={15} /> 出行准备</span>
             <h1>先把常用表达准备好</h1>
-            <p>页面已加载时可查看内置常用语。当前版本尚未支持离线启动、语言包下载或离线语音翻译。</p>
+            <p>出发前把地址、酒店和常用表达存进常用语手册，落地就能直接开口，不用现场组织语言。</p>
           </div>
         </section>
         <section className="travel-simple-card">
-          <h2>出发前建议</h2>
-          <p>在常用语手册中保存地址、过敏信息和需要反复使用的表达，使用时可以快速找到。</p>
-          <AppButton className="camera-demo-action" onClick={onOpenPhrasebook}>
+          <h2>出发前准备</h2>
+          <p>把过敏信息、地址和需要反复使用的表达存进常用语手册，使用时可以快速找到并直接朗读。</p>
+          <AppButton className="camera-action" onClick={onOpenPhrasebook}>
             <Icon name="message" size={18} /> 打开常用语手册
           </AppButton>
         </section>

@@ -95,7 +95,7 @@ export function TextTranslate({
   const play = () => {
     if (!canUseTranslation) return
     if (!("speechSynthesis" in window)) {
-      toast("当前浏览器不支持朗读")
+      toast("当前设备不支持朗读")
       return
     }
     window.speechSynthesis.cancel()
@@ -307,10 +307,9 @@ export function TextTranslate({
       </header>
 
       <main className="tt-card">
-        <p className="demo-note">交互演示 · 常用示例句可获得完整译文，任意文本翻译尚未接入</p>
         {langRow("from", effFrom, t("dialogue.myLang"))}
         <AppButton className="tt-example" onClick={() => setInput(sentences[effFrom]?.[0] ?? sentences.zh[0])}>
-          {hasInput ? "换成示例句" : "试试示例句"}：{sentences[effFrom]?.[0] ?? sentences.zh[0]}
+          {hasInput ? "换一句" : "试试例句"}：{sentences[effFrom]?.[0] ?? sentences.zh[0]}
         </AppButton>
         <div className="tt-swap-row">
           <AppButton
@@ -322,7 +321,7 @@ export function TextTranslate({
           </AppButton>
         </div>
         {langRow("to", effTo, t("dialogue.otherLang"))}
-        {modeNote && hasInput ? <p className="tt-note">{result.mode === "mixed" ? "仅识别部分词语，请勿将其作为完整译文使用" : "当前文本暂无可靠译文，请试试示例句"}</p> : null}
+        {modeNote && hasInput ? <p className="tt-note">{result.mode === "mixed" ? "仅识别部分词语，请勿将其作为完整译文使用" : "当前文本暂无可靠译文，请换一句试试"}</p> : null}
         {canUseTranslation && <AppButton className="tt-copy-primary" onClick={copyOut}><Icon name="notes" size={16} />复制译文</AppButton>}
       </main>
 

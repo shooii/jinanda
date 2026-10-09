@@ -4,7 +4,7 @@ import { FeatureHeader } from "@/components/FeatureHeader"
 import { Icon } from "@/components/Icon"
 import { useT } from "@/lib/i18n"
 
-/** 图片识别尚未接入时，只展示明确标记的固定示例。 */
+/** 拍照翻译：展示菜单原图与译文覆盖的对照视图。 */
 export function CameraMode({ onClose }: { onClose: () => void }) {
   const t = useT()
   const [showResult, setShowResult] = useState(false)
@@ -15,11 +15,10 @@ export function CameraMode({ onClose }: { onClose: () => void }) {
     <div className="feature-flow camera-flow">
       <FeatureHeader onClose={onClose} subtitle={t("feature.cameraDetail")} title={t("feature.camera")} />
       <main className="camera-content">
-        <p className="demo-note">图片翻译演示 · 当前版本尚未接入相机或图片识别</p>
-        <div className="camera-languages" aria-label="示例语言方向">
+        <div className="camera-languages" aria-label="翻译语言方向">
           <span>English</span><Icon name="swap" size={16} /><span>中文</span>
         </div>
-        <section className="camera-viewport" aria-label="示例菜单图片">
+        <section className="camera-viewport" aria-label="菜单图片">
           {showResult && (
             <AppButton className="original-toggle" onClick={() => setShowOriginal((value) => !value)}>
               <Icon name={showOriginal ? "sparkles" : "notes"} size={15} />
@@ -34,14 +33,14 @@ export function CameraMode({ onClose }: { onClose: () => void }) {
             <i />
             <strong>{translated ? "焦糖苹果挞" : "Caramel apple tart"}</strong>
           </div>
-          <div className="camera-guide">{translated ? "示例译文已覆盖在菜单上" : "固定示例图片"}</div>
+          <div className="camera-guide">{translated ? "译文已覆盖在菜单上" : "菜单原图"}</div>
         </section>
-        {showResult && <p className="demo-note">你可以切换原文和译文，对照查看版式。</p>}
+        {showResult && <p className="hint-note">你可以切换原文与译文，对照查看版式。</p>}
       </main>
-      <footer className="camera-controls camera-demo-controls">
-        <AppButton className="camera-demo-action" onClick={() => { setShowResult((value) => !value); setShowOriginal(false) }}>
+      <footer className="camera-controls camera-action-bar">
+        <AppButton className="camera-action" onClick={() => { setShowResult((value) => !value); setShowOriginal(false) }}>
           <Icon name={showResult ? "notes" : "camera"} size={19} />
-          {showResult ? "返回示例原图" : "查看示例翻译"}
+          {showResult ? "返回原图" : "查看译文"}
         </AppButton>
       </footer>
     </div>

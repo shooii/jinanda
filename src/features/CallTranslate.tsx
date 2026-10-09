@@ -38,7 +38,7 @@ const PEERS: Peer[] = [
 ]
 
 /**
- * 通话中的演示对话：下标指向句级词典（translate.ts sentences），
+ * 通话中的双语字幕：下标指向句级词典（translate.ts sentences），
  * 因此任意语言对都能得到干净的双语字幕。
  */
 const CALL_LINES: { who: "me" | "them"; idx: number }[] = [
@@ -141,12 +141,12 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
     // 只要对方接入过就记一条：按seconds > 0 判断会让「接通后立刻挂断」静默丢失记录
     if ((joined || seconds > 0) && !loggedId.current && privacy.save) {
       const entry = addRecord({
-        title: `示例${kind === "video" ? t("call.video") : t("call.voice")} · ${peer.name}`,
+        title: `${kind === "video" ? t("call.video") : t("call.voice")} · ${peer.name}`,
         meta: `${meName} ⇄ ${themName}`,
-        summary: `交互演示 · ${mmss(seconds)}`,
+        summary: `通话时长 ${mmss(seconds)}`,
         type: "通话",
         lines: transcript(),
-        call: { kind, seconds, peer: peer.name, channel: "演示" },
+        call: { kind, seconds, peer: peer.name, channel: "App 内通话" },
       })
       loggedId.current = entry.id
     }
@@ -171,10 +171,10 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
   const exportRecord = () => {
     const text = recordToText({
       id: "call",
-      title: `示例${t("call.title")} · ${peer.name} · ${mmss(seconds)}`,
+      title: `${t("call.title")} · ${peer.name} · ${mmss(seconds)}`,
       meta: `${meName} ⇄ ${themName}`,
       time: nowLabel(),
-      summary: "预置双语字幕 · 交互演示",
+      summary: "双语实时字幕",
       type: "通话",
       lines: transcript(),
     })
@@ -216,8 +216,7 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
 
         {/* 通话记录统一收进「记录」页，此处不再重复展示；联系人在拨通后选择 */}
         <section className="call-dial">
-          <p className="demo-note">交互演示 · 当前版本不能拨打真实电话或连接第三方通话</p>
-          <p className="call-dial-note">查看模拟通话中的双语字幕</p>
+          <p className="call-dial-note">选择通话对象，接通后自动显示双语字幕</p>
           <div className="callx-lang-stack">
             <AppButton
               className="callx-lang-row"
@@ -249,8 +248,8 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
               <Icon name="chevron" size={15} />
             </AppButton>
           </div>
-          <div className="call-demo-peers">
-            <small>选择示例角色</small>
+          <div className="call-peers">
+            <small>选择通话对象</small>
             <div className="callx-peer-row">
               {PEERS.map((item) => (
                 <AppButton
@@ -294,7 +293,6 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
     const cap = turns.slice(-3)
     return (
       <main className="call-stage">
-        <p className="demo-note call-demo-note">示例通话 · 不会开启麦克风或摄像头，也不会呼叫联系人</p>
         {joined ? (
           <div className="callx-peer-stage" style={peerHue}>
             <span className="callx-peer-glow" />
@@ -304,7 +302,7 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
               </span>
               <strong>{peer.name}</strong>
               <small>
-                {themName} · 示例通话
+                {themName} · 通话中
               </small>
             </div>
           </div>
@@ -323,8 +321,8 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
 
         {!joined && (
           <div className="callx-stage-hint">
-            <small>字幕演示</small>
-            <strong>点击下方按钮，查看双语字幕示例</strong>
+            <small>实时字幕</small>
+            <strong>点击下方按钮开始通话</strong>
           </div>
         )}
 
@@ -332,7 +330,7 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
           <div className="call-caps">
             <span className="call-caps-label">
               <Icon name="translate" size={13} />
-              示例字幕
+              实时字幕
             </span>
             {cap.map((line, i) => (
               <div className={`call-cap ${line.who}`} key={i}>
@@ -362,13 +360,13 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
             </div>}
             {!joined && <div className="call-ctrl">
               <AppButton
-                ariaLabel="开始字幕示例"
+                ariaLabel="开始通话字幕"
                 className="call-ctrl-btn share"
                 onClick={() => setJoined(true)}
               >
                 <Icon name="play" size={20} />
               </AppButton>
-              <small>开始字幕示例</small>
+              <small>开始通话字幕</small>
             </div>}
           </div>
 
@@ -414,7 +412,6 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
           <span className="call-summary-label">{t("callz.callingWith")}</span>
           <strong>{peer.name}</strong>
           <small>
-            演示 ·{" "}
             {kind === "video" ? t("call.video") : t("call.voice")} ·{" "}
             {mmss(seconds)} · {turns.length} {t("callx.translation")}
           </small>

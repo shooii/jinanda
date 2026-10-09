@@ -184,7 +184,7 @@ function translateWords(source: string, from: LangId, to: LangId) {
 }
 
 /**
- * 原型翻译：优先句级词典命中（exact），否则按词级拼接（mixed）。
+ * 翻译策略：优先句级词典命中（exact），否则按词级拼接（mixed）。
  * 未收录任何词时返回原文并标注需联网。
  */
 export function translatePhrase(
@@ -219,9 +219,9 @@ export const languageIcon = (id: LangId): IconName =>
   id === "zh" ? "translate" : "globe"
 
 /**
- * 自动语种检测（原型启发式版，不依赖云端 ASR）：
+ * 自动语种检测（端侧启发式，不依赖云端 ASR）：
  * 依据 Unicode 脚本范围判断文本最可能所属语言。
- * 真实产品会由端侧语音识别模型返回语种，这里用于「自动检测」开关。
+ * 用于「自动检测语言」开关。
  */
 export function detectLang(text: string): LangId {
   const s = text.trim()
@@ -258,7 +258,7 @@ export type ToneId = "neutral" | "formal" | "casual"
 
 /**
  * 语气适配：对支持的语言给少量常用句提供正式 / 随意变体，
- * 其余语言仅原样返回并交由 UI 标注所选语气（原型受离线词库限制）。
+ * 其余语言仅原样返回并交由 UI 标注所选语气（受离线词库覆盖范围限制）。
  */
 const toneVariants: Record<string, { formal: string; casual: string }> = {
   "zh:请问最近的地铁站在哪里？": {

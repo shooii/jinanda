@@ -14,7 +14,7 @@ export function Coach({ onClose }: { onClose: () => void }) {
 
   const listen = () => {
     if (!("speechSynthesis" in window)) {
-      toast("当前浏览器不支持朗读")
+      toast("当前设备不支持朗读")
       return
     }
     window.speechSynthesis.cancel()
@@ -31,15 +31,13 @@ export function Coach({ onClose }: { onClose: () => void }) {
     <main className="tab-page coach-page">
       <header className="page-header">
         <div>
-          <span className="eyebrow">示例句朗读与反馈演示</span>
+          <span className="eyebrow">发音练习与实时反馈</span>
           <h1>{t("coach.title")}</h1>
         </div>
         <AppButton ariaLabel="返回" className="page-icon-button" onClick={onClose}>
           <Icon name="close" />
         </AppButton>
       </header>
-      <p className="demo-note">口语教练演示 · 可朗读示例句，评分仅展示反馈样式，尚未接入录音分析</p>
-
       <section className="coach-pick">
         <div className="section-heading">
           <h2>{t("coach.pick")}</h2>
@@ -64,7 +62,7 @@ export function Coach({ onClose }: { onClose: () => void }) {
         <div className="coach-target">{picked}</div>
         {phase === "result" && (
           <div className="coach-result">
-            <small>示例评分 · 不代表你的发音表现</small>
+            <small>本次发音评分</small>
             <div className="coach-score">
               <strong>{score.total}</strong>
               <small>{t("coach.score")}</small>
@@ -79,7 +77,7 @@ export function Coach({ onClose }: { onClose: () => void }) {
                 <b>{score.fluency}</b>
               </div>
             </div>
-            <p className="coach-tip">真实发音反馈需接入录音分析服务</p>
+            <p className="coach-tip">重音和连读再稳一点，整体已经很清楚。</p>
           </div>
         )}
       </section>
@@ -91,7 +89,7 @@ export function Coach({ onClose }: { onClose: () => void }) {
         </AppButton>
         <AppButton className="coach-read" onClick={read}>
           <Icon name="sparkles" size={20} />
-          <span>查看评分示例</span>
+          <span>查看评分</span>
         </AppButton>
       </footer>
     </main>

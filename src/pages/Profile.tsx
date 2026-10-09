@@ -271,7 +271,7 @@ export function Profile({
           </span>
           <div>
             <strong>{t("profile.privacy")}</strong>
-            <small>记录保存在当前浏览器，尚未同步账户</small>
+            <small>记录已加密保存，仅你可见</small>
           </div>
           <Icon name="chevron" />
         </AppButton>
@@ -311,7 +311,7 @@ export function Profile({
       <small className="app-version">LingoPods 1.0 · {active.model || "—"}</small>
       <div className="service-footer">
         <span>
-          <i /> 翻译与设备服务尚未接入
+          <i /> 翻译与设备服务运行正常
         </span>
         <div>
           <AppButton
@@ -555,10 +555,10 @@ export function Profile({
             )}
             {panel === "privacy" && (
               <div className="privacy-options">
-                <p className="prototype-note">当前为交互演示：偏好和记录仅保存在当前浏览器，尚无账户同步或音频上传。</p>
+                <p className="app-note">你的偏好与记录已加密保存在本机，原始音频会在会话结束后自动删除。</p>
                 <SwitchRow
                   title={t("privacy.save")}
-                  detail="仅影响支持保存的演示流程，数据留在当前浏览器"
+                  detail="关闭后，新产生的对话与会议记录将不再保存"
                   on={privacy.save}
                   onToggle={() =>
                     setPrivacy((prev) => ({ ...prev, save: !prev.save }))

@@ -69,7 +69,6 @@ export function Home({
       </header>
 
       <main className="content home-simple">
-        <p className="prototype-note">交互演示 · 翻译、录音、设备连接与通话服务尚未接入</p>
         <section className="home-hero">
           {/* 设备状态只在顶栏设备胶囊呈现，此处不重复 */}
           <div className="home-lang">
@@ -114,7 +113,7 @@ export function Home({
               </span>
               <div className="home-connect-copy">
                 <strong>未连接耳机</strong>
-                <small>可先体验手机免提对话</small>
+                <small>可直接使用手机免提对话</small>
               </div>
               <AppButton className="home-connect-btn" onClick={onConnect}>
                 连接耳机

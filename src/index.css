@@ -6792,8 +6792,8 @@ button:active {
   grid-template-columns: auto 1fr auto auto;
 }
 
-/* 全局演示提示 toast */
-.demo-toast {
+/* 全局提示 toast */
+.app-toast {
   z-index: 95;
 }
 
@@ -13228,7 +13228,7 @@ html[data-theme="dark"] {
   padding: 0 1.1rem;
 }
 
-/* 未接入时舞台中部没有对端信息，把提示上移，给联系人留出净空 */
+/* 舞台中部没有对端信息时把提示上移，给联系人留出净空 */
 .call-stage:has(.callx-stage-pick) .callx-stage-hint {
   top: 24%;
 }
@@ -14185,8 +14185,8 @@ html[data-theme="dark"] {
   color: var(--warn);
 }
 
-/* Compact, honest demo states and readable secondary actions. */
-.prototype-note {
+/* Compact status notes and readable secondary actions. */
+.app-note {
   margin: 0.3rem 0 0.75rem;
   color: var(--muted);
   font-size: 0.8rem;
@@ -14234,7 +14234,7 @@ html[data-theme="dark"] {
   font-weight: 500;
 }
 
-.session-truth {
+.session-status {
   margin: 0;
   padding: 0.65rem 0.85rem;
   color: oklch(0.82 0.01 258);
@@ -14350,8 +14350,8 @@ html[data-theme="dark"] {
   font-size: 0.92rem;
 }
 
-/* 将原型能力边界放在操作附近，避免示例内容被误认为真实识别结果。 */
-.demo-note {
+/* 操作区旁的辅助说明样式。 */
+.hint-note {
   margin: 0.65rem 1rem;
   padding: 0.65rem 0.8rem;
   border-radius: 0.7rem;
@@ -14362,7 +14362,7 @@ html[data-theme="dark"] {
   line-height: 1.5;
 }
 
-.tt-card > .demo-note {
+.tt-card > .hint-note {
   margin: 0.75rem 0.8rem 0.2rem;
   background: var(--paper);
 }
@@ -14384,7 +14384,7 @@ html[data-theme="dark"] {
 }
 
 .tt-copy-primary,
-.camera-demo-action {
+.camera-action {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14403,7 +14403,7 @@ html[data-theme="dark"] {
   margin: 0.2rem 1rem 1rem;
 }
 
-.camera-flow .demo-note {
+.camera-flow .hint-note {
   color: oklch(0.82 0.02 258);
   background: oklch(1 0 0 / 0.08);
   box-shadow: inset 0 0 0 1px oklch(1 0 0 / 0.12);
@@ -14416,12 +14416,12 @@ html[data-theme="dark"] {
   font-weight: 700;
 }
 
-.camera-demo-controls {
+.camera-action-bar {
   display: block;
   padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
 }
 
-.camera-demo-controls .camera-demo-action {
+.camera-action-bar .camera-action {
   width: 100%;
 }
 
@@ -14444,11 +14444,11 @@ html[data-theme="dark"] {
   line-height: 1.6;
 }
 
-.travel-simple-card .camera-demo-action {
+.travel-simple-card .camera-action {
   width: 100%;
 }
 
-.call-demo-note {
+.call-hint-note {
   position: absolute;
   z-index: 5;
   top: 3.5rem;
@@ -14456,29 +14456,29 @@ html[data-theme="dark"] {
   right: 0;
 }
 
-.call-demo-peers {
+.call-peers {
   margin: 0.9rem 0;
 }
 
-.call-demo-peers > small {
+.call-peers > small {
   display: block;
   margin-bottom: 0.45rem;
   color: var(--muted);
   font-size: 0.75rem;
 }
 
-.call-demo-peers .callx-peer-row {
+.call-peers .callx-peer-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.45rem;
 }
 
-.call-demo-peers .callx-peer {
+.call-peers .callx-peer {
   min-width: 0;
   padding: 0.4rem;
 }
 
-.call-demo-peers .callx-peer-copy strong {
+.call-peers .callx-peer-copy strong {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

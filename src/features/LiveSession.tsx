@@ -27,7 +27,7 @@ type ShareTurn = {
   translated: string
 }
 
-/** 一人一只耳机 · 演示对话：取句级词典下标（20 语同序），任何语言对都能得到准确译文 */
+/** 一人一只耳机 · 对话字幕：取句级词典下标（20 语同序），任何语言对都能得到准确译文 */
 const SHARE_ME_LINES = [0, 7, 2]
 const SHARE_THEM_LINES = [9, 5, 12]
 
@@ -310,7 +310,7 @@ function TalkFlow({
 
   return (
     <main className="share-stage">
-      <p className="session-truth" role="status">{live ? "演示进行中 · 示例对话会自动出现" : "交互演示 · 点按按钮查看示例对话"}<br />{shared.offline ? "离线模式仅为界面演示" : routeDescription} · 点按气泡可朗读译文</p>
+      <p className="session-status" role="status">{live ? "对话进行中 · 正在实时翻译" : "点按按钮开始对话"}<br />{shared.offline ? "离线模式已开启 · 使用端侧语言包" : routeDescription} · 点按气泡可朗读译文</p>
       <div className="share-canvas" ref={canvasRef}>
         {turns.length === 0 ? (
           <p className="share-empty">
@@ -526,7 +526,7 @@ export function LiveSession({
             window.speechSynthesis.speak(utterance)
           }}
           onOpenTone={() => setShareSheet("tone")}
-          routeDescription={isHybrid ? "耳机 + 手机的呈现方式（演示）" : "双耳机的呈现方式（演示）"}
+          routeDescription={isHybrid ? "耳机 + 手机的呈现方式" : "双耳机的呈现方式"}
         />
       ) : null}
 

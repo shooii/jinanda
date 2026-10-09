@@ -84,8 +84,6 @@ export function Phrasebook({ onClose }: { onClose: () => void }) {
         subtitle={t("phrases.subtitle")}
         title={t("phrases.title")}
       />
-      <p className="demo-note">内置常用句可直接对照查看；自定义表达可保存，任意文本翻译尚未接入</p>
-
       <div className="ph-tabs" role="tablist">
         <AppButton
           className={tab === "phrases" ? "active" : ""}

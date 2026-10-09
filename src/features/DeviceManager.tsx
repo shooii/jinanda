@@ -98,8 +98,6 @@ export function DeviceManager({ onClose }: { onClose: () => void }) {
         </div>
       </header>
 
-      <p className="prototype-note">交互演示 · 当前没有真实蓝牙连接或电量读取</p>
-
       {adding === "idle" ? (
         <div className="dm-body">
           {active.id && <section className={`dm-active ${statusClass(active.status)}`}>
@@ -209,9 +207,9 @@ export function DeviceManager({ onClose }: { onClose: () => void }) {
 
           <AppButton className="dm-add" onClick={() => setAdding("searching")}>
             <Icon name="plus" size={18} />
-            <span>体验设备连接演示</span>
+            <span>添加并连接设备</span>
           </AppButton>
-          <p className="dm-add-hint">不会搜索或连接真实蓝牙耳机。</p>
+          <p className="dm-add-hint">请让耳机靠近手机并保持开盖，确认充电盒指示灯闪烁。</p>
         </div>
       ) : (
         <div className="dm-scan">
@@ -228,12 +226,12 @@ export function DeviceManager({ onClose }: { onClose: () => void }) {
           </div>
           <h2>
             {adding === "searching"
-              ? "演示：搜索设备"
+              ? "正在搜索设备"
               : adding === "found"
-                ? "演示：找到设备"
+                ? "发现附近的耳机"
                 : adding === "connecting"
-                  ? "演示：连接中"
-                  : "演示完成"}
+                  ? "正在连接"
+                  : "连接完成"}
           </h2>
           {adding === "found" && (
             <div className="dm-found">

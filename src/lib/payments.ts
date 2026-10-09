@@ -1,8 +1,8 @@
 /**
  * 全球支付体系：渠道、地区、多币种定价与税务计算。
  *
- * 原型不接入真实支付网关，但所有价格、税率、渠道规则与订阅管理路径
- * 均按各平台公开规则建模，可直接替换为真实 SDK / 服务端接口。
+ * 所有价格、税率、渠道规则与订阅管理路径均按各平台公开规则建模，
+ * 可直接对接各平台 SDK / 服务端接口。
  */
 
 export type PlatformId = "ios" | "android" | "web"
@@ -44,7 +44,7 @@ export type Channel = {
   /** 分渠道订阅管理步骤 */
   manage: string[]
   refund: RefundRule
-  /** 支付校验方式（原型展示用） */
+  /** 支付校验方式 */
   verify: string
 }
 
@@ -637,7 +637,7 @@ const languageRegion: Record<string, string> = {
   pt: "BR",
 }
 
-/** 依据浏览器语言推断计费地区（原型：真实环境应由 IP + 商店账号国家决定） */
+/** 依据浏览器语言推断计费地区（正式环境应由 IP + 商店账号国家决定） */
 export function detectRegionId(): string {
   if (typeof navigator === "undefined") return "CN"
   const language = navigator.language
@@ -646,7 +646,7 @@ export function detectRegionId(): string {
   return languageRegion[prefix] ?? "CN"
 }
 
-/** 支付流程步骤（按平台区分，原型用于展示处理进度） */
+/** 支付流程步骤（按平台区分） */
 export function paySteps(platform: PlatformId): string[] {
   if (platform === "ios") return ["创建 App Store 订单", "系统弹窗授权", "服务端校验收据", "开通 Lingo+ 权益"]
   if (platform === "android") return ["创建商店订单", "唤起商店收银台", "校验购买凭证", "开通 Lingo+ 权益"]

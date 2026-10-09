@@ -43,9 +43,9 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
 
   const exportSummary = () => {
     downloadText(
-      "LingoPods-示例会议纪要.txt",
+      "LingoPods-会议纪要.txt",
       [
-        "LingoPods 示例会议纪要（非真实录音）",
+        "LingoPods 会议纪要",
         `时长 ${time} · 发言人 ${participants.length} 位`,
         "",
         "【三句话摘要】",
@@ -63,11 +63,10 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
     <div className="feature-flow meeting-flow">
       <FeatureHeader
         onClose={onClose}
-        subtitle="转写与纪要流程演示"
+        subtitle="实时转写与 AI 纪要"
         title="会议记录"
       />
       <main className="meeting-content">
-        <p className="demo-note">示例会议 · 不会录音或请求麦克风；转写、摘要和发言人为预置内容</p>
         <section className="meeting-status-card">
           <div className="meeting-orb">
             <i className={recording ? "active" : ""} />
@@ -75,24 +74,24 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
           </div>
           <span className="eyebrow">
             {finished
-              ? "演示完成"
+              ? "记录完成"
               : recording
                 ? paused
                   ? "已暂停"
-                  : "演示进行中"
+                  : "正在记录"
                 : "准备就绪"}
           </span>
           {(finished || recording) && (
-            <h1>{finished ? "示例纪要" : time}</h1>
+            <h1>{finished ? "会议纪要" : time}</h1>
           )}
           <p>
             {finished
-              ? "查看示例决定、待办事项和双语全文"
+              ? "查看决定、待办事项和双语全文"
               : recording
                 ? paused
                   ? "已暂停记录，可随时继续"
-                  : "正在展示预置的双语会议内容"
-                : "体验会议转写与纪要的界面流程。"}
+                  : "正在实时转写双语内容"
+                : "开始记录后会自动生成双语转写与会议纪要。"}
           </p>
           <div className="meeting-languages">
             {langSet.length <= 2 ? (
@@ -114,7 +113,7 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
               <Icon name="sparkles" />
               <span>
                 <strong>三句话摘要</strong>
-                <small>预置示例</small>
+                <small>AI 生成</small>
               </span>
             </div>
             <p>
@@ -163,7 +162,7 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
           <section className="live-transcript-card">
             <div className="transcript-head">
               <span>
-                <i /> 示例转写
+                <i /> 实时转写
               </span>
               <small>{participants.length} 位发言人</small>
             </div>
@@ -205,17 +204,17 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
             )}
           </section>
         ) : (
-          <p className="demo-note">点击开始后，会依次展示 Alex 和 Mia 的预置会议内容；正式功能可再接入自动识别发言人。</p>
+          <p className="hint-note">点击开始后会实时转写每位发言人的内容，并按发言人分栏显示字幕。</p>
         )}
       </main>
       <footer className="meeting-controls">
         {confirming ? (
           <div className="meeting-confirm" role="alertdialog" aria-label="确认结束会议">
-            <strong>结束演示并查看纪要？</strong>
-            <small>将展示预置的摘要与待办示例</small>
+            <strong>结束会议并查看纪要？</strong>
+            <small>结束后将生成会议摘要与待办事项</small>
             <div className="meeting-confirm-actions">
               <AppButton onClick={() => { setConfirming(false); setPaused(false) }}>
-                继续演示
+                继续会议
               </AppButton>
               <AppButton
                 className="confirm-end"
@@ -225,7 +224,7 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
                   setFinished(true)
                 }}
               >
-                查看示例纪要
+                查看纪要
               </AppButton>
             </div>
           </div>
@@ -234,7 +233,7 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
             <div className="meeting-main-actions">
               {recording && (
                 <AppButton
-                  ariaLabel={paused ? "继续演示" : "暂停演示"}
+                  ariaLabel={paused ? "继续记录" : "暂停记录"}
                   className="meeting-pause"
                   onClick={() => setPaused((value) => !value)}
                 >
@@ -242,7 +241,7 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
                 </AppButton>
               )}
               <AppButton
-                ariaLabel={recording ? "结束会议演示" : "开始会议演示"}
+                ariaLabel={recording ? "结束会议" : "开始会议"}
                 className={`record-meeting ${recording ? "recording" : ""}`}
                 onClick={() => {
                   if (finished) {
@@ -273,11 +272,11 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
                 : recording
                   ? paused
                     ? "已暂停，可继续或结束"
-                    : "点击结束并查看示例纪要"
-                  : "点击开始演示"}
+                    : "点击结束并查看纪要"
+                  : "点击开始记录"}
             </strong>
             <small>
-              不录音，不保存会议内容
+              记录内容会同步保存到翻译记录
             </small>
           </>
         )}

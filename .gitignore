@@ -24,3 +24,6 @@ logs/
 
 # WorkBuddy agent state
 .workbuddy/
+
+# Excel owner/lock files created while a workbook is open
+~$*

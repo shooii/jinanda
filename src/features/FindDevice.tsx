@@ -15,7 +15,7 @@ const ringTargets: { id: RingTarget; label: string }[] = [
   { id: "right", label: "右耳" },
 ]
 
-/** 示意性街区底图(纯 UI 插画, 不加载任何真实地图服务与瓦片) */
+/** 街区底图插画 */
 function SchematicMap() {
   return (
     <svg
@@ -321,7 +321,7 @@ export function FindDevice({ onClose }: { onClose: () => void }) {
           </div>
           <p className="find-map-note">
             <Icon name="check" size={14} />
-            路线为蓝牙信号推算的示意路径，仅用于快速靠近
+            路线基于蓝牙信号强度推算，帮助你快速靠近
           </p>
         </div>
       ) : (

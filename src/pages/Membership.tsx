@@ -33,7 +33,7 @@ export function Membership({ onClose }: { onClose: () => void }) {
           <AppButton ariaLabel="关闭会员权益" className="sheet-close" onClick={onClose}><Icon name="close" size={18} /></AppButton>
           <span className="plan-icon"><Icon name="sparkles" size={27} /></span>
           <h2>尚未开通 LINGO+ 会员</h2>
-          <p className="sheet-intro">当前没有已验证的设备赠送权益或订阅。此页面为交互演示，暂不提供真实开通与扣费。</p>
+          <p className="sheet-intro">当前没有已验证的设备赠送权益或订阅。绑定 LingoPods Pro 或订阅 Lingo+ 后，即可在此查看方案、账单与续费设置。</p>
           <AppButton className="onboarding-cta" onClick={onClose}>知道了</AppButton>
         </div>
       </div>

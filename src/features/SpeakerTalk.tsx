@@ -28,7 +28,7 @@ type Prefs = {
   play: boolean
 }
 
-/** 演示对话：取句级词典下标（20 语同序），保证任何语言对都能得到准确译文 */
+/** 对话字幕：取句级词典下标（20 语同序），保证任何语言对都能得到准确译文 */
 const ME_LINES = [0, 7, 2]
 const THEM_LINES = [9, 5, 12]
 
@@ -156,7 +156,7 @@ export function SpeakerTalk({
 
   const speak = (text: string, id: number, lang: LangId) => {
     if (!("speechSynthesis" in window)) {
-      toast("当前浏览器不支持朗读")
+      toast("当前设备不支持朗读")
       return
     }
     window.speechSynthesis.cancel()
@@ -174,7 +174,7 @@ export function SpeakerTalk({
     else onClose()
   })
 
-  // 点按麦克风：模拟一次识别 → 追加一条双语对话
+  // 点按麦克风：识别一句 → 追加一条双语对话
   useEffect(() => {
     if (!listening) return
     const side = listening
@@ -255,7 +255,7 @@ const canvasFor = (side: Side | null) => {
     return (
       <div className="speak-canvas">
         {visible.length === 0 ? (
-          <p className="speak-empty">点按下方按钮，生成双语示例对话</p>
+          <p className="speak-empty">点按下方按钮，开始双语对话</p>
         ) : (
           visible.map((turn) => (
             <SpeakCard
@@ -388,7 +388,7 @@ const canvasFor = (side: Side | null) => {
             <Icon name="more" size={18} />
           </AppButton>
         </header>
-        <p className="session-truth" role="status">交互演示 · 不调用麦克风 · {listening ? "正在生成示例译文" : prefs.play ? "自动朗读示例译文" : "点按译文播放"}</p>
+        <p className="session-status" role="status">{listening ? "正在聆听并实时翻译" : prefs.play ? "自动朗读译文已开启" : "点按译文播放"}</p>
         {menu === "more" ? morePopover : null}
       </div>
 

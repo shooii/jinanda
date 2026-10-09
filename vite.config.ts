@@ -2,23 +2,19 @@ import { defineConfig, type HtmlTagDescriptor, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
-
 import siteConfiguration from './.figma/make/site.json'
-
-
 // Vite config — https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   // .figma/make/deploy-preview passes `--mode development` for cached-preview builds.
   const emitSourcemaps = mode === 'development'
-
   return {
-    base: process.env.FIGMA_PUBLIC_URL ? `${process.env.FIGMA_PUBLIC_URL}/` : '/',
+    base: process.env.FIGMA_PUBLIC_URL ? `${process.env.FIGMA_PUBLIC_URL}/` : (mode === 'production' ? '/jinanda/' : '/'),
     build: {
       sourcemap: emitSourcemaps ? 'inline' : false,
       minify: !emitSourcemaps,
     },
     plugins: [
-react(),
+      react(),
       tailwindcss(),
       figmaSiteConfiguration(siteConfiguration),
       figmaErrorOverlayReplay(),
@@ -37,7 +33,7 @@ react(),
       watch: {
         ignored: [
           '**/.figma/**',
-],
+        ],
       },
     },
     preview: {
@@ -46,7 +42,6 @@ react(),
     },
   }
 })
-
 type FigmaSiteConfiguration = {
   title?: string
   description?: string
@@ -73,7 +68,6 @@ type FigmaSiteConfiguration = {
     addBypassLinks?: boolean
   }
 }
-
 /** Applies /.figma/make/site.json to the generated document shell. */
 function figmaSiteConfiguration(config: FigmaSiteConfiguration): Plugin {
   function sanitizeHtmlValue(value: string | undefined): string {
@@ -85,7 +79,6 @@ function figmaSiteConfiguration(config: FigmaSiteConfiguration): Plugin {
   function replaceHtmlCommentSlot(html: string, slotName: string, content: string): string {
     return html.replace(`<!-- ${slotName} -->`, content)
   }
-
   const title = config.title ?? "Figma Make App"
   const description = config.description ?? ''
   const favicon = config.icons?.icon ?? ''
@@ -97,20 +90,17 @@ function figmaSiteConfiguration(config: FigmaSiteConfiguration): Plugin {
   const bodyStart = config.customScripts?.bodyStart ?? ''
   const bodyEnd = config.customScripts?.bodyEnd ?? ''
   const robotsTxt = config.robots?.index === false ? 'User-agent: *\nDisallow: /\n' : ''
-
   return {
     name: 'figma-site-configuration',
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         if (!robotsTxt || req.url?.split('?')[0] !== '/robots.txt') return next()
-
         res.setHeader('Content-Type', 'text/plain; charset=utf-8')
         res.end(robotsTxt)
       })
     },
     generateBundle() {
       if (!robotsTxt) return
-
       this.emitFile({
         type: 'asset',
         fileName: 'robots.txt',
@@ -127,7 +117,6 @@ function figmaSiteConfiguration(config: FigmaSiteConfiguration): Plugin {
         result = replaceHtmlCommentSlot(result, 'figma:head-end', headEnd)
         result = replaceHtmlCommentSlot(result, 'figma:body-start', bodyStart)
         result = replaceHtmlCommentSlot(result, 'figma:body-end', bodyEnd)
-
         const tags: HtmlTagDescriptor[] = []
         if (description) {
           tags.push({ tag: 'meta', attrs: { name: 'description', content: description }, injectTo: 'head' })
@@ -151,7 +140,6 @@ function figmaSiteConfiguration(config: FigmaSiteConfiguration): Plugin {
             { tag: 'meta', attrs: { name: 'twitter:image', content: socialImage }, injectTo: 'head' },
           )
         }
-
         if (googleAnalyticsId) {
           tags.push(
             {
@@ -174,7 +162,6 @@ function figmaSiteConfiguration(config: FigmaSiteConfiguration): Plugin {
             },
           )
         }
-
         if (config.accessibility?.addBypassLinks) {
           tags.push(
             {
@@ -207,7 +194,6 @@ function figmaSiteConfiguration(config: FigmaSiteConfiguration): Plugin {
             },
           )
         }
-
         return {
           html: result,
           tags,
@@ -215,8 +201,7 @@ function figmaSiteConfiguration(config: FigmaSiteConfiguration): Plugin {
       },
     },
   }
-}
-
+})
 /**
  * Replay the most recent build error to clients that connect after
  * it was first broadcast. Vite buffers an error payload only while
@@ -236,7 +221,6 @@ function figmaErrorOverlayReplay(): Plugin {
     apply: 'serve',
     configureServer(server) {
       let lastError: object | null = null
-
       const origSend = server.ws.send.bind(server.ws) as (...args: any[]) => void
       server.ws.send = ((...args: any[]) => {
         const payload = args[0]
@@ -250,7 +234,6 @@ function figmaErrorOverlayReplay(): Plugin {
         }
         return origSend(...args)
       }) as typeof server.ws.send
-
       server.ws.on('connection', (socket) => {
         if (lastError !== null) {
           socket.send(JSON.stringify(lastError))
@@ -259,7 +242,6 @@ function figmaErrorOverlayReplay(): Plugin {
     },
   }
 }
-
 /**
  * Reload when a module that previously defined a React Refresh boundary stops
  * defining one. This happens when an agent moves a component into a new file
@@ -275,7 +257,6 @@ function figmaErrorOverlayReplay(): Plugin {
 function figmaReactRefreshBoundaryFallback(): Plugin {
   const hadRefreshBoundary = new Map<string, boolean>()
   let sendFullReload: (() => void) | null = null
-
   return {
     name: 'figma-react-refresh-boundary-fallback',
     apply: 'serve',
@@ -285,21 +266,17 @@ function figmaReactRefreshBoundaryFallback(): Plugin {
     },
     transform(code, id) {
       if (!/\.[jt]sx?(?:\?|$)/.test(id) || id.includes('/node_modules/')) return null
-
       const moduleId = id.split('?')[0] ?? id
       const hasRefreshBoundary = code.includes('registerExportsForReactRefresh')
       const previousHadRefreshBoundary = hadRefreshBoundary.get(moduleId)
       hadRefreshBoundary.set(moduleId, hasRefreshBoundary)
-
       if (previousHadRefreshBoundary && !hasRefreshBoundary) {
         queueMicrotask(() => sendFullReload?.())
       }
-
       return null
     },
   }
 }
-
 /**
  * Serves a blank render-target page at /.figma/make/kit.html that
  * the Figma preview script drives directly. The page exposes a
@@ -332,7 +309,6 @@ function figmaMakeKitPlugin(options: { storiesGlob: string | string[] }): Plugin
 </script>
 </body>
 </html>`
-
   return {
     name: 'figma-make-kit',
     apply: 'serve',
@@ -348,7 +324,6 @@ function figmaMakeKitPlugin(options: { storiesGlob: string | string[] }): Plugin
       server.middlewares.use(async (req, res, next) => {
         const url = req.url || ''
         if (url.split('?')[0] !== ROUTE) return next()
-
         try {
           res.setHeader('Content-Type', 'text/html')
           res.end(await server.transformIndexHtml(url, HTML_BOOTSTRAP))

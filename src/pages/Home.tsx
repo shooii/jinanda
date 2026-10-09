@@ -69,7 +69,7 @@ export function Home({
       </header>
 
       <main className="content home-simple">
-        <p className="prototype-note">交互演示 · 设备连接与语音翻译尚未接入</p>
+        <p className="prototype-note">交互演示 · 翻译、录音、设备连接与通话服务尚未接入</p>
         <section className="home-hero">
           {/* 设备状态只在顶栏设备胶囊呈现，此处不重复 */}
           <div className="home-lang">

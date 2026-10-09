@@ -1,9 +1,9 @@
-import { useMemo, useRef, useState } from "react"
+import { useMemo, useState } from "react"
 import { AppButton, toast } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
 import type { IconName } from "@/components/Icon"
 import { LangPicker } from "@/components/LangPicker"
-import { useEscapeKey } from "@/lib/core"
+import { useEscapeKey, useLangPair } from "@/lib/core"
 import type { FeatureId } from "@/lib/core"
 import {
   copyText,
@@ -28,16 +28,19 @@ export function TextTranslate({
   onNavigate?: (feature: FeatureId) => void
 }) {
   const t = useT()
-  const [from, setFrom] = useState<FromLang>("zh")
-  const [to, setTo] = useState<LangId>("en")
+  const { me, them, setMe, setThem } = useLangPair()
+  const [autoFrom, setAutoFrom] = useState(false)
+  const from: FromLang = autoFrom ? "auto" : me
+  const to = them
+  const setFrom = (lang: FromLang) => {
+    setAutoFrom(lang === "auto")
+    if (lang !== "auto") setMe(lang)
+  }
+  const setTo = setThem
   const [input, setInput] = useState("")
-  const [playing, setPlaying] = useState(false)
   const [tone, setTone] = useState<ToneId>("neutral")
   const [picker, setPicker] = useState<Side | null>(null)
   const [menu, setMenu] = useState(false)
-  /** 正在拾音的语言区：真实录音不可用，这里只做状态呈现，避免静默无反馈 */
-  const [listening, setListening] = useState<Side | null>(null)
-  const voiceCursor = useRef(0)
   const [, addRecord] = useSavedRecords()
   const { hasFavorite, toggleFavorite } = useFavorites()
 
@@ -62,12 +65,8 @@ export function TextTranslate({
   const result = useMemo(() => translatePhrase(input, effFrom, effTo), [input, effFrom, effTo])
   const toneText = applyTone(result.text, effTo, tone)
   const hasInput = input.trim().length > 0
-  const modeNote =
-    result.mode === "exact"
-      ? null
-      : result.mode === "mixed"
-        ? t("text.modeMixed")
-        : t("text.modeNone")
+  const canUseTranslation = hasInput && result.mode === "exact"
+  const modeNote = result.mode !== "exact"
 
   useEscapeKey(() => {
     if (picker) setPicker(null)
@@ -76,47 +75,33 @@ export function TextTranslate({
   })
 
   const swap = () => {
-    setFrom(to)
+    setFrom(effTo)
     setTo(effFrom)
     // 双向对译：把当前译文带回输入框，符合「交换语言」的直觉
-    if (hasInput && result.mode !== "none") setInput(result.text)
+    if (canUseTranslation) setInput(result.text)
   }
 
   const pick = (side: Side, lang: FromLang) => {
-    if (side === "from") setFrom(lang)
-    else setTo(lang as LangId)
+    if (side === "from") {
+      if (lang !== "auto" && lang === to) setTo(effFrom)
+      setFrom(lang)
+    } else {
+      if (lang === effFrom && from !== "auto") setFrom(to)
+      setTo(lang as LangId)
+    }
     setPicker(null)
   }
 
   const play = () => {
-    setPlaying(true)
-    window.setTimeout(() => setPlaying(false), 1800)
-    toast(t("text.reading"))
-  }
-
-  /**
-   * 语音输入：点按后按当前语言取一句高频表达填入对应区域。
-   * 真实拾音不可用时也必须给出明确反馈，不能静默无响应。
-   */
-  const dictate = (side: Side) => {
-    if (listening) {
-      setListening(null)
+    if (!canUseTranslation) return
+    if (!("speechSynthesis" in window)) {
+      toast("当前浏览器不支持朗读")
       return
     }
-    setListening(side)
-    const lang = side === "from" ? effFrom : effTo
-    window.setTimeout(() => {
-      const list = sentences[lang] ?? sentences.zh
-      const text = list[voiceCursor.current % list.length]
-      voiceCursor.current += 1
-      setInput(text)
-      setListening(null)
-      if (side === "to" && lang !== effFrom) {
-        // 说的是译文语言：交换语向，让这句话成为新的「原文」
-        setFrom(lang)
-        setTo(effFrom)
-      }
-    }, 1200)
+    window.speechSynthesis.cancel()
+    const utterance = new SpeechSynthesisUtterance(toneText)
+    utterance.lang = effTo === "zh" ? "zh-CN" : effTo === "en" ? "en-US" : effTo
+    window.speechSynthesis.speak(utterance)
   }
 
   const clear = () => {
@@ -126,15 +111,17 @@ export function TextTranslate({
   }
 
   const copyOut = async () => {
-    const ok = await copyText(result.text || "")
+    if (!canUseTranslation) return
+    const ok = await copyText(toneText)
     toast(ok ? t("text.copied") : t("text.copyFail"))
     setMenu(false)
   }
 
   /** 收藏夹：收藏「原文 + 译文」，可在常语手册的收藏页回看 */
-  const favText = toneText || t("text.modeNone")
+  const favText = toneText
   const favorited = hasFavorite(input.trim(), favText)
   const toggleFav = () => {
+    if (!canUseTranslation) return
     const on = toggleFavorite({
       original: input.trim(),
       translated: favText,
@@ -146,17 +133,17 @@ export function TextTranslate({
   }
 
   const saveRecord = () => {
-    if (!hasInput) return
+    if (!canUseTranslation) return
     addRecord({
       title: input.trim().slice(0, 18),
       meta: `${langOption(effFrom).label} → ${langOption(effTo).label}`,
-      summary: toneText || t("text.modeNone"),
+      summary: toneText,
       type: "文本",
       lines: [
         {
           speaker: langOption(effFrom).short,
           original: input.trim(),
-          translated: toneText || t("text.modeNone"),
+          translated: toneText,
         },
       ],
     })
@@ -165,6 +152,7 @@ export function TextTranslate({
   }
 
   const exportRecord = () => {
+    if (!canUseTranslation) return
     downloadText(
       "text-translate.txt",
       recordToText({
@@ -224,51 +212,44 @@ export function TextTranslate({
         />
       ) : (
         <p className={`tt-lane-text readonly ${hasInput ? "" : "empty"}`}>
-          {hasInput ? toneText || t("text.modeNone") : langOption(lang).native}
+          {hasInput ? (result.mode === "none" ? "暂无可靠译文" : toneText) : langOption(lang).native}
         </p>
       )}
-      <AppButton
-        ariaLabel={listening === side ? t("text.listening") : t("text.voice")}
-        className={`tt-lane-mic ${listening === side ? "listening" : ""}`}
-        onClick={() => dictate(side)}
-      >
-        <Icon name="mic" size={24} />
-      </AppButton>
     </div>
   )
 
   const moreMenu = (
     <div className="speak-popover speak-pop-more">
       <AppButton
-        className={hasInput ? "" : "active"}
+        className={canUseTranslation ? "" : "active"}
         onClick={() => {
           setMenu(false)
           play()
         }}
-        disabled={!hasInput}
+        disabled={!canUseTranslation}
       >
         <span className="speak-pop-mark" />
-        <Icon name={playing ? "pause" : "audio"} size={19} />
+        <Icon name="audio" size={19} />
         <span className="speak-pop-label">{t("text.reading")}</span>
       </AppButton>
-      <AppButton onClick={copyOut} disabled={!hasInput}>
+      <AppButton onClick={copyOut} disabled={!canUseTranslation}>
         <span className="speak-pop-mark" />
         <Icon name="notes" size={19} />
         <span className="speak-pop-label">{t("text.copy")}</span>
       </AppButton>
-      <AppButton onClick={toggleFav} disabled={!hasInput}>
+      <AppButton onClick={toggleFav} disabled={!canUseTranslation}>
         <span className="speak-pop-mark" />
         <Icon name="sparkles" size={19} />
         <span className="speak-pop-label">
           {favorited ? t("phrases.favRemove") : t("phrases.favAdd")}
         </span>
       </AppButton>
-      <AppButton onClick={saveRecord} disabled={!hasInput}>
+      <AppButton onClick={saveRecord} disabled={!canUseTranslation}>
         <span className="speak-pop-mark" />
         <Icon name="plus" size={19} />
         <span className="speak-pop-label">{t("text.save")}</span>
       </AppButton>
-      <AppButton onClick={exportRecord} disabled={!hasInput}>
+      <AppButton onClick={exportRecord} disabled={!canUseTranslation}>
         <span className="speak-pop-mark" />
         <Icon name="plane" size={19} />
         <span className="speak-pop-label">{t("call.export")}</span>
@@ -326,7 +307,11 @@ export function TextTranslate({
       </header>
 
       <main className="tt-card">
+        <p className="demo-note">交互演示 · 常用示例句可获得完整译文，任意文本翻译尚未接入</p>
         {langRow("from", effFrom, t("dialogue.myLang"))}
+        <AppButton className="tt-example" onClick={() => setInput(sentences[effFrom]?.[0] ?? sentences.zh[0])}>
+          {hasInput ? "换成示例句" : "试试示例句"}：{sentences[effFrom]?.[0] ?? sentences.zh[0]}
+        </AppButton>
         <div className="tt-swap-row">
           <AppButton
             ariaLabel={t("dialogue.swapLang")}
@@ -337,7 +322,8 @@ export function TextTranslate({
           </AppButton>
         </div>
         {langRow("to", effTo, t("dialogue.otherLang"))}
-        {modeNote && hasInput ? <p className="tt-note">{modeNote}</p> : null}
+        {modeNote && hasInput ? <p className="tt-note">{result.mode === "mixed" ? "仅识别部分词语，请勿将其作为完整译文使用" : "当前文本暂无可靠译文，请试试示例句"}</p> : null}
+        {canUseTranslation && <AppButton className="tt-copy-primary" onClick={copyOut}><Icon name="notes" size={16} />复制译文</AppButton>}
       </main>
 
       <nav className="speak-tabs">

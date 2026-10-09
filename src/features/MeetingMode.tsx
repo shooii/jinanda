@@ -1,9 +1,7 @@
-import { useEffect, useMemo, useState } from "react"
-import type { CSSProperties } from "react"
+import { useEffect, useState } from "react"
 import { AppButton, toast } from "@/components/AppButton"
 import { FeatureHeader } from "@/components/FeatureHeader"
 import { Icon } from "@/components/Icon"
-import { LangPicker } from "@/components/LangPicker"
 import { useT } from "@/lib/i18n"
 import { langOption } from "@/lib/translate"
 import type { LangId } from "@/lib/translate"
@@ -11,10 +9,10 @@ import { downloadText } from "@/lib/store"
 
 type Participant = { id: string; name: string; lang: LangId }
 
-const MAX_PARTICIPANTS = 8
-
-/** 每位发言人一个稳定色相，头像与转写气泡保持一致 */
-const hueOf = (index: number) => [152, 28, 258, 340, 92, 196, 12, 312][index % 8]
+const participants: Participant[] = [
+  { id: "p-a", name: "Alex", lang: "en" },
+  { id: "p-m", name: "Mia", lang: "en" },
+]
 
 export function MeetingMode({ onClose }: { onClose: () => void }) {
   const t = useT()
@@ -22,14 +20,8 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
   const [paused, setPaused] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const [seconds, setSeconds] = useState(0)
-  const [consent, setConsent] = useState(false)
   const [finished, setFinished] = useState(false)
-  const [pickerId, setPickerId] = useState<string | null>(null)
   const [fullText, setFullText] = useState(false)
-  const [participants, setParticipants] = useState<Participant[]>([
-    { id: "p-a", name: "Alex", lang: "en" },
-    { id: "p-m", name: "Mia", lang: "en" },
-  ])
 
   useEffect(() => {
     if (!recording || paused) return
@@ -42,45 +34,18 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
 
   const time = `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`
 
-  const full = participants.length >= MAX_PARTICIPANTS
-
-  const addParticipant = () => {
-    if (full) return
-    setParticipants((prev) => [
-      ...prev,
-      { id: `p-${Date.now()}`, name: `发言人 ${prev.length + 1}`, lang: "en" },
-    ])
-  }
-
-  const setLang = (id: string, lang: LangId) =>
-    setParticipants((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, lang } : p)),
-    )
-
-  const removeParticipant = (id: string) =>
-    setParticipants((prev) => prev.filter((p) => p.id !== id))
-
   const langSet = Array.from(new Set(participants.map((p) => p.lang)))
 
-  const pickerTarget = useMemo(
-    () => participants.find((p) => p.id === pickerId) ?? null,
-    [participants, pickerId],
-  )
-
   const startRecording = () => {
-    if (!consent) {
-      toast("请先勾选已获得参会者同意")
-      return
-    }
     setRecording(true)
     setPaused(false)
   }
 
   const exportSummary = () => {
     downloadText(
-      "LingoPods-会议纪要.txt",
+      "LingoPods-示例会议纪要.txt",
       [
-        "LingoPods 会议纪要",
+        "LingoPods 示例会议纪要（非真实录音）",
         `时长 ${time} · 发言人 ${participants.length} 位`,
         "",
         "【三句话摘要】",
@@ -98,10 +63,11 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
     <div className="feature-flow meeting-flow">
       <FeatureHeader
         onClose={onClose}
-        subtitle="实时转写与 AI 纪要"
+        subtitle="转写与纪要流程演示"
         title="会议记录"
       />
       <main className="meeting-content">
+        <p className="demo-note">示例会议 · 不会录音或请求麦克风；转写、摘要和发言人为预置内容</p>
         <section className="meeting-status-card">
           <div className="meeting-orb">
             <i className={recording ? "active" : ""} />
@@ -109,24 +75,24 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
           </div>
           <span className="eyebrow">
             {finished
-              ? "会议完成"
+              ? "演示完成"
               : recording
                 ? paused
                   ? "已暂停"
-                  : "正在记录"
+                  : "演示进行中"
                 : "准备就绪"}
           </span>
           {(finished || recording) && (
-            <h1>{finished ? "纪要已生成" : time}</h1>
+            <h1>{finished ? "示例纪要" : time}</h1>
           )}
           <p>
             {finished
-              ? "已整理关键决定、待办事项和双语全文"
+              ? "查看示例决定、待办事项和双语全文"
               : recording
                 ? paused
                   ? "已暂停记录，可随时继续"
-                  : "正在识别多语言，并同步生成中文翻译"
-                : "自动区分发言人，会后生成摘要与待办事项。"}
+                  : "正在展示预置的双语会议内容"
+                : "体验会议转写与纪要的界面流程。"}
           </p>
           <div className="meeting-languages">
             {langSet.length <= 2 ? (
@@ -148,7 +114,7 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
               <Icon name="sparkles" />
               <span>
                 <strong>三句话摘要</strong>
-                <small>AI 已整理</small>
+                <small>预置示例</small>
               </span>
             </div>
             <p>
@@ -197,7 +163,7 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
           <section className="live-transcript-card">
             <div className="transcript-head">
               <span>
-                <i /> 实时转写
+                <i /> 示例转写
               </span>
               <small>{participants.length} 位发言人</small>
             </div>
@@ -239,87 +205,17 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
             )}
           </section>
         ) : (
-          <>
-            <AppButton
-              className={`consent-card ${consent ? "accepted" : ""}`}
-              onClick={() => setConsent((value) => !value)}
-            >
-              <span>{consent ? <Icon name="check" size={15} /> : "1"}</span>
-              <div>
-                <strong>已获得参会者同意</strong>
-                <small>开始前请告知所有参会者正在录音与转写</small>
-              </div>
-            </AppButton>
-
-            <section className="meeting-participants">
-              <div className="section-heading">
-                <h2>{t("meeting.multi")}</h2>
-                <AppButton
-                  className="add-speaker"
-                  disabled={full}
-                  onClick={addParticipant}
-                >
-                  <Icon name="plus" size={15} /> {t("meeting.addSpeaker")}
-                </AppButton>
-              </div>
-              <div className="participant-list">
-                {participants.map((p, idx) => (
-                  <div className="participant-row" key={p.id}>
-                    <span
-                      className="participant-avatar"
-                      style={{ "--p-hue": hueOf(idx) } as CSSProperties}
-                    >
-                      {p.name.slice(0, 1)}
-                    </span>
-                    <button
-                      className="participant-lang"
-                      onClick={() => setPickerId(p.id)}
-                      type="button"
-                    >
-                      <strong>{p.name}</strong>
-                      <small>
-                        {langOption(p.lang).native}
-                        <Icon name="chevron" size={13} />
-                      </small>
-                    </button>
-                    {participants.length > 1 && (
-                      <AppButton
-                        ariaLabel={`移除${p.name}`}
-                        className="remove-participant"
-                        onClick={() => removeParticipant(p.id)}
-                      >
-                        <Icon name="close" size={14} />
-                      </AppButton>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <small className="participant-tip">{t("meeting.tip")}</small>
-            </section>
-
-          </>
+          <p className="demo-note">点击开始后，会依次展示 Alex 和 Mia 的预置会议内容；正式功能可再接入自动识别发言人。</p>
         )}
       </main>
-      {pickerTarget && (
-        <LangPicker
-          onClose={() => setPickerId(null)}
-          onPick={(id) => {
-            setLang(pickerTarget.id, id)
-            setPickerId(null)
-          }}
-          open
-          title={t("meeting.assignLang")}
-          value={pickerTarget.lang}
-        />
-      )}
       <footer className="meeting-controls">
         {confirming ? (
           <div className="meeting-confirm" role="alertdialog" aria-label="确认结束会议">
-            <strong>结束并生成纪要？</strong>
-            <small>转写将停止，摘要与待办随后生成</small>
+            <strong>结束演示并查看纪要？</strong>
+            <small>将展示预置的摘要与待办示例</small>
             <div className="meeting-confirm-actions">
-              <AppButton onClick={() => setConfirming(false)}>
-                继续记录
+              <AppButton onClick={() => { setConfirming(false); setPaused(false) }}>
+                继续演示
               </AppButton>
               <AppButton
                 className="confirm-end"
@@ -329,7 +225,7 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
                   setFinished(true)
                 }}
               >
-                结束并生成
+                查看示例纪要
               </AppButton>
             </div>
           </div>
@@ -338,7 +234,7 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
             <div className="meeting-main-actions">
               {recording && (
                 <AppButton
-                  ariaLabel={paused ? "继续记录" : "暂停记录"}
+                  ariaLabel={paused ? "继续演示" : "暂停演示"}
                   className="meeting-pause"
                   onClick={() => setPaused((value) => !value)}
                 >
@@ -346,17 +242,19 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
                 </AppButton>
               )}
               <AppButton
-                ariaLabel={recording ? "结束会议记录" : "开始会议记录"}
+                ariaLabel={recording ? "结束会议演示" : "开始会议演示"}
                 className={`record-meeting ${recording ? "recording" : ""}`}
                 onClick={() => {
                   if (finished) {
                     setFinished(false)
                     setSeconds(0)
                     setPaused(false)
+                    startRecording()
                     return
                   }
                   if (recording) {
                     setConfirming(true)
+                    setPaused(true)
                   } else {
                     startRecording()
                   }
@@ -365,7 +263,7 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
                 {recording ? (
                   <span className="stop-square" />
                 ) : (
-                  <Icon name="mic" size={26} />
+                  <Icon name="play" size={26} />
                 )}
               </AppButton>
             </div>
@@ -375,13 +273,11 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
                 : recording
                   ? paused
                     ? "已暂停，可继续或结束"
-                    : "点击结束并生成纪要"
-                  : consent
-                    ? "点击开始记录"
-                    : "请先勾选参会者同意"}
+                    : "点击结束并查看示例纪要"
+                  : "点击开始演示"}
             </strong>
             <small>
-              {recording ? "内容已自动保存" : "首次使用会请求麦克风权限"}
+              不录音，不保存会议内容
             </small>
           </>
         )}

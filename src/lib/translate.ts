@@ -161,10 +161,7 @@ function matchSentence(text: string, from: LangId) {
   const list = sentences[from]
   const exact = list.findIndex((item) => normalize(item) === key)
   if (exact >= 0) return exact
-  return list.findIndex((item) => {
-    const value = normalize(item)
-    return value.includes(key) || key.includes(value)
-  })
+  return -1
 }
 
 /** 逐词对译：把 source 中命中的词按词表换成目标语言 */
@@ -204,10 +201,6 @@ export function translatePhrase(
   const direct = translateWords(input, from, to)
   if (direct.hit) return { text: direct.text, mode: "mixed" }
 
-  // 反向匹配：用目标语言词表反查，让英文等输入也能得到结果
-  const reverse = translateWords(input, to, from)
-  if (reverse.hit) return { text: reverse.text, mode: "mixed" }
-
   return { text: input, mode: "none" }
 }
 
@@ -215,8 +208,7 @@ export function translatePhrase(
 export function translatePhraseOf(text: string, to: LangId) {
   const index = matchSentence(text, "zh")
   if (index >= 0) return sentences[to][index]
-  const { text: mixed, hit } = translateWords(text, "zh", to)
-  return hit ? mixed : ""
+  return ""
 }
 
 export function langLabel(id: LangId) {

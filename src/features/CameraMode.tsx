@@ -1,188 +1,49 @@
-import { useEffect, useState } from "react"
-import { AppButton, toast } from "@/components/AppButton"
+import { useState } from "react"
+import { AppButton } from "@/components/AppButton"
 import { FeatureHeader } from "@/components/FeatureHeader"
 import { Icon } from "@/components/Icon"
-import { LangPicker } from "@/components/LangPicker"
-import { usePersistentState } from "@/lib/core"
 import { useT } from "@/lib/i18n"
-import { langOption } from "@/lib/translate"
-import type { LangId } from "@/lib/translate"
 
-
-
+/** 图片识别尚未接入时，只展示明确标记的固定示例。 */
 export function CameraMode({ onClose }: { onClose: () => void }) {
   const t = useT()
-  const [scanning, setScanning] = useState(true)
-  /** 每点一次快门自增，用于在「已在扫描」时也能重新触发一次扫描 */
-  const [scanRun, setScanRun] = useState(0)
   const [showResult, setShowResult] = useState(false)
-  /** 点按快门的短暂反馈：扫描中再点也能看到明确响应 */
-  const [pulsing, setPulsing] = useState(false)
   const [showOriginal, setShowOriginal] = useState(false)
-  const [flash, setFlash] = useState(false)
-  const [picker, setPicker] = useState<"from" | "to" | null>(null)
-  const [fromLang, setFromLang] = usePersistentState<LangId>(
-    "lingo.camera-from",
-    "en",
-  )
-  const [toLang, setToLang] = usePersistentState<LangId>("lingo.camera-to", "zh")
-
-  useEffect(() => {
-    if (!scanning) return
-    setShowResult(false)
-    setShowOriginal(false)
-    const timer = window.setTimeout(() => {
-      setScanning(false)
-      setShowResult(true)
-    }, 1700)
-    return () => window.clearTimeout(timer)
-  }, [scanning, scanRun])
+  const translated = showResult && !showOriginal
 
   return (
     <div className="feature-flow camera-flow">
-      <FeatureHeader
-        onClose={onClose}
-        subtitle={t("feature.cameraDetail")}
-        title={t("feature.camera")}
-      />
+      <FeatureHeader onClose={onClose} subtitle={t("feature.cameraDetail")} title={t("feature.camera")} />
       <main className="camera-content">
-        <div className="camera-languages">
-          <AppButton onClick={() => setPicker("from")}>
-            {langOption(fromLang).native}
-          </AppButton>
-          <AppButton
-            ariaLabel={t("dialogue.swapLang")}
-            onClick={() => {
-              const prev = fromLang
-              setFromLang(toLang)
-              setToLang(prev)
-              setScanning(true)
-            }}
-          >
-            <Icon name="swap" size={16} />
-          </AppButton>
-          <AppButton onClick={() => setPicker("to")}>
-            {langOption(toLang).native}
-          </AppButton>
+        <p className="demo-note">图片翻译演示 · 当前版本尚未接入相机或图片识别</p>
+        <div className="camera-languages" aria-label="示例语言方向">
+          <span>English</span><Icon name="swap" size={16} /><span>中文</span>
         </div>
-        <section className="camera-viewport">
+        <section className="camera-viewport" aria-label="示例菜单图片">
           {showResult && (
-            <AppButton
-              className="original-toggle"
-              onClick={() => setShowOriginal((value) => !value)}
-            >
+            <AppButton className="original-toggle" onClick={() => setShowOriginal((value) => !value)}>
               <Icon name={showOriginal ? "sparkles" : "notes"} size={15} />
               {showOriginal ? t("camera.showTranslated") : t("camera.showOriginal")}
             </AppButton>
           )}
-          <div
-            className={`menu-paper ${
-              showResult && !showOriginal ? "translated-paper" : ""
-            }`}
-            key={showResult && !showOriginal ? "translated" : "original"}
-          >
-            <span>
-              {showResult && !showOriginal ? "今日菜单" : "TODAY'S MENU"}
-            </span>
-            <strong>
-              {showResult && !showOriginal ? "番茄汤" : "Tomato soup"}
-            </strong>
+          <div className={`menu-paper ${translated ? "translated-paper" : ""}`}>
+            <span>{translated ? "今日菜单" : "TODAY'S MENU"}</span>
+            <strong>{translated ? "番茄汤" : "Tomato soup"}</strong>
             <i />
-            <strong>
-              {showResult && !showOriginal
-                ? "香草烤鸡配时蔬"
-                : "Roast chicken with herbs"}
-            </strong>
+            <strong>{translated ? "香草烤鸡配时蔬" : "Roast chicken with herbs"}</strong>
             <i />
-            <strong>
-              {showResult && !showOriginal
-                ? "焦糖苹果挞"
-                : "Caramel apple tart"}
-            </strong>
+            <strong>{translated ? "焦糖苹果挞" : "Caramel apple tart"}</strong>
           </div>
-          <span className="scan-corner corner-a" />
-          <span className="scan-corner corner-b" />
-          <span className="scan-corner corner-c" />
-          <span className="scan-corner corner-d" />
-          {scanning && <i className="scan-line" key={scanRun} />}
-          <div className="camera-guide">
-            {scanning
-              ? t("camera.scanning")
-              : showOriginal
-                ? t("camera.showingSource")
-                : t("camera.replaced")}
-          </div>
+          <div className="camera-guide">{translated ? "示例译文已覆盖在菜单上" : "固定示例图片"}</div>
         </section>
-
-        {showResult && (
-          <section className="direct-translation-status">
-            <span className="direct-status-icon">
-              <Icon name="check" size={18} />
-            </span>
-            <div>
-              <strong>{t("camera.replaced")}</strong>
-              <small>
-                {t("camera.overlayHint")} · {langOption(fromLang).label} →{" "}
-                {langOption(toLang).label}
-              </small>
-            </div>
-            <AppButton
-              ariaLabel={t("camera.saveImage")}
-              onClick={() => toast(t("camera.saved"))}
-            >
-              <Icon name="camera" size={18} />
-            </AppButton>
-          </section>
-        )}
+        {showResult && <p className="demo-note">你可以切换原文和译文，对照查看版式。</p>}
       </main>
-      <footer className="camera-controls">
-        <AppButton
-          ariaLabel={t("camera.pickImage")}
-          className="gallery-button"
-          onClick={() => {
-            setScanning(true)
-            toast(t("camera.picked"))
-          }}
-        >
-          <Icon name="image" />
-        </AppButton>
-        <AppButton
-          ariaLabel={t("camera.rescan")}
-          className={`shutter-button ${scanning ? "scanning" : ""}${pulsing ? " pulsing" : ""}`}
-          onClick={() => {
-            setScanRun((n) => n + 1)
-            setScanning(true)
-            setPulsing(true)
-            window.setTimeout(() => setPulsing(false), 340)
-          }}
-        >
-          <span>
-            <Icon name="camera" size={25} />
-          </span>
-        </AppButton>
-        <AppButton
-          ariaLabel={t("camera.flash")}
-          className={`gallery-button ${flash ? "flash-on" : ""}`}
-          onClick={() => setFlash((value) => !value)}
-        >
-          <Icon name="bolt" />
+      <footer className="camera-controls camera-demo-controls">
+        <AppButton className="camera-demo-action" onClick={() => { setShowResult((value) => !value); setShowOriginal(false) }}>
+          <Icon name={showResult ? "notes" : "camera"} size={19} />
+          {showResult ? "返回示例原图" : "查看示例翻译"}
         </AppButton>
       </footer>
-
-      {picker && (
-        <LangPicker
-          onClose={() => setPicker(null)}
-          onPick={(id) => {
-            if (picker === "from") setFromLang(id)
-            else setToLang(id)
-            setPicker(null)
-            setScanning(true)
-          }}
-          open
-          title={picker === "from" ? t("camera.sourceLang") : t("camera.targetLang")}
-          value={picker === "from" ? fromLang : toLang}
-        />
-      )}
     </div>
   )
 }

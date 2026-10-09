@@ -2,8 +2,6 @@ import { useEffect, useRef, useState } from "react"
 import type { CSSProperties } from "react"
 import { AppButton, toast } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
-import { SwitchRow } from "@/components/SwitchRow"
-import type { IconName } from "@/components/Icon"
 import { LangPicker } from "@/components/LangPicker"
 import { useEscapeKey, usePersistentState, useLangPair } from "@/lib/core"
 import { useT } from "@/lib/i18n"
@@ -40,28 +38,6 @@ const PEERS: Peer[] = [
 ]
 
 /**
- * 可分享到的聊天软件：先拨通通话，接通后再把通话分享到这些 App。
- * 第三方名称仅作兼容性说明。
- */
-const CHANNELS: { id: string; name: string; icon: IconName; hue: number }[] = [
-  { id: "wechat", name: "微信", icon: "message", hue: 155 },
-  { id: "whatsapp", name: "WhatsApp", icon: "message", hue: 150 },
-  { id: "telegram", name: "Telegram", icon: "message", hue: 240 },
-  { id: "messenger", name: "Messenger", icon: "message", hue: 265 },
-  { id: "instagram", name: "Instagram", icon: "camera", hue: 345 },
-  { id: "signal", name: "Signal", icon: "message", hue: 230 },
-  { id: "facetime", name: "FaceTime", icon: "video", hue: 145 },
-  { id: "meet", name: "Google Meet", icon: "video", hue: 190 },
-  { id: "teams", name: "Teams", icon: "video", hue: 262 },
-  { id: "zoom", name: "Zoom", icon: "video", hue: 238 },
-  { id: "skype", name: "Skype", icon: "video", hue: 205 },
-  { id: "viber", name: "Viber", icon: "message", hue: 288 },
-  { id: "line", name: "LINE", icon: "message", hue: 140 },
-  { id: "discord", name: "Discord", icon: "message", hue: 270 },
-  { id: "snapchat", name: "Snapchat", icon: "camera", hue: 95 },
-]
-
-/**
  * 通话中的演示对话：下标指向句级词典（translate.ts sentences），
  * 因此任意语言对都能得到干净的双语字幕。
  */
@@ -93,28 +69,8 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
   )
   const { me: meLang, them: themLang, setMe: setMeLang, setThem: setThemLang } =
     useLangPair()
-  /** 分享到哪个 App（拨通之后才需要选） */
-  const [channelId, setChannelId] = usePersistentState<string>(
-    "lingo.call-channel",
-    "wechat",
-  )
-  const [autoDetect, setAutoDetect] = usePersistentState<boolean>(
-    "lingo.call-auto-detect",
-    true,
-  )
-  const [overlay, setOverlay] = usePersistentState<boolean>(
-    "lingo.call-overlay",
-    true,
-  )
   const [picker, setPicker] = useState<"me" | "them" | null>(null)
-  const [sheet, setSheet] = useState<null | "share" | "setup">(null)
-  const [cameraOn, setCameraOn] = useState(true)
-  const [micOn, setMicOn] = useState(true)
-  /** 译文走耳机、手机不外放，与参考图默认一致 */
-  const [speakerOn, setSpeakerOn] = useState(false)
   const [captionOn, setCaptionOn] = useState(true)
-  /** 已把本次通话分享给对方；对方点开后才会接入 */
-  const [shared, setShared] = useState(false)
   const [joined, setJoined] = useState(false)
   const [seconds, setSeconds] = useState(0)
   const [turns, setTurns] = useState<Turn[]>([])
@@ -124,14 +80,13 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
   const [privacy] = usePrivacyPrefs()
   const tick = useRef<number | null>(null)
 
-  const peer = PEERS.find((item) => item.id === peerId) ?? PEERS[0]
-  const channel =
-    CHANNELS.find((item) => item.id === channelId) ?? CHANNELS[0]
+  const peer = PEERS.find((item) => item.id === peerId && item.lang === themLang) ?? {
+    id: "guest", name: "对方", lang: themLang, hue: 210,
+  }
   const peerHue = { "--peer-hue": peer.hue } as CSSProperties
 
   useEscapeKey(() => {
-    if (sheet) setSheet(null)
-    else if (picker) setPicker(null)
+    if (picker) setPicker(null)
     else if (view !== "home") setView("home")
     else onClose()
   })
@@ -141,16 +96,8 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
     if (view !== "call") return
     setSeconds(0)
     setTurns([])
-    setShared(false)
     setJoined(false)
   }, [view])
-
-  // 分享出去之后，对方才会接入（参考图：分享后，等待用户接入）
-  useEffect(() => {
-    if (view !== "call" || !shared) return
-    const accept = window.setTimeout(() => setJoined(true), 1600)
-    return () => window.clearTimeout(accept)
-  }, [view, shared])
 
   // 计时从对方接入开始
   useEffect(() => {
@@ -185,7 +132,6 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
   const start = (nextKind: CallKind) => {
     setKind(nextKind)
     loggedId.current = null
-    setCameraOn(nextKind === "video")
     setView("call")
   }
 
@@ -195,22 +141,16 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
     // 只要对方接入过就记一条：按seconds > 0 判断会让「接通后立刻挂断」静默丢失记录
     if ((joined || seconds > 0) && !loggedId.current && privacy.save) {
       const entry = addRecord({
-        title: `${kind === "video" ? t("call.video") : t("call.voice")} · ${peer.name}`,
+        title: `示例${kind === "video" ? t("call.video") : t("call.voice")} · ${peer.name}`,
         meta: `${meName} ⇄ ${themName}`,
-        summary: `${channel.name} · ${mmss(seconds)}`,
+        summary: `交互演示 · ${mmss(seconds)}`,
         type: "通话",
         lines: transcript(),
-        call: { kind, seconds, peer: peer.name, channel: channel.name },
+        call: { kind, seconds, peer: peer.name, channel: "演示" },
       })
       loggedId.current = entry.id
     }
     setView("ended")
-  }
-
-  const confirmShare = () => {
-    setSheet(null)
-    if (view === "call") setShared(true)
-    else toast(t("callz.shared"))
   }
 
   const pickPeer = (next: Peer) => {
@@ -231,10 +171,10 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
   const exportRecord = () => {
     const text = recordToText({
       id: "call",
-      title: `${t("call.title")} · ${peer.name} · ${mmss(seconds)}`,
+      title: `示例${t("call.title")} · ${peer.name} · ${mmss(seconds)}`,
       meta: `${meName} ⇄ ${themName}`,
       time: nowLabel(),
-      summary: `${channel.name} · ${t("call.subtitle")}`,
+      summary: "预置双语字幕 · 交互演示",
       type: "通话",
       lines: transcript(),
     })
@@ -246,166 +186,16 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
       onClose={() => setPicker(null)}
       onPick={(id) => {
         if (picker === "me") setMeLang(id)
-        else setThemLang(id)
+        else {
+          setThemLang(id)
+          setPeerId(PEERS.find((item) => item.lang === id)?.id ?? "guest")
+        }
         setPicker(null)
       }}
       open={picker !== null}
       title={picker === "me" ? t("call.me") : t("call.them")}
       value={picker === "me" ? meLang : themLang}
     />
-  )
-
-  /** 微信风格分享面板：先拨通，接通后再把通话分享给对方 */
-  const shareSheet = sheet === "share" && (
-    <div className="call-sheet-backdrop" onClick={() => setSheet(null)}>
-      <div
-        className="callx-share-sheet"
-        onClick={(event) => event.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-      >
-        <header className="callx-share-head">
-          <AppButton
-            className="callx-share-close"
-            onClick={() => setSheet(null)}
-          >
-            {t("callz.close")}
-          </AppButton>
-          <strong>{channel.name}</strong>
-          <span />
-        </header>
-
-        <div className="callx-share-apps">
-          <small className="callx-share-apps-label">{t("callz.shareTo")}</small>
-          <div className="callx-app-row">
-            {CHANNELS.map((item) => (
-              <AppButton
-                className={`callx-app ${item.id === channel.id ? "on" : ""}`}
-                key={item.id}
-                onClick={() => setChannelId(item.id)}
-              >
-                <span
-                  className="callx-app-icon"
-                  style={{ "--app-hue": item.hue } as CSSProperties}
-                >
-                  <Icon name={item.icon} size={17} />
-                </span>
-                <span className="callx-app-name">{item.name}</span>
-              </AppButton>
-            ))}
-          </div>
-        </div>
-
-        <div className="callx-share-card">
-          <span className="callx-share-logo">L</span>
-          <div>
-            <strong>{t("call.title")}</strong>
-            <small>{t("call.shareDesc")}</small>
-          </div>
-        </div>
-
-        <div className="callx-share-actions">
-          <AppButton onClick={confirmShare}>
-            <span className="callx-share-action-icon">
-              <Icon name="profile" size={18} />
-            </span>
-            <span>{t("call.forward")}</span>
-            <Icon name="chevron" size={16} />
-          </AppButton>
-          <AppButton onClick={confirmShare}>
-            <span className="callx-share-action-icon moments">
-              <Icon name="globe" size={18} />
-            </span>
-            <span>{t("call.moments")}</span>
-            <Icon name="chevron" size={16} />
-          </AppButton>
-          <AppButton onClick={confirmShare}>
-            <span className="callx-share-action-icon save">
-              <Icon name="receipt" size={18} />
-            </span>
-            <span>{t("call.favorite")}</span>
-            <Icon name="chevron" size={16} />
-          </AppButton>
-        </div>
-
-        <p className="callx-share-note">
-          <Icon name="sparkles" size={13} />
-          <span>{t("callz.shareNote")}</span>
-        </p>
-      </div>
-    </div>
-  )
-
-  /** 通话设置：通话应用 / 自动识别来电 / 系统级悬浮字幕 */
-  const setupSheet = sheet === "setup" && (
-    <div className="call-sheet-backdrop" onClick={() => setSheet(null)}>
-      <div
-        className="callx-setup-sheet"
-        onClick={(event) => event.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-      >
-        <header className="callx-setup-head">
-          <div>
-            <strong>{t("callz.setup")}</strong>
-            <small>{t("callx.appsNote")}</small>
-          </div>
-          <AppButton
-            className="callx-nav-back"
-            ariaLabel={t("callz.close")}
-            onClick={() => setSheet(null)}
-          >
-            <Icon name="close" size={17} />
-          </AppButton>
-        </header>
-        <div className="callx-setup-body">
-          <div className="section-heading">
-            <h3>{t("callx.apps")}</h3>
-            <span className="callx-live-tag">
-              <Icon name="sparkles" size={12} />
-              {t("callx.live")}
-            </span>
-          </div>
-          <div className="callx-app-row">
-            {CHANNELS.map((item) => (
-              <AppButton
-                className={`callx-app ${item.id === channel.id ? "on" : ""}`}
-                key={item.id}
-                onClick={() => setChannelId(item.id)}
-              >
-                <span
-                  className="callx-app-icon"
-                  style={{ "--app-hue": item.hue } as CSSProperties}
-                >
-                  <Icon name={item.icon} size={17} />
-                </span>
-                <span className="callx-app-name">{item.name}</span>
-              </AppButton>
-            ))}
-          </div>
-          <SwitchRow
-            icon="bolt"
-            title={t("callx.autoDetect")}
-            on={autoDetect}
-            onToggle={() => setAutoDetect((v) => !v)}
-          />
-          <SwitchRow
-            icon="volume"
-            title={speakerOn ? t("callx.speakerOn") : t("callx.speakerOff")}
-            detail={t("session.soundOut")}
-            on={speakerOn}
-            onToggle={() => setSpeakerOn((v) => !v)}
-          />
-          <SwitchRow
-            icon="monitor"
-            title={t("callx.overlay")}
-            detail={t("callx.overlayNote")}
-            on={overlay}
-            onToggle={() => setOverlay((v) => !v)}
-          />
-        </div>
-      </div>
-    </div>
   )
 
   /* ---------------- 落地页 ---------------- */
@@ -421,18 +211,13 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
             <Icon name="chevron" size={18} />
           </AppButton>
           <h1>{t("call.title")}</h1>
-          <AppButton
-            ariaLabel={t("callz.setup")}
-            className="callx-nav-gear"
-            onClick={() => setSheet("setup")}
-          >
-            <Icon name="settings" size={17} />
-          </AppButton>
+          <span />
         </header>
 
         {/* 通话记录统一收进「记录」页，此处不再重复展示；联系人在拨通后选择 */}
         <section className="call-dial">
-          <p className="call-dial-note">{t("call.subtitle")}</p>
+          <p className="demo-note">交互演示 · 当前版本不能拨打真实电话或连接第三方通话</p>
+          <p className="call-dial-note">查看模拟通话中的双语字幕</p>
           <div className="callx-lang-stack">
             <AppButton
               className="callx-lang-row"
@@ -464,27 +249,42 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
               <Icon name="chevron" size={15} />
             </AppButton>
           </div>
+          <div className="call-demo-peers">
+            <small>选择示例角色</small>
+            <div className="callx-peer-row">
+              {PEERS.map((item) => (
+                <AppButton
+                  className={`callx-peer ${item.id === peer.id ? "on" : ""}`}
+                  key={item.id}
+                  onClick={() => pickPeer(item)}
+                >
+                  <span className="callx-peer-avatar" style={{ "--peer-hue": item.hue } as CSSProperties}>
+                    {initialOf(item.name)}
+                  </span>
+                  <span className="callx-peer-copy"><strong>{item.name}</strong></span>
+                </AppButton>
+              ))}
+            </div>
+          </div>
           <div className="call-dial-actions">
             <AppButton
               className="call-btn call-btn-video"
               onClick={() => start("video")}
             >
               <Icon name="video" size={20} />
-              <span>{t("call.video")}</span>
+              <span>体验视频通话</span>
             </AppButton>
             <AppButton
               className="call-btn call-btn-voice"
               onClick={() => start("voice")}
             >
               <Icon name="mic" size={20} />
-              <span>{t("call.voice")}</span>
+              <span>体验语音通话</span>
             </AppButton>
           </div>
         </section>
 
         {langPicker}
-        {shareSheet}
-        {setupSheet}
       </main>
     )
   }
@@ -492,9 +292,9 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
   /* ---------------- 通话中 ---------------- */
   if (view === "call") {
     const cap = turns.slice(-3)
-    const selfVideo = kind === "video" && cameraOn
     return (
       <main className="call-stage">
+        <p className="demo-note call-demo-note">示例通话 · 不会开启麦克风或摄像头，也不会呼叫联系人</p>
         {joined ? (
           <div className="callx-peer-stage" style={peerHue}>
             <span className="callx-peer-glow" />
@@ -504,34 +304,12 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
               </span>
               <strong>{peer.name}</strong>
               <small>
-                {themName} · {t("callz.joined")} · {channel.name}
+                {themName} · 示例通话
               </small>
             </div>
           </div>
         ) : (
-          <div className={selfVideo ? "call-video on" : "call-video off"}>
-            <span className="call-video-grid" />
-            <div className="call-video-center">
-              {selfVideo ? (
-                <>
-                  <span className="call-video-avatar">
-                    <Icon name="profile" size={30} />
-                  </span>
-                  <p className="call-video-status">{t("call.me")}</p>
-                </>
-              ) : (
-                <>
-                  <span className="call-video-avatar">
-                    <Icon name="camera" size={30} />
-                  </span>
-                  <p className="call-video-status">{t("call.cameraOff")}</p>
-                  <small className="call-video-pair">
-                    {themName} ⇄ {meName}
-                  </small>
-                </>
-              )}
-            </div>
-          </div>
+          <div className="call-video off"><span className="call-video-grid" /></div>
         )}
 
         <header className="callx-stage-top">
@@ -543,68 +321,10 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
           {joined && <b className="callx-stage-timer">{mmss(seconds)}</b>}
         </header>
 
-        {/* 联系人在拨通后选择：接入前可随时切换通话对象 */}
-        {!joined && (
-          <section className="callx-stage-pick">
-            <div className="section-heading">
-              <h2>{t("callz.contacts")}</h2>
-              <small>{t("callz.pickPeer")}</small>
-            </div>
-            <div className="callx-peer-row">
-              {PEERS.map((item) => {
-                const on = item.id === peer.id
-                return (
-                  <AppButton
-                    className={`callx-peer ${on ? "on" : ""}`}
-                    key={item.id}
-                    onClick={() => pickPeer(item)}
-                  >
-                    <span
-                      className="callx-peer-avatar"
-                      style={{ "--peer-hue": item.hue } as CSSProperties}
-                    >
-                      {initialOf(item.name)}
-                    </span>
-                    <span className="callx-peer-copy">
-                      <strong>{item.name}</strong>
-                      <small>{langOption(item.lang).label}</small>
-                    </span>
-                    {on && <Icon name="check" size={15} />}
-                  </AppButton>
-                )
-              })}
-            </div>
-          </section>
-        )}
-
         {!joined && (
           <div className="callx-stage-hint">
-            <small>{t("callz.inviting")}</small>
-            <strong>
-              {shared ? t("callz.shared") : t("callz.shareHint")}
-            </strong>
-          </div>
-        )}
-
-        {joined && (
-          <div
-            className={selfVideo ? "callx-pip" : "callx-pip off"}
-            style={{ "--app-hue": peer.hue } as CSSProperties}
-          >
-            {selfVideo ? (
-              <>
-                <span className="callx-pip-glow" />
-                <span className="callx-pip-face">
-                  <Icon name="profile" size={20} />
-                </span>
-                <small>{t("call.me")}</small>
-              </>
-            ) : (
-              <span className="callx-pip-off">
-                <Icon name="camera" size={18} />
-                <small>{t("call.cameraOff")}</small>
-              </span>
-            )}
+            <small>字幕演示</small>
+            <strong>点击下方按钮，查看双语字幕示例</strong>
           </div>
         )}
 
@@ -612,7 +332,7 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
           <div className="call-caps">
             <span className="call-caps-label">
               <Icon name="translate" size={13} />
-              {t("callx.live")}
+              示例字幕
             </span>
             {cap.map((line, i) => (
               <div className={`call-cap ${line.who}`} key={i}>
@@ -629,29 +349,7 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
 
         <footer className="call-controls">
           <div className="callx-ctrl-row">
-            {kind === "video" && (
-              <div className="call-ctrl">
-                <AppButton
-                  className={`call-ctrl-btn ${cameraOn ? "on" : "off"}`}
-                  onClick={() => setCameraOn((v) => !v)}
-                >
-                  <Icon name="camera" size={20} />
-                </AppButton>
-                <small>
-                  {cameraOn ? t("call.cameraOn") : t("call.cameraOff")}
-                </small>
-              </div>
-            )}
-            <div className="call-ctrl">
-              <AppButton
-                className={`call-ctrl-btn ${micOn ? "on" : "off"}`}
-                onClick={() => setMicOn((v) => !v)}
-              >
-                <Icon name="mic" size={20} />
-              </AppButton>
-              <small>{micOn ? t("call.micOn") : t("call.micOff")}</small>
-            </div>
-            <div className="call-ctrl">
+            {joined && <div className="call-ctrl">
               <AppButton
                 className={`call-ctrl-btn ${captionOn ? "on" : "off"}`}
                 onClick={() => setCaptionOn((v) => !v)}
@@ -661,35 +359,17 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
               <small>
                 {captionOn ? t("callx.captionOn") : t("callx.captionOff")}
               </small>
-            </div>
-            <div className="call-ctrl">
-              {!shared && (
-                <span className="callx-share-arrow" aria-hidden="true">
-                  <svg viewBox="0 0 40 34" width="34" height="29" fill="none">
-                    <path
-                      d="M34 3C23 5 15.5 12 11.5 25"
-                      stroke="currentColor"
-                      strokeWidth="3.2"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M4.5 18.5 10.5 26.5l8.5-5.5"
-                      stroke="currentColor"
-                      strokeWidth="3.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </span>
-              )}
+            </div>}
+            {!joined && <div className="call-ctrl">
               <AppButton
-                className={`call-ctrl-btn share ${shared ? "done" : ""}`}
-                onClick={() => setSheet("share")}
+                ariaLabel="开始字幕示例"
+                className="call-ctrl-btn share"
+                onClick={() => setJoined(true)}
               >
-                <Icon name="share" size={20} />
+                <Icon name="play" size={20} />
               </AppButton>
-              <small>{shared ? t("callz.shared") : t("call.share")}</small>
-            </div>
+              <small>开始字幕示例</small>
+            </div>}
           </div>
 
           <div className="callx-hangup-row">
@@ -706,7 +386,6 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
           </div>
         </footer>
 
-        {shareSheet}
       </main>
     )
   }
@@ -735,7 +414,7 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
           <span className="call-summary-label">{t("callz.callingWith")}</span>
           <strong>{peer.name}</strong>
           <small>
-            {channel.name} ·{" "}
+            演示 ·{" "}
             {kind === "video" ? t("call.video") : t("call.voice")} ·{" "}
             {mmss(seconds)} · {turns.length} {t("callx.translation")}
           </small>
@@ -770,14 +449,6 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
           <AppButton
             className="text-button"
             disabled={turns.length === 0}
-            onClick={() => setSheet("share")}
-          >
-            <Icon name="share" size={16} />
-            <span>{t("call.share")}</span>
-          </AppButton>
-          <AppButton
-            className="text-button"
-            disabled={turns.length === 0}
             onClick={exportRecord}
           >
             <Icon name="receipt" size={16} />
@@ -790,8 +461,6 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
         </div>
       </section>
 
-      {shareSheet}
-      {setupSheet}
     </main>
   )
 }

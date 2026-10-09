@@ -20,14 +20,10 @@ import type { LangId } from "@/lib/translate"
  */
 
 type Genre = "movie" | "series" | "class" | "live"
-type InputWay = "mic" | "media" | "bt"
-type SoundWay = "original" | "dub" | "dubOnly"
 type CapMode = "bilingual" | "target" | "source"
 
 type WatchPrefs = {
   genre: Genre
-  input: InputWay
-  sound: SoundWay
   capMode: CapMode
   capSize: number
   sync: number
@@ -35,8 +31,6 @@ type WatchPrefs = {
 
 const DEFAULT_PREFS: WatchPrefs = {
   genre: "movie",
-  input: "mic",
-  sound: "original",
   capMode: "bilingual",
   capSize: 1,
   sync: 0,
@@ -47,18 +41,6 @@ const GENRES: { id: Genre; icon: IconName; key: string }[] = [
   { id: "series", icon: "video", key: "watch.gSeries" },
   { id: "class", icon: "notes", key: "watch.gClass" },
   { id: "live", icon: "users", key: "watch.gLive" },
-]
-
-const INPUTS: { id: InputWay; icon: IconName; key: string }[] = [
-  { id: "mic", icon: "mic", key: "watch.srcMic" },
-  { id: "media", icon: "audio", key: "watch.srcMedia" },
-  { id: "bt", icon: "bluetooth", key: "watch.srcBt" },
-]
-
-const SOUNDS: { id: SoundWay; icon: IconName; key: string }[] = [
-  { id: "original", icon: "volume", key: "watch.sndOriginal" },
-  { id: "dub", icon: "headphones", key: "watch.sndDub" },
-  { id: "dubOnly", icon: "sparkles", key: "watch.sndDubOnly" },
 ]
 
 const CAP_MODES: { id: CapMode; key: string }[] = [
@@ -102,7 +84,7 @@ export function WatchMode({ onClose }: { onClose: () => void }) {
 
   useEscapeKey(onClose)
 
-  const { genre, input, sound, capMode, capSize, sync } = prefs
+  const { genre, capMode, capSize, sync } = prefs
   const patch = (next: Partial<WatchPrefs>) =>
     setPrefs((prev) => ({ ...prev, ...next }))
 
@@ -169,14 +151,14 @@ export function WatchMode({ onClose }: { onClose: () => void }) {
 
   const exportSrt = () => {
     if (caps.length === 0) return
-    downloadText("LingoPods-captions.srt", toSrt())
+    downloadText("LingoPods-示例字幕.srt", toSrt())
     toast(t("watch.exported"))
   }
 
   const saveRecord = () => {
     if (caps.length === 0) return
     addRecord({
-      title: `${t(GENRES.find((g) => g.id === genre)?.key ?? "watch.gMovie")} · ${langOption(srcLang).native}`,
+      title: `示例 · ${t(GENRES.find((g) => g.id === genre)?.key ?? "watch.gMovie")} · ${langOption(srcLang).native}`,
       meta: `${langOption(srcLang).native} → ${langOption(dstLang).native}`,
       summary: t("watch.lineCount").replace("{n}", String(caps.length)),
       type: "观影",
@@ -197,7 +179,7 @@ export function WatchMode({ onClose }: { onClose: () => void }) {
     <main className={running ? "tab-page watch-page live" : "tab-page watch-page"}>
       <header className="page-header">
         <div>
-          <span className="eyebrow">{t("watch.tip")}</span>
+          <span className="eyebrow">预置字幕与样式演示</span>
           <h1>{t("watch.title")}</h1>
         </div>
         {/* 关闭即回首页，复用助眠页的「返回首页」文案，避免再造一个同义 key */}
@@ -205,6 +187,7 @@ export function WatchMode({ onClose }: { onClose: () => void }) {
           <Icon name="close" />
         </AppButton>
       </header>
+      <p className="demo-note">字幕演示 · 播放预置台词；当前版本不读取麦克风、媒体或蓝牙音频</p>
 
       <div className="watch-pair">
         <AppButton
@@ -236,9 +219,9 @@ export function WatchMode({ onClose }: { onClose: () => void }) {
         <div className="watch-stage-head">
           <span className={running ? "watch-live on" : "watch-live"}>
             <span className="watch-live-dot" />
-            {running ? t("watch.listening") : t("watch.live")}
+            {running ? "示例播放中" : "字幕示例"}
           </span>
-          <span className="watch-ai">{t("watch.aiNotice")}</span>
+          <span className="watch-ai">预置字幕示例</span>
         </div>
 
         <div
@@ -246,7 +229,7 @@ export function WatchMode({ onClose }: { onClose: () => void }) {
           aria-live="polite"
         >
           {caps.length === 0 ? (
-            <p className="watch-empty">{t("watch.waiting")}</p>
+            <p className="watch-empty">选择内容类型，播放字幕示例</p>
           ) : (
             visible.map((cap, i) => (
               <div
@@ -290,46 +273,8 @@ export function WatchMode({ onClose }: { onClose: () => void }) {
 
           <div className="watch-group">
             <h2 className="watch-group-title">
-              <Icon name="audio" size={14} />
-              {t("watch.source")}
-            </h2>
-            <div className="watch-chips">
-              {INPUTS.map((item) => (
-                <AppButton
-                  key={item.id}
-                  className={input === item.id ? "watch-chip active" : "watch-chip"}
-                  onClick={() => patch({ input: item.id })}
-                >
-                  <Icon name={item.icon} size={15} />
-                  <span>{t(item.key)}</span>
-                </AppButton>
-              ))}
-            </div>
-          </div>
-
-          <div className="watch-group">
-            <h2 className="watch-group-title">
-              <Icon name="volume" size={14} />
-              {t("watch.sound")}
-            </h2>
-            <div className="watch-chips">
-              {SOUNDS.map((item) => (
-                <AppButton
-                  key={item.id}
-                  className={sound === item.id ? "watch-chip active" : "watch-chip"}
-                  onClick={() => patch({ sound: item.id })}
-                >
-                  <Icon name={item.icon} size={15} />
-                  <span>{t(item.key)}</span>
-                </AppButton>
-              ))}
-            </div>
-          </div>
-
-          <div className="watch-group">
-            <h2 className="watch-group-title">
               <Icon name="sliders" size={14} />
-              {t("watch.settings")}
+              字幕设置
             </h2>
             <div className="watch-row">
               <span className="watch-row-label">{t("watch.captions")}</span>
@@ -392,7 +337,7 @@ export function WatchMode({ onClose }: { onClose: () => void }) {
           onClick={toggle}
         >
           <Icon name={running ? "pause" : "play"} size={20} />
-          <span>{running ? t("watch.stop") : t("watch.start")}</span>
+          <span>{running ? "停止示例" : "播放字幕示例"}</span>
         </AppButton>
         <div className="watch-sub">
           <AppButton onClick={exportSrt} disabled={caps.length === 0}>

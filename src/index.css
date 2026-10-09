@@ -4228,6 +4228,123 @@ button {
   }
 }
 
+.coach-page {
+  padding-bottom: 1.25rem;
+}
+
+.coach-pick,
+.coach-stage,
+.coach-controls {
+  margin: 0.9rem 1rem;
+}
+
+.coach-pick .section-heading {
+  margin-bottom: 0.65rem;
+}
+
+.coach-sentences {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.coach-sentence {
+  min-height: 4rem;
+  padding: 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 0.8rem;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.coach-sentence.active {
+  border-color: oklch(0.55 0.19 255);
+  background: oklch(0.95 0.04 250);
+}
+
+.coach-stage {
+  padding: 1rem;
+  border-radius: 1rem;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.coach-target {
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.coach-result {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.coach-result > small,
+.coach-score small,
+.coach-metrics span,
+.coach-tip {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.coach-score {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  margin: 0.5rem 0;
+}
+
+.coach-score strong {
+  color: oklch(0.51 0.19 255);
+  font-size: 2.4rem;
+}
+
+.coach-metrics {
+  display: flex;
+  gap: 1rem;
+}
+
+.coach-metrics > div {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.coach-tip {
+  margin-bottom: 0;
+}
+
+.coach-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.coach-controls button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2.9rem;
+  padding: 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 0.8rem;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.coach-controls .coach-read {
+  border-color: oklch(0.51 0.19 255);
+  background: oklch(0.51 0.19 255);
+  color: white;
+}
+
 /* Visual refinement: quieter surfaces, stronger hierarchy, and more whitespace. */
 :root {
   --paper: oklch(0.987 0.004 95);
@@ -14231,4 +14348,149 @@ html[data-theme="dark"] {
   justify-content: center;
   border-radius: 0.8rem;
   font-size: 0.92rem;
+}
+
+/* 将原型能力边界放在操作附近，避免示例内容被误认为真实识别结果。 */
+.demo-note {
+  margin: 0.65rem 1rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: 0.7rem;
+  color: var(--muted);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.tt-card > .demo-note {
+  margin: 0.75rem 0.8rem 0.2rem;
+  background: var(--paper);
+}
+
+.tt-lane {
+  grid-template-columns: 1fr;
+  grid-template-areas: "head" "text";
+}
+
+.tt-example {
+  margin: 0 1rem 0.35rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 0.6rem;
+  color: oklch(0.51 0.19 255);
+  background: var(--paper);
+  font-size: 0.72rem;
+  text-align: left;
+}
+
+.tt-copy-primary,
+.camera-demo-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.9rem;
+  border: 0;
+  border-radius: 0.8rem;
+  color: white;
+  background: oklch(0.51 0.19 255);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.tt-copy-primary {
+  margin: 0.2rem 1rem 1rem;
+}
+
+.camera-flow .demo-note {
+  color: oklch(0.82 0.02 258);
+  background: oklch(1 0 0 / 0.08);
+  box-shadow: inset 0 0 0 1px oklch(1 0 0 / 0.12);
+}
+
+.camera-languages > span {
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: oklch(1 0 0 / 0.08);
+  font-weight: 700;
+}
+
+.camera-demo-controls {
+  display: block;
+  padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+}
+
+.camera-demo-controls .camera-demo-action {
+  width: 100%;
+}
+
+.travel-simple-card {
+  margin-top: 1rem;
+  padding: 1.1rem;
+  border-radius: var(--radius-lg);
+  color: var(--ink);
+  background: var(--surface);
+}
+
+.travel-simple-card h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.travel-simple-card p {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.travel-simple-card .camera-demo-action {
+  width: 100%;
+}
+
+.call-demo-note {
+  position: absolute;
+  z-index: 5;
+  top: 3.5rem;
+  left: 0;
+  right: 0;
+}
+
+.call-demo-peers {
+  margin: 0.9rem 0;
+}
+
+.call-demo-peers > small {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.call-demo-peers .callx-peer-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.call-demo-peers .callx-peer {
+  min-width: 0;
+  padding: 0.4rem;
+}
+
+.call-demo-peers .callx-peer-copy strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (min-width: 52rem) {
+  .tt-page {
+    height: calc(100dvh - 4rem);
+  }
+
+  .call-stage {
+    min-height: calc(100dvh - 4rem);
+    height: calc(100dvh - 4rem);
+  }
 }

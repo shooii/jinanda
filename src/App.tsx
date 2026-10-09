@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { AppButton, AppToast } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
 import type { IconName } from "@/components/Icon"
@@ -29,6 +29,7 @@ import { allLanguages } from "@/lib/translate"
 
 
 export default function App() {
+  const phoneRef = useRef<HTMLDivElement>(null)
   const [tab, setTab] = useState("home")
   const [showLive, setShowLive] = useState(false)
   const [showMembership, setShowMembership] = useState(false)
@@ -44,6 +45,10 @@ export default function App() {
   const shortcuts = mergeShortcuts(storedShortcuts)
   const [activeFeature, setActiveFeature] = useState<FeatureId | null>(null)
   const t = useT()
+
+  useEffect(() => {
+    phoneRef.current?.scrollTo({ top: 0 })
+  }, [activeFeature, tab, showLive, showDevices, showMembership])
 
   const navItems: { id: string; label: string; icon: IconName }[] = [
     { id: "home", label: t("nav.translate"), icon: "mic" },
@@ -77,7 +82,7 @@ export default function App() {
         <span className="story-foot">{t("story.foot")}</span>
       </aside>
 
-      <div className="phone-app">
+      <div className="phone-app" ref={phoneRef}>
         {!onboarded ? (
           <Onboarding onClose={() => transitionTo(() => setOnboarded(true))} />
         ) : showDevices ? (
@@ -104,6 +109,7 @@ export default function App() {
         ) : activeFeature === "travel" ? (
           <TravelMode
             onClose={() => transitionTo(() => setActiveFeature(null))}
+            onOpenPhrasebook={() => transitionTo(() => setActiveFeature("phrasebook"))}
           />
         ) : activeFeature === "camera" ? (
           <CameraMode

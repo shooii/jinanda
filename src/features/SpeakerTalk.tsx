@@ -32,7 +32,7 @@ type Prefs = {
 const ME_LINES = [0, 7, 2]
 const THEM_LINES = [9, 5, 12]
 
-const defaultPrefs: Prefs = { play: true }
+const defaultPrefs: Prefs = { play: false }
 
 function SpeakCard({
   turn,
@@ -153,19 +153,26 @@ export function SpeakerTalk({
   const [listening, setListening] = useState<Side | null>(null)
   const [playingId, setPlayingId] = useState<number | null>(null)
   const cursors = useRef<Record<Side, number>>({ me: 0, them: 0 })
-  const playTimer = useRef<number | null>(null)
+
+  const speak = (text: string, id: number, lang: LangId) => {
+    if (!("speechSynthesis" in window)) {
+      toast("当前浏览器不支持朗读")
+      return
+    }
+    window.speechSynthesis.cancel()
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.lang = lang === "zh" ? "zh-CN" : lang === "en" ? "en-US" : lang
+    utterance.onend = () => setPlayingId(null)
+    utterance.onerror = () => setPlayingId(null)
+    setPlayingId(id)
+    window.speechSynthesis.speak(utterance)
+  }
 
   useEscapeKey(() => {
     if (sheet) setSheet(null)
     else if (menu) setMenu(null)
     else onClose()
   })
-
-  useEffect(() => {
-    return () => {
-      if (playTimer.current) window.clearTimeout(playTimer.current)
-    }
-  }, [])
 
   // 点按麦克风：模拟一次识别 → 追加一条双语对话
   useEffect(() => {
@@ -185,9 +192,7 @@ export function SpeakerTalk({
       setTurns((prev) => [...prev, { id, who: side, original, translated }])
       setListening(null)
       if (prefs.play) {
-        setPlayingId(id)
-        if (playTimer.current) window.clearTimeout(playTimer.current)
-        playTimer.current = window.setTimeout(() => setPlayingId(null), 2400)
+        speak(translated, id, to)
       }
     }, 1700)
     return () => window.clearTimeout(handle)
@@ -217,9 +222,14 @@ export function SpeakerTalk({
   }
 
   const playTurn = (id: number) => {
-    setPlayingId((current) => (current === id ? null : id))
-    if (playTimer.current) window.clearTimeout(playTimer.current)
-    playTimer.current = window.setTimeout(() => setPlayingId(null), 2400)
+    const turn = turns.find((item) => item.id === id)
+    if (!turn) return
+    if (playingId === id) {
+      window.speechSynthesis?.cancel()
+      setPlayingId(null)
+      return
+    }
+    speak(turn.translated, id, turn.who === "me" ? themLang : meLang)
   }
 
   const togglePref = (key: keyof Prefs) =>
@@ -245,7 +255,7 @@ const canvasFor = (side: Side | null) => {
     return (
       <div className="speak-canvas">
         {visible.length === 0 ? (
-          <p className="speak-empty">{t("speak.hint")}</p>
+          <p className="speak-empty">点按下方按钮，生成双语示例对话</p>
         ) : (
           visible.map((turn) => (
             <SpeakCard
@@ -378,7 +388,7 @@ const canvasFor = (side: Side | null) => {
             <Icon name="more" size={18} />
           </AppButton>
         </header>
-        <p className="session-truth" role="status">交互演示 · {listening ? "正在生成示例译文" : "选择一侧麦克风开始"} · 声音输出：手机</p>
+        <p className="session-truth" role="status">交互演示 · 不调用麦克风 · {listening ? "正在生成示例译文" : prefs.play ? "自动朗读示例译文" : "点按译文播放"}</p>
         {menu === "more" ? morePopover : null}
       </div>
 

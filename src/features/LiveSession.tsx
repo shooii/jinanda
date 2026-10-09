@@ -310,7 +310,7 @@ function TalkFlow({
 
   return (
     <main className="share-stage">
-      <p className="session-truth" role="status">{live ? "演示进行中 · 示例对话会自动出现" : "交互演示 · 点按麦克风查看示例对话"}<br />{shared.offline ? "离线模式仅为界面演示" : routeDescription}</p>
+      <p className="session-truth" role="status">{live ? "演示进行中 · 示例对话会自动出现" : "交互演示 · 点按按钮查看示例对话"}<br />{shared.offline ? "离线模式仅为界面演示" : routeDescription} · 点按气泡可朗读译文</p>
       <div className="share-canvas" ref={canvasRef}>
         {turns.length === 0 ? (
           <p className="share-empty">
@@ -401,19 +401,12 @@ export function LiveSession({
   )
   const shareCursor = useRef<{ me: number; them: number }>({ me: 0, them: 0 })
   const shareNext = useRef<"me" | "them">("them")
-  const shareTimer = useRef<number | null>(null)
   const { entries: vocab } = useVocabulary()
 
   useEscapeKey(() => {
     if (shareSheet) setShareSheet(null)
     else if (showSettings) setShowSettings(false)
   })
-
-  useEffect(() => {
-    return () => {
-      if (shareTimer.current) window.clearTimeout(shareTimer.current)
-    }
-  }, [])
 
   // 面对面翻译：开启拾音后按「对方 → 我 → 对方…」流式追加双语气泡
   useEffect(() => {
@@ -432,9 +425,6 @@ export function LiveSession({
         from === to ? original : translatePhrase(original, from, to).text
       const id = Date.now()
       setShareTurns((prev) => [...prev, { id, who: side, original, translated }])
-      setSharePlayingId(id)
-      if (shareTimer.current) window.clearTimeout(shareTimer.current)
-      shareTimer.current = window.setTimeout(() => setSharePlayingId(null), 2400)
     }
     tick()
     const handle = window.setInterval(tick, 2900)
@@ -519,15 +509,24 @@ export function LiveSession({
           live={shareLive}
           onToggle={() => setShareLive((value) => !value)}
           onPlay={(id) => {
-            setSharePlayingId((current) => (current === id ? null : id))
-            if (shareTimer.current) window.clearTimeout(shareTimer.current)
-            shareTimer.current = window.setTimeout(
-              () => setSharePlayingId(null),
-              2400,
-            )
+            const turn = shareTurns.find((item) => item.id === id)
+            if (!turn || !("speechSynthesis" in window)) return
+            if (sharePlayingId === id) {
+              window.speechSynthesis.cancel()
+              setSharePlayingId(null)
+              return
+            }
+            window.speechSynthesis.cancel()
+            const utterance = new SpeechSynthesisUtterance(turn.translated)
+            const target = turn.who === "me" ? pair.them : pair.me
+            utterance.lang = target === "zh" ? "zh-CN" : target === "en" ? "en-US" : target
+            utterance.onend = () => setSharePlayingId(null)
+            utterance.onerror = () => setSharePlayingId(null)
+            setSharePlayingId(id)
+            window.speechSynthesis.speak(utterance)
           }}
           onOpenTone={() => setShareSheet("tone")}
-          routeDescription={isHybrid ? "我听耳机，对方听手机（演示）" : "双方各戴一只耳机（演示）"}
+          routeDescription={isHybrid ? "耳机 + 手机的呈现方式（演示）" : "双耳机的呈现方式（演示）"}
         />
       ) : null}
 

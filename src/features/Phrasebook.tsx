@@ -3,11 +3,10 @@ import { AppButton, toast } from "@/components/AppButton"
 import { FeatureHeader } from "@/components/FeatureHeader"
 import { Icon } from "@/components/Icon"
 import { LangPicker } from "@/components/LangPicker"
-import { usePersistentState } from "@/lib/core"
+import { useLangPair } from "@/lib/core"
 import { useFavorites, usePhrases } from "@/lib/store"
 import type { FavoriteEntry } from "@/lib/store"
 import { langOption, translatePhraseOf } from "@/lib/translate"
-import type { LangId } from "@/lib/translate"
 import { useT } from "@/lib/i18n"
 
 type Tab = "phrases" | "favorites"
@@ -22,18 +21,23 @@ export function Phrasebook({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<Tab>("phrases")
   const [draft, setDraft] = useState("")
   const [picker, setPicker] = useState(false)
-  const [to, setTo] = usePersistentState<LangId>("lingo.phrasebook-to", "en")
+  const { them: to, setThem: setTo } = useLangPair()
   const { phrases, addPhrase, removePhrase } = usePhrases()
   const { favorites, removeFavorite } = useFavorites()
-  /** 正在「朗读」的条目 id，用于给出明确反馈（原型无真实 TTS） */
   const [speaking, setSpeaking] = useState<string | null>(null)
 
-  const speak = (id: string) => {
+  const speak = (id: string, text: string) => {
+    if (!text || !("speechSynthesis" in window)) {
+      toast("当前内容无法朗读")
+      return
+    }
+    window.speechSynthesis.cancel()
     setSpeaking(id)
-    toast(t("phrases.play"))
-    window.setTimeout(() => {
-      setSpeaking((current) => (current === id ? null : current))
-    }, 1200)
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.lang = to === "zh" ? "zh-CN" : to === "en" ? "en-US" : to
+    utterance.onend = () => setSpeaking(null)
+    utterance.onerror = () => setSpeaking(null)
+    window.speechSynthesis.speak(utterance)
   }
 
   const add = () => {
@@ -58,7 +62,8 @@ export function Phrasebook({ onClose }: { onClose: () => void }) {
       <AppButton
         ariaLabel={t("phrases.play")}
         className={speaking === id ? "ph-icon playing" : "ph-icon"}
-        onClick={() => speak(id)}
+        onClick={() => speak(id, translated)}
+        disabled={!translated}
       >
         <Icon name={speaking === id ? "pause" : "volume"} size={18} />
       </AppButton>
@@ -79,6 +84,7 @@ export function Phrasebook({ onClose }: { onClose: () => void }) {
         subtitle={t("phrases.subtitle")}
         title={t("phrases.title")}
       />
+      <p className="demo-note">内置常用句可直接对照查看；自定义表达可保存，任意文本翻译尚未接入</p>
 
       <div className="ph-tabs" role="tablist">
         <AppButton

@@ -116,13 +116,9 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
                   : "正在记录"
                 : "准备就绪"}
           </span>
-          <h1>
-            {finished
-              ? "纪要已生成"
-              : recording
-                ? time
-                : "让每个重点都有迹可循"}
-          </h1>
+          {(finished || recording) && (
+            <h1>{finished ? "纪要已生成" : time}</h1>
+          )}
           <p>
             {finished
               ? "已整理关键决定、待办事项和双语全文"

@@ -178,7 +178,6 @@ export function Membership({ onClose }: { onClose: () => void }) {
               <Icon name="sparkles" size={28} />
             </span>
             <span className="eyebrow">LINGO+ 会员</span>
-            <h2>让翻译陪你去往每个地方。</h2>
             <p className="sheet-intro">
               购买 LingoPods Pro 已获赠会员，有效期至 2026 年 10 月 18 日。
             </p>

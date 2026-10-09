@@ -152,7 +152,6 @@ export function Profile({
     <main className="tab-page profile-page">
       <header className="page-header">
         <div>
-          <span className="eyebrow">{t("profile.eyebrow")}</span>
           <h1>{t("profile.title")}</h1>
         </div>
       </header>

@@ -147,13 +147,6 @@ export function DialogueMode({
           ))}
         </section>
 
-        <div className="dialogue-privacy">
-          <Icon name="headphones" size={18} />
-          <span>
-            <strong>{t("dialogue.privacyTitle")}</strong>
-            <small>{t("dialogue.privacySub")}</small>
-          </span>
-        </div>
       </main>
       <footer className="dialogue-start-bar">
         <div>

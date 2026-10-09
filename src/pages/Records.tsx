@@ -88,7 +88,6 @@ export function Records() {
     <main className="tab-page records-page">
       <header className="page-header">
         <div>
-          <span className="eyebrow">{t("records.eyebrow")}</span>
           <h1>{t("records.title")}</h1>
         </div>
         <AppButton

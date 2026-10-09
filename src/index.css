@@ -13228,3 +13228,148 @@ html[data-theme="dark"] {
     transform: scale(0.9);
   }
 }
+
+/* ============================================================
+   本轮精简：记录卡回到浅色列表项；通话落地页卡片增厚
+   ============================================================ */
+
+/* 记录卡统一为浅色列表（与「我的」页设置列表一致）。
+   深色卡片只留给语言对 / 会员这类「强调卡」，列表项用浅色更轻。 */
+.record-card {
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--card-line);
+}
+
+/* 通话落地页：单卡片居中时把卡片做厚一点，减少上下巨大留白带来的空旷感 */
+.call-dial {
+  padding: 1.6rem 1.2rem 1.5rem;
+}
+
+.call-dial-note {
+  margin: 0 0 1.1rem;
+}
+
+.call-lang-row {
+  margin-bottom: 1.15rem;
+}
+
+.call-lang-cell {
+  padding: 0.75rem 1.7rem 0.75rem 0.85rem;
+}
+
+.call-dial-actions {
+  gap: 0.7rem;
+}
+
+.call-btn {
+  padding: 1.05rem;
+}
+
+/* 对话方式卡：未选中回到浅色（与页面其它列表项统一）。
+   此前「未选中深色、选中浅色」导致两张深卡比选中项更抢眼，选中态不突出。 */
+.dialogue-mode-card {
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--card-line);
+}
+
+.dialogue-mode-card.active {
+  background: oklch(0.975 0.022 189);
+  box-shadow:
+    inset 0 0 0 1.5px var(--teal),
+    0 0.5rem 1.4rem oklch(0.64 0.13 189 / 0.14);
+}
+
+/* 插画底板跟随卡片底色 */
+.dialogue-mode-card .mode-illustration {
+  background: oklch(0.95 0.018 255);
+}
+
+.dialogue-mode-card.active .mode-illustration {
+  background:
+    radial-gradient(circle at 50% 0%, oklch(0.93 0.09 189), transparent 60%),
+    oklch(0.965 0.03 189);
+}
+
+/* 「我的」设置列表与旅行语言包：恢复浅色列表项（与记录卡、对话框卡统一）。
+   二者早期定义本为浅色，后被统一深色群组覆盖；这里显式指定背景与文字色。 */
+.settings-list {
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--card-line);
+}
+
+.settings-list button {
+  color: var(--ink);
+}
+
+.settings-list strong {
+  color: var(--ink);
+}
+
+.settings-list small {
+  color: var(--muted);
+}
+
+.language-pack {
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--card-line);
+}
+
+.language-pack strong {
+  color: var(--ink);
+}
+
+.language-pack small {
+  color: var(--muted);
+}
+
+/* ============================================================
+   暗色主题：反转卡的文字层级修复
+   反转卡（背景跟随 --ink）在暗色主题下会变成「浅底」，
+   但部分标题/标签仍用 var(--ink) —— 在暗色下是浅色，
+   造成浅底浅字不可读。这里把卡内所有文字层级显式设为深色系。
+   ============================================================ */
+[data-theme="dark"] .my-device-card,
+[data-theme="dark"] .offline-hero,
+[data-theme="dark"] .meeting-status-card,
+[data-theme="dark"] .dialogue-language-card {
+  color: oklch(0.2 0.015 258);
+}
+
+[data-theme="dark"] .my-device-card h1,
+[data-theme="dark"] .my-device-card h2,
+[data-theme="dark"] .my-device-card strong,
+[data-theme="dark"] .my-device-card b,
+[data-theme="dark"] .offline-hero h1,
+[data-theme="dark"] .offline-hero strong,
+[data-theme="dark"] .meeting-status-card h1,
+[data-theme="dark"] .meeting-status-card strong,
+[data-theme="dark"] .dialogue-language-card strong,
+[data-theme="dark"] .dialogue-language-card button {
+  color: oklch(0.2 0.015 258);
+}
+
+[data-theme="dark"] .my-device-card small,
+[data-theme="dark"] .offline-hero small,
+[data-theme="dark"] .offline-hero p,
+[data-theme="dark"] .meeting-status-card small,
+[data-theme="dark"] .meeting-status-card p,
+[data-theme="dark"] .dialogue-language-card small {
+  color: oklch(0.46 0.015 258);
+}
+
+[data-theme="dark"] .offline-hero .eyebrow,
+[data-theme="dark"] .my-device-card .eyebrow,
+[data-theme="dark"] .dialogue-language-card .eyebrow {
+  color: oklch(0.5 0.12 252);
+}
+
+/* 暗色下设备卡的三个操作按钮自身是深色块（--surface），
+   其文字不应跟随「反转卡内次级文字加深」规则（会变成深底深字），改回浅色。 */
+[data-theme="dark"] .my-device-card .device-actions button,
+[data-theme="dark"] .my-device-card .device-actions button small,
+[data-theme="dark"] .my-device-card .device-actions button strong {
+  color: oklch(0.86 0.01 258);
+}

@@ -42,31 +42,12 @@ export function TravelMode({ onClose }: { onClose: () => void }) {
         title="旅行模式"
       />
       <main className="travel-content">
-        <AppButton className="trip-prep-card" onClick={() => download("日语")}>
-          <span>
-            <Icon name="plane" size={20} />
-          </span>
-          <div>
-            <small>明天 · 东京</small>
-            <strong>
-              {downloaded.includes("日语")
-                ? "旅行准备已完成"
-                : "下载日语离线包"}
-            </strong>
-          </div>
-          {downloaded.includes("日语") ? (
-            <Icon name="check" size={18} />
-          ) : (
-            <Icon name="chevron" size={18} />
-          )}
-        </AppButton>
         <section className="offline-hero">
           <div>
             <span className="eyebrow">
               <i /> 离线可用
             </span>
-            <h1>把语言装进口袋</h1>
-            <p>出发前下载语言包，在飞机、地铁和没有漫游网络的地方继续翻译。</p>
+            <p>下载语言包后，在无网络环境继续翻译。</p>
           </div>
           <span className="travel-plane">
             <Icon name="plane" size={34} />
@@ -127,14 +108,6 @@ export function TravelMode({ onClose }: { onClose: () => void }) {
               </div>
             )
           })}
-        </section>
-
-        <section className="travel-tip">
-          <Icon name="sparkles" size={20} />
-          <div>
-            <strong>旅行小助手</strong>
-            <p>语言包包含机场、餐厅、酒店和紧急求助等高频场景表达。</p>
-          </div>
         </section>
       </main>
     </div>

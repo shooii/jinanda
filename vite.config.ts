@@ -201,7 +201,7 @@ function figmaSiteConfiguration(config: FigmaSiteConfiguration): Plugin {
       },
     },
   }
-})
+}
 /**
  * Replay the most recent build error to clients that connect after
  * it was first broadcast. Vite buffers an error payload only while

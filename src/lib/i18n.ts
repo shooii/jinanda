@@ -217,6 +217,43 @@ export const batteryKeys = ["battery.connectHint"] as const
 /** 通用：图标按钮必须有可读名称（此前面板关闭键是没有任何标签的裸图标） */
 export const commonKeys = ["common.close"] as const
 
+/** 服务状态页：整页文案（此前全写死在组件里，被 i18n 审计棘轮拦下） */
+export const serviceKeys = [
+  "service.voiceRecognition",
+  "service.translation",
+  "service.synthesis",
+  "service.mic",
+  "service.offlinePacks",
+  "service.bluetooth",
+  "service.account",
+  "service.ok",
+  "service.unsupported",
+  "service.limited",
+  "service.connected",
+  "service.localMode",
+  "service.recogOnDevice",
+  "service.recogBrowser",
+  "service.mtOnDevice",
+  "service.mtDictionary",
+  "service.synthDetail",
+  "service.micDetail",
+  "service.packsBoth",
+  "service.packsTranslationOnly",
+  "service.packsNone",
+  "service.btDetail",
+  "service.accountServer",
+  "service.accountLocal",
+  "service.titleOk",
+  "service.titlePartial",
+  "service.intro",
+  "service.noIncident",
+  "service.notifyOn",
+  "service.notifyOff",
+  "service.notifySubscribe",
+  "service.notifySubscribed",
+  "service.refreshed",
+] as const
+
 /** 组内用 | 分隔，顺序与 packKeys 一致 */
 const packRows: Partial<Record<LangId, string>> = {
   zh: "离线语言包|把语言装进口袋|出发前下载语言包，飞机上、地铁里或没有漫游网络时照样能识别和翻译。|选择目的地语言|我的语言|{done} 个已安装 · 共 {total} 个可选|语音识别|双向翻译|已安装|可下载|下载中|不可用|下载|重试|下载失败，请检查网络后重试|当前浏览器不支持离线语言包|端侧识别与翻译模型目前由 Chrome / Edge 提供，iOS 需要原生版本。|语言包由浏览器端侧模型提供，安装后断网也能识别与翻译；占用空间由系统统一管理。|首次下载会同时装好你所用语言的识别包。|正在检查语言包状态…|还需一步，再点一次即可完成",
@@ -249,6 +286,11 @@ const commonRows: Partial<Record<LangId, string>> = {
   en: "Close",
 }
 
+const serviceRows: Partial<Record<LangId, string>> = {
+  zh: "语音识别|机器翻译|语音播报|麦克风采集|离线语言包|耳机直连|账户与订阅|可用|不支持|受限|已连接|本地模式|端侧语言包可用|由浏览器语音服务提供|端侧翻译模型可用|仅本地词典，联网后可获得完整译文|由系统语音合成提供|首次使用会请求麦克风权限|在旅行模式下载后断网可用|该浏览器不支持端侧识别|需要 Chrome / Edge 的端侧模型|读取标准 GATT 服务的电量与设备信息|权益与账单来自服务端|未配置服务端地址，权益校验与同步不可用|本机能力均可用|部分能力不可用|以下为本机实时检测结果（更新于 {time}）；当前为本地模式，未接入服务端，因此不显示任何云端延迟或可用率数据。|没有可自行修复的异常；不可用项由浏览器能力决定，可换用 Chrome / Edge 重试。|已开启故障提醒，异常时会第一时间通知你|已关闭故障提醒|订阅故障通知|已订阅故障通知|状态页已刷新",
+  en: "Speech recognition|Machine translation|Speech playback|Microphone|Offline packs|Earbud link|Account & billing|Available|Unsupported|Limited|Connected|Local mode|On-device pack ready|Provided by the browser's speech service|On-device translation ready|Local dictionary only — connect for full translations|Provided by system speech synthesis|Asks for microphone access on first use|Download in Travel mode to use it offline|This browser has no on-device recognition|Needs Chrome or Edge on-device models|Reads battery and device info over standard GATT services|Entitlements and billing come from the server|No server configured — entitlement checks and sync are unavailable|All local capabilities available|Some capabilities unavailable|Results below are live checks on this device (updated {time}). You're in local mode with no server connected, so no cloud latency or uptime figures are shown.|Nothing here is self-fixable — unavailable items depend on browser support; try Chrome or Edge.|Incident alerts on — you'll be notified if something breaks|Incident alerts off|Subscribe to incident alerts|Subscribed to incident alerts|Status refreshed",
+}
+
 /** 单行文案表：组内用 | 分隔，按 keys 顺序取值；缺项回退英文 */
 function rowTable(keys: readonly string[], row: string | undefined): Record<string, string> {
   const parts = (row ?? "").split("|")
@@ -268,6 +310,7 @@ function explicitTable(lang: LangId): Record<string, string> {
     ...rowTable(navKeys, navRows[lang] ?? navRows.en),
     ...rowTable(batteryKeys, batteryRows[lang] ?? batteryRows.en),
     ...rowTable(commonKeys, commonRows[lang] ?? commonRows.en),
+    ...rowTable(serviceKeys, serviceRows[lang] ?? serviceRows.en),
   }
 }
 

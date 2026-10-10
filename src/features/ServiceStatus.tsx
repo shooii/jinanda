@@ -3,6 +3,7 @@ import { AppButton, toast } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
 import { InfoSheet } from "@/components/InfoSheet"
 import { bluetoothSupported } from "@/lib/device-link"
+import { useT } from "@/lib/i18n"
 import { offlineSupport } from "@/lib/offline-packs"
 import { apiConfigured } from "@/lib/services/api"
 import { speechSupport } from "@/lib/speech"
@@ -11,90 +12,95 @@ import { nowLabel } from "@/lib/store"
 /**
  * 服务状态。
  *
- * 这里只呈现「能验证的东西」：本机能力检测（识别 / 合成 / 麦克风 / 端侧模型 /
+ * 只呈现「能验证的东西」：本机能力检测（识别 / 合成 / 麦克风 / 端侧模型 /
  * 蓝牙）与账户服务是否已配置。
  * 过去这一页写的是「延迟 0.8 秒」「队列 0 等待」「最近 30 天无故障」——
  * 这些数字没有数据源，属于编造，已经删掉。
  */
 type ServiceRow = { name: string; status: string; detail: string; ok: boolean }
 
-function capabilityRows(): ServiceRow[] {
+function capabilityRows(t: (key: string) => string): ServiceRow[] {
   const speech = speechSupport()
   const offline = offlineSupport()
   const connected = apiConfigured()
 
-  const rows: ServiceRow[] = [
+  return [
     {
-      name: "语音识别",
-      status: speech.recognition ? "可用" : "不支持",
-      detail: offline.recognition ? "端侧语言包可用" : "由浏览器语音服务提供",
+      name: t("service.voiceRecognition"),
+      status: speech.recognition ? t("service.ok") : t("service.unsupported"),
+      detail: offline.recognition
+        ? t("service.recogOnDevice")
+        : t("service.recogBrowser"),
       ok: speech.recognition,
     },
     {
-      name: "机器翻译",
-      status: speech.translation || offline.translation ? "可用" : "受限",
+      name: t("service.translation"),
+      status:
+        speech.translation || offline.translation
+          ? t("service.ok")
+          : t("service.limited"),
       detail: offline.translation
-        ? "端侧翻译模型可用"
-        : "仅本地词典，联网后可获得完整译文",
+        ? t("service.mtOnDevice")
+        : t("service.mtDictionary"),
       ok: speech.translation || offline.translation,
     },
     {
-      name: "语音播报",
-      status: speech.synthesis ? "可用" : "不支持",
-      detail: "由系统语音合成提供",
+      name: t("service.synthesis"),
+      status: speech.synthesis ? t("service.ok") : t("service.unsupported"),
+      detail: t("service.synthDetail"),
       ok: speech.synthesis,
     },
     {
-      name: "麦克风采集",
-      status: speech.mic ? "可用" : "不支持",
-      detail: "首次使用会请求麦克风权限",
+      name: t("service.mic"),
+      status: speech.mic ? t("service.ok") : t("service.unsupported"),
+      detail: t("service.micDetail"),
       ok: speech.mic,
     },
     {
-      name: "离线语言包",
-      status: offline.recognition || offline.translation ? "可用" : "不支持",
+      name: t("service.offlinePacks"),
+      status:
+        offline.recognition || offline.translation
+          ? t("service.ok")
+          : t("service.unsupported"),
       detail:
         offline.recognition && offline.translation
-          ? "在旅行模式下载后断网可用"
+          ? t("service.packsBoth")
           : offline.translation
-            ? "该浏览器不支持端侧识别"
-            : "需要 Chrome / Edge 的端侧模型",
+            ? t("service.packsTranslationOnly")
+            : t("service.packsNone"),
       ok: offline.recognition || offline.translation,
     },
     {
-      name: "耳机直连",
-      status: bluetoothSupported() ? "可用" : "不支持",
-      detail: "读取标准 GATT 服务的电量与设备信息",
+      name: t("service.bluetooth"),
+      status: bluetoothSupported() ? t("service.ok") : t("service.unsupported"),
+      detail: t("service.btDetail"),
       ok: bluetoothSupported(),
     },
     {
-      name: "账户与订阅",
-      status: connected ? "已连接" : "本地模式",
-      detail: connected
-        ? "权益与账单来自服务端"
-        : "未配置服务端地址，权益校验与同步不可用",
+      name: t("service.account"),
+      status: connected ? t("service.connected") : t("service.localMode"),
+      detail: connected ? t("service.accountServer") : t("service.accountLocal"),
       ok: connected,
     },
   ]
-  return rows
 }
 
 export function ServiceStatus({ onClose }: { onClose: () => void }) {
+  const t = useT()
   const [updatedAt, setUpdatedAt] = useState(() => nowLabel())
   const [subscribed, setSubscribed] = useState(false)
-  const services = useMemo(capabilityRows, [updatedAt])
+  const services = useMemo(() => capabilityRows(t), [t, updatedAt])
   const allOk = services.every((item) => item.ok)
 
   return (
     <InfoSheet
-      eyebrow="服务状态"
+      eyebrow={t("profile.serviceStatus")}
       icon={allOk ? "check" : "shield"}
       onClose={onClose}
-      title={allOk ? "本机能力均可用" : "部分能力不可用"}
+      title={allOk ? t("service.titleOk") : t("service.titlePartial")}
     >
       <p className="sheet-intro">
-        以下为本机实时检测结果（更新于 {updatedAt}）；当前为本地模式，未接入服务端，
-        因此不显示任何云端延迟或可用率数据。
+        {t("service.intro").replace("{time}", updatedAt)}
       </p>
       <div className="status-list">
         {services.map((item) => (
@@ -110,7 +116,7 @@ export function ServiceStatus({ onClose }: { onClose: () => void }) {
       </div>
       <div className="status-incident">
         <Icon name="sparkles" size={16} />
-        <p>没有可自行修复的异常；不可用项由浏览器能力决定，可换用 Chrome / Edge 重试。</p>
+        <p>{t("service.noIncident")}</p>
       </div>
       <div className="stack-actions">
         <AppButton
@@ -119,23 +125,21 @@ export function ServiceStatus({ onClose }: { onClose: () => void }) {
             const next = !subscribed
             setSubscribed(next)
             toast(
-              next
-                ? "已开启故障提醒，异常时会第一时间通知你"
-                : "已关闭故障提醒",
+              next ? t("service.notifyOn") : t("service.notifyOff"),
             )
           }}
         >
-          {subscribed ? "已订阅故障通知" : "订阅故障通知"}
+          {subscribed ? t("service.notifySubscribed") : t("service.notifySubscribe")}
         </AppButton>
         <AppButton
           className="text-button"
           onClick={() => {
             const value = nowLabel()
             setUpdatedAt(value)
-            toast(`状态页已刷新 · ${value}`)
+            toast(`${t("service.refreshed")} · ${value}`)
           }}
         >
-          刷新状态
+          {t("service.refreshed")}
         </AppButton>
       </div>
     </InfoSheet>

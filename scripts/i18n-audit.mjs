@@ -19,8 +19,11 @@ import { join, relative } from "node:path"
 const ROOTS = ["src/components", "src/features", "src/pages"]
 const SKIP = /(i18n\.ts|\.test\.tsx?$)/
 
-/** 当前基线。每清理一批就把它调小，防止回退。 */
-const BASELINE = 450
+/**
+ * 当前基线。每清理一批就把它调小，防止回退。
+ * 450 → 420：首页 Hero 与服务状态页接入 i18n 后实际降到 418。
+ */
+const BASELINE = 420
 
 function walk(dir) {
   const out = []

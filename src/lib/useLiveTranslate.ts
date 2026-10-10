@@ -43,6 +43,8 @@ type Options = {
   autoSpeak: boolean
   /** "pick"：由用户指定谁在说；"auto"：按识别到的语种判断 */
   mode: "pick" | "auto"
+  /** 仅使用离线语言包：端侧模型没装好时不退回联网识别 */
+  offlineOnly?: boolean
   onTurn: (turn: LiveTurn) => void
 }
 
@@ -67,6 +69,7 @@ export function useLiveTranslate({
   themLang,
   autoSpeak,
   mode,
+  offlineOnly = false,
   onTurn,
 }: Options): LiveTranslate {
   const [status, setStatus] = useState<LiveStatus>("idle")
@@ -93,6 +96,8 @@ export function useLiveTranslate({
   speakRef.current = autoSpeak
   const modeRef = useRef(mode)
   modeRef.current = mode
+  const offlineOnlyRef = useRef(offlineOnly)
+  offlineOnlyRef.current = offlineOnly
   const turnRef = useRef(onTurn)
   turnRef.current = onTurn
 
@@ -178,6 +183,14 @@ export function useLiveTranslate({
         // 端侧识别优先：模型没装过时会在这里完成下载
         const engine = await prepareRecognition(speechLang)
         if (isIdle()) return
+
+        // 开了「离线优先」却没有语言包：直接给出可执行的提示，不偷偷走网络
+        if (offlineOnlyRef.current && engine !== "ondevice") {
+          setError("offline-pack")
+          closeMic()
+          applyStatus("idle")
+          return
+        }
 
         const session = startRecognition(speechLang, {
           onInterim: (text) => setInterim(text),

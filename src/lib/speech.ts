@@ -135,6 +135,8 @@ export type RecognitionErrorReason =
   | "nocapture"
   /** 该语言不支持识别 */
   | "lang"
+  /** 离线模式开启，但语言包还没装好 */
+  | "offline-pack"
   /** 没听到说话 */
   | "silent"
   /** 其他失败 */
@@ -156,6 +158,8 @@ export function describeRecognitionError(
       return "没有找到可用的麦克风"
     case "lang":
       return "当前语言暂不支持语音识别"
+    case "offline-pack":
+      return "离线语言包尚未安装，请先到「旅行模式」下载"
     case "silent":
       return "没有听到声音，请靠近麦克风再说一次"
     default:
@@ -317,6 +321,11 @@ export function prepareRecognition(lang: LangId): Promise<RecognitionEngine> {
   })()
 
   recognitionPrep.set(tag, prep)
+  // 只缓存「端侧可用」：模型后来才装好时（或在旅行模式下载完语言包后），
+  // 之前判定的 remote 必须能被推翻，否则会一直走联网识别。
+  void prep.then((engine) => {
+    if (engine !== "ondevice") recognitionPrep.delete(tag)
+  })
   prep.catch(() => recognitionPrep.delete(tag))
   return prep
 }

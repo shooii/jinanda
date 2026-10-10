@@ -3,6 +3,7 @@ import {
   allTranslationKeys,
   appLanguages,
   i18nCoverage,
+  packKeys,
   translateKey,
 } from "@/lib/i18n"
 
@@ -31,6 +32,24 @@ describe("界面文案", () => {
   it("英文覆盖完整", () => {
     const en = i18nCoverage().find((item) => item.lang === "en")
     expect(en?.missing).toEqual([])
+  })
+
+  it("离线语言包文案每种语言都有值（缺项回退英文而不是中文）", () => {
+    for (const lang of appLanguages) {
+      for (const key of packKeys) {
+        const value = translateKey(lang, key)
+        expect(value, `${lang} 缺 ${key}`).not.toBe("")
+        expect(value, `${lang} 未配置 ${key}`).not.toBe(key)
+      }
+    }
+  })
+
+  it("离线语言包的中英文案都不含分隔符 |", () => {
+    for (const lang of ["zh", "en"] as const) {
+      for (const key of packKeys) {
+        expect(translateKey(lang, key)).not.toContain("|")
+      }
+    }
   })
 
   it("未知键原样返回，便于定位漏配", () => {

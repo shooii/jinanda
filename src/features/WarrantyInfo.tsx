@@ -1,29 +1,36 @@
 import { useState } from "react"
 import { AppButton, toast } from "@/components/AppButton"
-import { Icon } from "@/components/Icon"
 import { InfoSheet } from "@/components/InfoSheet"
-import { downloadText, nowLabel } from "@/lib/store"
+import { downloadText, nowLabel, useDevices } from "@/lib/store"
 
-
-
-const device = {
-  model: "LingoPods Pro",
-  serial: "LP-8821-CN-0417",
-  deviceId: "LP-8821",
-  purchasedAt: "2025 年 10 月 18 日",
-  warrantyUntil: "2027 年 10 月 18 日",
-  firmware: "2.4.1",
-}
+/**
+ * 保修与设备信息。
+ *
+ * 型号 / 序列号 / 固件来自身边这台设备的蓝牙 Device Information Service 真实读数；
+ * 购买日期与保修期没有任何标准 GATT 特征可以读取，也没有接入账户系统，
+ * 所以没绑定之前一律显示「未绑定」，不再编造日期与「剩余 24 个月」。
+ */
+const UNKNOWN = "未读取"
+const UNBOUND = "未绑定"
 
 export function WarrantyInfo({ onClose }: { onClose: () => void }) {
   const [ticket, setTicket] = useState<string | null>(null)
+  const { active } = useDevices()
+  const device = {
+    model: active.name,
+    serial: active.serial ?? UNKNOWN,
+    deviceId: active.model || UNKNOWN,
+    purchasedAt: UNBOUND,
+    warrantyUntil: UNBOUND,
+    firmware: active.firmware ?? UNKNOWN,
+  }
 
   return (
     <InfoSheet
       eyebrow="保修与设备信息"
       icon="headphones"
       onClose={onClose}
-      title="LingoPods Pro"
+      title={device.model}
     >
       <div className="kv-list">
         <div className="kv-row">
@@ -40,13 +47,11 @@ export function WarrantyInfo({ onClose }: { onClose: () => void }) {
         </div>
         <div className="kv-row">
           <small>保修状态</small>
-          <strong className="good">
-            <Icon name="check" size={15} /> 在保 · 剩余 24 个月
-          </strong>
+          <strong>{UNBOUND}购买记录 · 绑定后显示</strong>
         </div>
         <div className="kv-row">
           <small>固件版本</small>
-          <strong>{device.firmware} · 已是最新</strong>
+          <strong>{device.firmware}</strong>
         </div>
         <div className="kv-row">
           <small>设备编号</small>

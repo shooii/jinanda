@@ -25,6 +25,9 @@ import { SubscriptionManage } from "@/features/SubscriptionManage"
 import { SupportCenter } from "@/features/SupportCenter"
 import { WarrantyInfo } from "@/features/WarrantyInfo"
 import { channelById, regionById } from "@/lib/payments"
+import { APP_VERSION } from "@/lib/app-meta"
+import { offlineSupport } from "@/lib/offline-packs"
+import { speechSupport } from "@/lib/speech"
 import {
   defaultPrivacy,
   defaultDevicePrefs,
@@ -93,15 +96,15 @@ export function Profile({
   const region = regionById(plan.regionId)
   const vocabulary = useVocabulary()
   const { active } = useDevices()
+  /** 端侧翻译能力：有端侧模型或本地词典时才算「可用」，不再无条件写「服务正常」 */
+  const translationReady =
+    speechSupport().translation || offlineSupport().translation
   const [vocabEditing, setVocabEditing] = useState<string | null>(null)
   const [vocabTerm, setVocabTerm] = useState("")
   const [vocabCategory, setVocabCategory] = useState<string>(
     vocabularyCategories[0],
   )
   const [vocabNote, setVocabNote] = useState("")
-  const [otaState, setOtaState] = useState<
-    "idle" | "checking" | "downloading" | "installing" | "done"
-  >("idle")
   const [anc, setAnc] = usePersistentState<"off" | "trans" | "on" | "deep">(
     "lingo.anc",
     "on",
@@ -114,27 +117,6 @@ export function Profile({
     "lingo.device-prefs",
     defaultDevicePrefs,
   )
-
-  const otaBusy =
-    otaState === "checking" ||
-    otaState === "downloading" ||
-    otaState === "installing"
-
-  const runOta = () => {
-    if (otaBusy) return
-    setOtaState("checking")
-    setTimeout(() => setOtaState("downloading"), 1200)
-    setTimeout(() => setOtaState("installing"), 2400)
-    setTimeout(() => setOtaState("done"), 3600)
-  }
-
-  const otaLabel = () => {
-    if (otaState === "checking") return `${t("ota.check")}…`
-    if (otaState === "downloading") return t("ota.downloading")
-    if (otaState === "installing") return t("ota.installing")
-    if (otaState === "done") return t("ota.latest")
-    return t("ota.check")
-  }
 
   const ancModes: ("off" | "trans" | "on" | "deep")[] = [
     "off",
@@ -178,23 +160,30 @@ export function Profile({
             {t("profile.manage")}
           </AppButton>
         </div>
-        {active.id && <div className="device-display">
-          <Earbuds />
-          <div className="device-battery-grid">
-            <span>
-              <small>{t("profile.earLeft")}</small>
-              <MiniBattery level={active.leftBattery} label="L" />
-            </span>
-            <span>
-              <small>{t("profile.earRight")}</small>
-              <MiniBattery level={active.rightBattery} label="R" />
-            </span>
-            <span>
-              <small>{t("profile.earCase")}</small>
-              <MiniBattery level={active.caseBattery} label={t("devices.caseTag")} />
-            </span>
+        {active.id && (
+          <div className="device-display">
+            <Earbuds />
+            {/* 断开时读不到真实电量，只显示提示，不再画三条 0% 的空电池 */}
+            {active.status === "connected" ? (
+              <div className="device-battery-grid">
+                <span>
+                  <small>{t("profile.earLeft")}</small>
+                  <MiniBattery level={active.leftBattery} label="L" />
+                </span>
+                <span>
+                  <small>{t("profile.earRight")}</small>
+                  <MiniBattery level={active.rightBattery} label="R" />
+                </span>
+                <span>
+                  <small>{t("profile.earCase")}</small>
+                  <MiniBattery level={active.caseBattery} label={t("devices.caseTag")} />
+                </span>
+              </div>
+            ) : (
+              <p className="device-battery-hint">{t("battery.connectHint")}</p>
+            )}
           </div>
-        </div>}
+        )}
         <div className="device-actions">
           <AppButton onClick={onConnect}>
             <Icon name="bluetooth" />
@@ -273,7 +262,7 @@ export function Profile({
           </span>
           <div>
             <strong>{t("profile.privacy")}</strong>
-            <small>记录已加密保存，仅你可见</small>
+            <small>记录保存在本机，仅你可见</small>
           </div>
           <Icon name="chevron" />
         </AppButton>
@@ -310,10 +299,15 @@ export function Profile({
           <Icon name="chevron" />
         </AppButton>
       </section>
-      <small className="app-version">LingoPods 1.0 · {active.model || "—"}</small>
+      <small className="app-version">
+        LingoPods {APP_VERSION} · {active.model || t("firmware.unknown")}
+      </small>
       <div className="service-footer">
         <span>
-          <i /> 翻译与设备服务运行正常
+          <i className={translationReady ? "" : "local"} />
+          {translationReady
+            ? "端侧翻译能力可用"
+            : "翻译能力受限 · 建议使用 Chrome 或 Edge"}
         </span>
         <span>
           <i className={sync.serverConfigured ? "" : "local"} />
@@ -370,7 +364,11 @@ export function Profile({
                             : t("panel.support")}
                 </h2>
               </div>
-              <AppButton onClick={() => setPanel(null)}>
+              <AppButton
+                ariaLabel={t("common.close")}
+                className="sheet-close"
+                onClick={() => setPanel(null)}
+              >
                 <Icon name="close" />
               </AppButton>
             </header>
@@ -563,7 +561,10 @@ export function Profile({
             )}
             {panel === "privacy" && (
               <div className="privacy-options">
-                <p className="app-note">你的偏好与记录已加密保存在本机，原始音频会在会话结束后自动删除。</p>
+                <p className="app-note">
+                  偏好与记录保存在本机浏览器中（未加密）；本 App 不保存原始音频。
+                  接入账户服务后才会加密同步到你的账户。
+                </p>
                 <SwitchRow
                   title={t("privacy.save")}
                   detail="关闭后，新产生的对话与会议记录将不再保存"
@@ -610,21 +611,10 @@ export function Profile({
                     <div className="enhance-row">
                       <div className="enhance-copy">
                         <strong>{t("ota.title")}</strong>
-                        <small>{`${t("ota.version")} 2.4.1`}</small>
+                        <small>{`${t("ota.version")} ${active.firmware ?? t("firmware.unknown")}`}</small>
                       </div>
-                      <AppButton
-                        className="enhance-action"
-                        disabled={otaBusy}
-                        onClick={runOta}
-                      >
-                        {otaLabel()}
-                      </AppButton>
                     </div>
-                    {otaState === "done" && (
-                      <p className="enhance-status">
-                        <Icon name="check" size={14} /> {t("ota.done")}
-                      </p>
-                    )}
+                    <span className="enhance-note">{t("firmware.native")}</span>
                   </section>
 
                   <section className="enhance-block">

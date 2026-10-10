@@ -100,7 +100,7 @@ export default function App() {
   }, [activeFeature, tab, showLive, showDevices, showMembership])
 
   const navItems: { id: string; label: string; icon: IconName }[] = [
-    { id: "home", label: t("nav.translate"), icon: "mic" },
+    { id: "home", label: t("nav.home"), icon: "mic" },
     { id: "notes", label: t("nav.records"), icon: "notes" },
     { id: "profile", label: t("nav.profile"), icon: "profile" },
   ]

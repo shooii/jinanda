@@ -3,7 +3,8 @@ import { AppButton, toast } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
 import { InfoSheet } from "@/components/InfoSheet"
 import { useEscapeKey } from "@/lib/core"
-import { usePlan } from "@/lib/store"
+import { usePlan, useSavedRecords, useVocabulary } from "@/lib/store"
+import { MEMBERSHIP_NAME } from "@/lib/app-meta"
 import { LegalDocument } from "@/features/LegalDocument"
 import type { LegalDocId } from "@/features/LegalDocument"
 import { SubscriptionPlans } from "@/features/SubscriptionPlans"
@@ -18,6 +19,14 @@ export function Membership({ onClose }: { onClose: () => void }) {
   const [plansOpen, setPlansOpen] = useState(false)
   const [restoring, setRestoring] = useState(false)
   const [cancelConfirm, setCancelConfirm] = useState(false)
+  /** 用量一律取真实记录，不再写死「347 分钟 / 18 次对话 / 4h 节省时间」 */
+  const [records] = useSavedRecords()
+  const { entries: vocabulary } = useVocabulary()
+  const usage = {
+    conversations: records.filter((item) => item.type === "对话" || item.type === "通话").length,
+    meetings: records.filter((item) => item.type === "会议").length,
+    terms: vocabulary.length,
+  }
   const [billing, setBilling] = useState(false)
   const [legalDoc, setLegalDoc] = useState<LegalDocId | null>(null)
   const [plan, setPlan] = usePlan()
@@ -29,10 +38,10 @@ export function Membership({ onClose }: { onClose: () => void }) {
   if (plan.source === "none") {
     return (
       <div className="sheet-backdrop" onClick={onClose}>
-        <div className="membership-sheet" role="dialog" aria-modal="true" aria-label="LINGO+ 会员" onClick={(event) => event.stopPropagation()}>
+        <div className="membership-sheet" role="dialog" aria-modal="true" aria-label={`${MEMBERSHIP_NAME} 会员`} onClick={(event) => event.stopPropagation()}>
           <AppButton ariaLabel="关闭会员权益" className="sheet-close" onClick={onClose}><Icon name="close" size={18} /></AppButton>
           <span className="plan-icon"><Icon name="sparkles" size={27} /></span>
-          <h2>尚未开通 LINGO+ 会员</h2>
+          <h2>尚未开通 {MEMBERSHIP_NAME} 会员</h2>
           <p className="sheet-intro">当前没有已验证的设备赠送权益或订阅。绑定 LingoPods Pro 或订阅 Lingo+ 后，即可在此查看方案、账单与续费设置。</p>
           <AppButton className="onboarding-cta" onClick={onClose}>知道了</AppButton>
         </div>
@@ -47,7 +56,7 @@ export function Membership({ onClose }: { onClose: () => void }) {
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label="LINGO+ 会员"
+        aria-label={`${MEMBERSHIP_NAME} 会员`}
       >
         <div className="sheet-handle" />
         <AppButton
@@ -63,7 +72,7 @@ export function Membership({ onClose }: { onClose: () => void }) {
               <Icon name="settings" size={27} />
             </span>
             <span className="eyebrow">订阅管理</span>
-            <h2>你的 Lingo+ 方案</h2>
+            <h2>你的 {MEMBERSHIP_NAME} 方案</h2>
             <p className="sheet-intro">
               当前会员由 LingoPods Pro 设备权益提供，赠送期内不会扣费。
             </p>
@@ -191,7 +200,7 @@ export function Membership({ onClose }: { onClose: () => void }) {
             <span className="plan-icon">
               <Icon name="sparkles" size={28} />
             </span>
-            <span className="eyebrow">LINGO+ 会员</span>
+            <span className="eyebrow">{MEMBERSHIP_NAME} 会员</span>
             <p className="sheet-intro">
               购买 LingoPods Pro 已获赠会员，有效期至 2026 年 10 月 18 日。
             </p>
@@ -207,7 +216,7 @@ export function Membership({ onClose }: { onClose: () => void }) {
                 <Icon name="plane" />
                 <span>
                   <strong>离线旅行语言包</strong>
-                  <small>没有漫游网络或 Wi-Fi 也能交流</small>
+                  <small>在旅行模式下载后，没有漫游网络也能交流</small>
                 </span>
               </div>
               <div>
@@ -220,20 +229,20 @@ export function Membership({ onClose }: { onClose: () => void }) {
             </div>
             <section className="member-value">
               <span>
-                <strong>347</strong>
-                <small>翻译分钟</small>
+                <strong>{usage.conversations}</strong>
+                <small>翻译记录</small>
               </span>
               <span>
-                <strong>18</strong>
-                <small>真实对话</small>
-              </span>
-              <span>
-                <strong>6</strong>
+                <strong>{usage.meetings}</strong>
                 <small>会议纪要</small>
               </span>
               <span>
-                <strong>4h</strong>
-                <small>节省时间</small>
+                <strong>{usage.terms}</strong>
+                <small>个人词汇</small>
+              </span>
+              <span>
+                <strong>{allLanguages.length}</strong>
+                <small>支持语言</small>
               </span>
             </section>
             <AppButton

@@ -435,6 +435,7 @@ export function LiveSession({
     themLang: pair.them,
     autoSpeak: false,
     mode: "auto",
+    offlineOnly: offline,
     onTurn: (turn) => setShareTurns((prev) => [...prev, turn]),
   })
   const shareLive = liveTalk.status !== "idle"

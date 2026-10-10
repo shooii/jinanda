@@ -153,13 +153,131 @@ const keyGroups: string[][] = [
   ],
 ]
 
+/**
+ * 离线语言包文案（packs.*）。
+ *
+ * 单独成表，不塞进上面的位置数组：位置数组插入一个新组要同步改 20 份语言数据，
+ * 错一位就会串行。这一组按语言键直接取值，缺失时统一回退英文，
+ * 不会出现「德语界面里蹦出中文」。
+ */
+export const packKeys = [
+  "packs.eyebrow",
+  "packs.title",
+  "packs.desc",
+  "packs.listTitle",
+  "packs.myLanguage",
+  "packs.summary",
+  "packs.capRecognition",
+  "packs.capTranslation",
+  "packs.stateInstalled",
+  "packs.stateDownloadable",
+  "packs.stateDownloading",
+  "packs.stateUnsupported",
+  "packs.download",
+  "packs.retry",
+  "packs.failed",
+  "packs.unsupportedTitle",
+  "packs.unsupportedDesc",
+  "packs.footer",
+  "packs.shared",
+  "packs.checking",
+  "packs.partial",
+] as const
+
+/**
+ * 首页文案（home.*）。
+ *
+ * 首页原来把这些字直接写在 JSX 里，导致切到英文后「导航是英文、Hero 还是中文」。
+ * 和离线语言包一样单独成表，缺项回退英文。
+ */
+export const homeKeys = [
+  "home.noDevice",
+  "home.phoneReady",
+  "home.connect",
+  "home.continue",
+  "home.startPhone",
+  "home.chooseMode",
+  "home.deviceAria",
+  "home.disconnectedAria",
+] as const
+
+/** 固件一行：浏览器刷不了固件，文案必须说清楚，不能再伪造升级流程 */
+export const firmwareKeys = ["firmware.native", "firmware.unknown"] as const
+
+/**
+ * 底部导航第一项。
+ * 原来叫「翻译」，但页面其实是首页（设备状态 + 快捷入口），
+ * 而实时翻译里另有一个同名「翻译」页签，同一屏出现两个「翻译」指向不同页面。
+ */
+export const navKeys = ["nav.home"] as const
+
+/** 电量：没连上时没有真实读数，只能提示去连接 */
+export const batteryKeys = ["battery.connectHint"] as const
+
+/** 通用：图标按钮必须有可读名称（此前面板关闭键是没有任何标签的裸图标） */
+export const commonKeys = ["common.close"] as const
+
+/** 组内用 | 分隔，顺序与 packKeys 一致 */
+const packRows: Partial<Record<LangId, string>> = {
+  zh: "离线语言包|把语言装进口袋|出发前下载语言包，飞机上、地铁里或没有漫游网络时照样能识别和翻译。|选择目的地语言|我的语言|{done} 个已安装 · 共 {total} 个可选|语音识别|双向翻译|已安装|可下载|下载中|不可用|下载|重试|下载失败，请检查网络后重试|当前浏览器不支持离线语言包|端侧识别与翻译模型目前由 Chrome / Edge 提供，iOS 需要原生版本。|语言包由浏览器端侧模型提供，安装后断网也能识别与翻译；占用空间由系统统一管理。|首次下载会同时装好你所用语言的识别包。|正在检查语言包状态…|还需一步，再点一次即可完成",
+  en: "Offline packs|Put languages in your pocket|Download packs before you travel, then keep recognizing and translating on a plane, in the subway, or with no roaming data.|Choose a destination language|My language|{done} installed · {total} available|Speech recognition|Two-way translation|Installed|Available|Downloading|Unavailable|Download|Retry|Download failed. Check your connection and try again.|Offline packs aren't supported in this browser|On-device recognition and translation models are provided by Chrome and Edge today; iOS needs the native app.|Packs come from the browser's on-device models. Once installed, recognition and translation keep working offline, and the system manages their storage.|The first download also installs the recognition pack for your own language.|Checking pack status…|One more step — tap once more to finish",
+}
+
+/** 首页文案：与 packRows 同样的口径 */
+const homeRows: Partial<Record<LangId, string>> = {
+  zh: "未连接耳机|可直接使用手机免提对话|连接耳机|继续对话|用手机开始对话|选择对话方式|设备未连接，打开设备管理|设备设置",
+  en: "No earbuds connected|Phone hands-free works right away|Connect earbuds|Continue|Start on phone|Choose conversation mode|No device connected — open device management|Device settings",
+}
+
+const firmwareRows: Partial<Record<LangId, string>> = {
+  zh: "固件升级需在原生 App 内完成，浏览器无法刷写固件|未读取",
+  en: "Firmware updates need the native app — browsers can't flash firmware|Not read",
+}
+
+const navRows: Partial<Record<LangId, string>> = {
+  zh: "首页",
+  en: "Home",
+}
+
+const batteryRows: Partial<Record<LangId, string>> = {
+  zh: "连接耳机后读取电量",
+  en: "Connect to read battery level",
+}
+
+const commonRows: Partial<Record<LangId, string>> = {
+  zh: "关闭",
+  en: "Close",
+}
+
+/** 单行文案表：组内用 | 分隔，按 keys 顺序取值；缺项回退英文 */
+function rowTable(keys: readonly string[], row: string | undefined): Record<string, string> {
+  const parts = (row ?? "").split("|")
+  const table: Record<string, string> = {}
+  keys.forEach((key, index) => {
+    table[key] = parts[index] ?? ""
+  })
+  return table
+}
+
+/** 独立于位置数组的文案（新增分组不再改 20 份位置数据，避免错位） */
+function explicitTable(lang: LangId): Record<string, string> {
+  return {
+    ...rowTable(packKeys, packRows[lang] ?? packRows.en),
+    ...rowTable(homeKeys, homeRows[lang] ?? homeRows.en),
+    ...rowTable(firmwareKeys, firmwareRows[lang] ?? firmwareRows.en),
+    ...rowTable(navKeys, navRows[lang] ?? navRows.en),
+    ...rowTable(batteryKeys, batteryRows[lang] ?? batteryRows.en),
+    ...rowTable(commonKeys, commonRows[lang] ?? commonRows.en),
+  }
+}
+
 /** 每种语言按上述 11 组的顺序，组内用 | 分隔 */
 const raw: Record<LangId, string[]> = {
   zh: [
     "翻译|记录|我的|主导航",
     "听见 · 理解 · 连接|每一种声音，|都近在耳边。|专为耳机打造的 AI 翻译，无需一直盯着手机屏幕。|种语言|覆盖真实生活场景|专为 LingoPods Pro 打造",
     "你的 LingoPods|管理你的设备、语言和会员权益。",
-    "个人中心|我的|已连接|管理|左耳|右耳|充电盒|重新连接|查找耳机|设备设置|LINGO+ 会员|设备赠送权益使用中",
+    "个人中心|我的|已连接|管理|左耳|右耳|充电盒|重新连接|查找耳机|设备设置|Lingo+ 会员|设备赠送权益使用中",
     "外观主题|自动匹配系统|App 语言|个人词汇|姓名、地点和专业术语|数据与隐私|记录仅保存在你的账户中|帮助与支持|连接指南、常见问题|支付与账单|设备赠送权益|所有服务运行正常|隐私政策|用户协议|服务状态",
     "设置|设备偏好|App 语言|外观主题|个人词汇|数据与隐私|帮助与支持",
     "App 界面语言 · 选择后立即生效|App 语言已切换",
@@ -181,7 +299,7 @@ const raw: Record<LangId, string[]> = {
     "通话应用|已打通欧美主流聊天软件，任意 App 的来电都能实时互译。|自动识别来电应用|系统级悬浮字幕|字幕悬浮在任意通话画面之上，无需切换应用。|扬声器已开|扬声器已关|字幕已开|字幕已关|译文|实时互译",
     "通话设置|关闭|分享到|分享后，等待用户接入|对方点开链接即可加入本次通话|已接入|联系人|选择要通话的联系人|再次通话|正在呼叫…|已分享|通话对象|返回通话首页|已存入记录|未写入记录",
     "存为记录|复制译文|清空|已保存到翻译记录|译文已复制|复制失败，请手动选择文本|正在朗读译文|正在聆听|语音输入|更多|词典拼接译文 · 联网后更准确|词典未收录 · 联网后可获得完整译文|已清空|检测语言|检测到 {lang}",
-    "会议记录|实时转写与 AI 纪要|旅行模式|出行常用表达|拍照翻译|菜单与路牌识别|音视频通话|双语实时字幕|文本翻译|常用句即时互译|媒体同传|多语言实时字幕|口语教练|AI 发音评分|常用语手册|收藏常用表达",
+    "会议记录|实时转写与 AI 纪要|旅行模式|离线语言包与常用表达|拍照翻译|菜单与路牌识别|音视频通话|双语实时字幕|文本翻译|常用句即时互译|媒体同传|多语言实时字幕|口语教练|AI 发音评分|常用语手册|收藏常用表达",
     "编辑快捷功能|按你的使用习惯排列首页|完成|首页快捷功能|更多功能|恢复默认|首页最多展示 6 个|至少保留 2 个|请先移除一个，再添加新的|已移至更多功能|已添加到首页|排序已更新|已恢复默认排序|所有功能都已添加到首页|编辑",
     "我听耳机，对方听手机|双方都使用手机|试译|输入一句，试试翻译效果|盒",
     "对照原文|查看译文|正在识别并翻译…|正在对照原文|已将译文覆盖到原图|保留原有排版与文字位置|图片已保存到相册|已从相册选取图片|保存翻译图片|从相册选择图片|重新扫描|闪光灯|识别语言|翻译为",
@@ -195,7 +313,7 @@ const raw: Record<LangId, string[]> = {
     "Translate|Records|Me|Main navigation",
     "Hear · Understand · Connect|Every voice,|right by your ear.|AI translation built for earbuds — no need to stare at your phone.|languages|for real-life moments|Made for LingoPods Pro",
     "Your LingoPods|Manage your devices, language and membership.",
-    "Profile|Me|Connected|Manage|Left|Right|Case|Reconnect|Find earbuds|Device settings|LINGO+ Member|Device gift benefits active",
+    "Profile|Me|Connected|Manage|Left|Right|Case|Reconnect|Find earbuds|Device settings|Lingo+ Member|Device gift benefits active",
     "Appearance|Auto-match system|App Language|Personal Vocabulary|Names, places & terms|Data & Privacy|Records saved only in your account|Help & Support|Setup guides & FAQ|Billing & Plans|Device gift benefit|All services running|Privacy Policy|Terms of Service|Service Status",
     "Settings|Device Preferences|App Language|Appearance|Personal Vocabulary|Data & Privacy|Help & Support",
     "App interface language · applies instantly|App language changed",
@@ -231,7 +349,7 @@ const raw: Record<LangId, string[]> = {
     "Traducir|Registros|Yo|Navegación principal",
     "Oye · Comprende · Conecta|Cada voz,|junto a tu oído.|Traducción con IA hecha para auriculares — sin mirar el móvil.|idiomas|para momentos reales|Creado para LingoPods Pro",
     "Tus LingoPods|Gestiona tus dispositivos, idioma y membresía.",
-    "Perfil|Yo|Conectado|Gestionar|Izquierdo|Derecho|Estuche|Reconectar|Buscar auriculares|Ajustes del dispositivo|Miembro LINGO+|Beneficios de regalo activos",
+    "Perfil|Yo|Conectado|Gestionar|Izquierdo|Derecho|Estuche|Reconectar|Buscar auriculares|Ajustes del dispositivo|Miembro Lingo+|Beneficios de regalo activos",
     "Apariencia|Coincidir con el sistema|Idioma de la app|Vocabulario personal|Nombres, lugares y términos|Datos y privacidad|Registros guardados solo en tu cuenta|Ayuda y soporte|Guías y preguntas frecuentes|Facturación y planes|Beneficio de regalo|Servicios operativos|Política de privacidad|Términos del servicio|Estado del servicio",
     "Ajustes|Preferencias del dispositivo|Idioma de la app|Apariencia|Vocabulario personal|Datos y privacidad|Ayuda y soporte",
     "Idioma de la interfaz · se aplica al instante|Idioma de la app cambiado",
@@ -267,7 +385,7 @@ const raw: Record<LangId, string[]> = {
     "翻訳|記録|マイ|メインナビ",
     "聴く・理解する・繋がる|すべての声が、|耳元に。|イヤホン専用の AI 翻訳。画面を見つめなくても。|言語|リアルな暮らしのために|LingoPods Pro のために",
     "あなたの LingoPods|デバイス・言語・会員を管理。",
-    "プロフィール|マイ|接続中|管理|左|右|ケース|再接続|イヤホンを探す|デバイス設定|LINGO+ メンバー|デバイス特典利用中",
+    "プロフィール|マイ|接続中|管理|左|右|ケース|再接続|イヤホンを探す|デバイス設定|Lingo+ メンバー|デバイス特典利用中",
     "外観|システムに合わせる|アプリの言語|マイ単語|名前・場所・用語|データとプライバシー|記録はあなたのアカウントのみに保存|ヘルプとサポート|設定ガイドとよくある質問|請求とプラン|デバイス特典|すべてのサービス正常|プライバシーポリシー|利用規約|サービス状況",
     "設定|デバイス設定|アプリの言語|外観|マイ単語|データとプライバシー|ヘルプとサポート",
     "アプリの表示言語・すぐに反映|アプリの言語を変更しました",
@@ -303,7 +421,7 @@ const raw: Record<LangId, string[]> = {
     "Traduire|Historique|Moi|Navigation principale",
     "Écouter · Comprendre · Relier|Chaque voix,|tout près de l'oreille.|Traduction IA conçue pour les écouteurs — sans fixer l'écran.|langues|pour la vraie vie|Conçu pour LingoPods Pro",
     "Vos LingoPods|Gérez vos appareils, la langue et l'abonnement.",
-    "Profil|Moi|Connecté|Gérer|Gauche|Droite|Boîtier|Reconnecter|Retrouver les écouteurs|Réglages de l'appareil|Membre LINGO+|Avantage cadeau actif",
+    "Profil|Moi|Connecté|Gérer|Gauche|Droite|Boîtier|Reconnecter|Retrouver les écouteurs|Réglages de l'appareil|Membre Lingo+|Avantage cadeau actif",
     "Apparence|Suivre le système|Langue de l'app|Vocabulaire personnel|Noms, lieux et termes|Données et confidentialité|Historique enregistré seulement sur votre compte|Aide et assistance|Guides et FAQ|Facturation et forfaits|Avantage cadeau|Tous les services fonctionnent|Politique de confidentialité|Conditions d'utilisation|État des services",
     "Réglages|Préférences de l'appareil|Langue de l'app|Apparence|Vocabulaire personnel|Données et confidentialité|Aide et assistance",
     "Langue de l'interface · appliquée instantanément|Langue de l'app modifiée",
@@ -339,7 +457,7 @@ const raw: Record<LangId, string[]> = {
     "번역|기록|마이|주요 탐색",
     "듣다 · 이해하다 · 연결하다|모든 목소리가,|귀 가까이.|이어폰을 위해 만든 AI 번역 — 화면을 볼 필요 없이.|언어|진짜 생활을 위해|LingoPods Pro 를 위해",
     "내 LingoPods|기기·언어·멤버십 관리.",
-    "프로필|마이|연결됨|관리|왼쪽|오른쪽|케이스|다시 연결|이어폰 찾기|기기 설정|LINGO+ 멤버|기기 증정 혜택 사용 중",
+    "프로필|마이|연결됨|관리|왼쪽|오른쪽|케이스|다시 연결|이어폰 찾기|기기 설정|Lingo+ 멤버|기기 증정 혜택 사용 중",
     "외관|시스템에 맞추기|앱 언어|내 단어|이름·장소·용어|데이터와 개인정보|기록은 내 계정에만 저장|도움말 및 지원|설정 가이드와 자주 묻는 질문|결제 및 요금제|기기 증정 혜택|모든 서비스 정상|개인정보 처리방침|이용약관|서비스 상태",
     "설정|기기 환경설정|앱 언어|외관|내 단어|데이터와 개인정보|도움말 및 지원",
     "앱 인터페이스 언어 · 즉시 적용|앱 언어가 변경되었습니다",
@@ -375,7 +493,7 @@ const raw: Record<LangId, string[]> = {
     "Übersetzen|Verlauf|Ich|Hauptnavigation",
     "Hören · Verstehen · Verbinden|Jede Stimme,|ganz nah am Ohr.|KI-Übersetzung für Kopfhörer — ohne aufs Handy zu starren.|Sprachen|für echte Momente|Für LingoPods Pro gemacht",
     "Deine LingoPods|Verwalte Geräte, Sprache und Mitgliedschaft.",
-    "Profil|Ich|Verbunden|Verwalten|Links|Rechts|Etui|Neu verbinden|Kopfhörer finden|Geräteeinstellungen|LINGO+ Mitglied|Geräte-Gratisvorteil aktiv",
+    "Profil|Ich|Verbunden|Verwalten|Links|Rechts|Etui|Neu verbinden|Kopfhörer finden|Geräteeinstellungen|Lingo+ Mitglied|Geräte-Gratisvorteil aktiv",
     "Erscheinungsbild|System folgen|App-Sprache|Eigenes Vokabular|Namen, Orte & Begriffe|Daten & Datenschutz|Verlauf nur in deinem Konto gespeichert|Hilfe & Support|Anleitungen & FAQ|Abrechnung & Tarife|Geräte-Gratisvorteil|Alle Dienste laufen|Datenschutz|Nutzungsbedingungen|Servicestatus",
     "Einstellungen|Geräte-Einstellungen|App-Sprache|Erscheinungsbild|Eigenes Vokabular|Daten & Datenschutz|Hilfe & Support",
     "App-Anzeigesprache · sofort aktiv|App-Sprache geändert",
@@ -411,7 +529,7 @@ const raw: Record<LangId, string[]> = {
     "Traduzir|Registros|Eu|Navegação principal",
     "Ouvir · Entender · Conectar|Cada voz,|perto do seu ouvido.|Tradução com IA feita para fones — sem olhar o celular.|idiomas|para momentos reais|Feito para LingoPods Pro",
     "Seus LingoPods|Gerencie seus dispositivos, idioma e assinatura.",
-    "Perfil|Eu|Conectado|Gerenciar|Esquerdo|Direito|Case|Reconectar|Encontrar fones|Config. do dispositivo|Membro LINGO+|Benefício de presente ativo",
+    "Perfil|Eu|Conectado|Gerenciar|Esquerdo|Direito|Case|Reconectar|Encontrar fones|Config. do dispositivo|Membro Lingo+|Benefício de presente ativo",
     "Aparência|Seguir o sistema|Idioma do app|Vocabulário pessoal|Nomes, lugares e termos|Dados e privacidade|Registros salvos só na sua conta|Ajuda e suporte|Guias e perguntas frequentes|Faturamento e planos|Benefício de presente|Todos os serviços ativos|Política de privacidade|Termos de uso|Status do serviço",
     "Configurações|Preferências do dispositivo|Idioma do app|Aparência|Vocabulário pessoal|Dados e privacidade|Ajuda e suporte",
     "Idioma da interface · aplica na hora|Idioma do app alterado",
@@ -447,7 +565,7 @@ const raw: Record<LangId, string[]> = {
     "Перевод|Записи|Я|Основная навигация",
     "Слышать · Понимать · Связывать|Каждый голос|рядом с ухом.|ИИ-перевод для наушников — не нужно смотреть в телефон.|языков|для реальной жизни|Создано для LingoPods Pro",
     "Ваши LingoPods|Управляйте устройствами, языком и подпиской.",
-    "Профиль|Я|Подключено|Управление|Левый|Правый|Чехол|Переподключить|Найти наушники|Настройки устройства|Участник LINGO+|Подарочная выгода активна",
+    "Профиль|Я|Подключено|Управление|Левый|Правый|Чехол|Переподключить|Найти наушники|Настройки устройства|Участник Lingo+|Подарочная выгода активна",
     "Внешний вид|Как в системе|Язык приложения|Личный словарь|Имена, места и термины|Данные и приватность|Записи хранятся только в вашей учётной записи|Помощь и поддержка|Руководства и FAQ|Оплата и планы|Подарочная выгода|Все сервисы работают|Политика приватности|Условия использования|Статус сервиса",
     "Настройки|Настройки устройства|Язык приложения|Внешний вид|Личный словарь|Данные и приватность|Помощь и поддержка",
     "Язык интерфейса · применяется сразу|Язык приложения изменён",
@@ -483,7 +601,7 @@ const raw: Record<LangId, string[]> = {
     "Tradurre|Cronologia|Io|Navigazione principale",
     "Ascolta · Comprendi · Connetti|Ogni voce,|vicino al tuo orecchio.|Traduzione IA per auricolari — senza fissare il telefono.|lingue|per momenti reali|Creato per LingoPods Pro",
     "I tuoi LingoPods|Gestisci dispositivi, lingua e abbonamento.",
-    "Profilo|Io|Connesso|Gestisci|Sinistra|Destra|Custodia|Riconnetti|Trova auricolari|Impostazioni dispositivo|Membro LINGO+|Vantaggio regalo attivo",
+    "Profilo|Io|Connesso|Gestisci|Sinistra|Destra|Custodia|Riconnetti|Trova auricolari|Impostazioni dispositivo|Membro Lingo+|Vantaggio regalo attivo",
     "Aspetto|Segui il sistema|Lingua app|Vocabolario personale|Nomi, luoghi e termini|Dati e privacy|Cronologia salvata solo nel tuo account|Aiuto e supporto|Guide e FAQ|Fatturazione e piani|Vantaggio regalo|Tutti i servizi attivi|Informativa privacy|Termini di servizio|Stato servizio",
     "Impostazioni|Preferenze dispositivo|Lingua app|Aspetto|Vocabolario personale|Dati e privacy|Aiuto e supporto",
     "Lingua interfaccia · applicata subito|Lingua app cambiata",
@@ -519,7 +637,7 @@ const raw: Record<LangId, string[]> = {
     "Vertalen|Geschiedenis|Ik|Hoofdnavigatie",
     "Horen · Begrijpen · Verbinden|Elke stem,|dicht bij je oor.|AI-vertaling gemaakt voor oordopjes — zonder naar je telefoon te staren.|talen|voor echt leven|Gemaakt voor LingoPods Pro",
     "Jouw LingoPods|Beheer je apparaten, taal en lidmaatschap.",
-    "Profiel|Ik|Verbonden|Beheren|Links|Rechts|Hoes|Opnieuw verbinden|Oordopjes vinden|Apparaatinstellingen|LINGO+ lid|Cadeauvoordeel actief",
+    "Profiel|Ik|Verbonden|Beheren|Links|Rechts|Hoes|Opnieuw verbinden|Oordopjes vinden|Apparaatinstellingen|Lingo+ lid|Cadeauvoordeel actief",
     "Weergave|Systeem volgen|App-taal|Persoonlijke woordenlijst|Namen, plaatsen & termen|Gegevens & privacy|Geschiedenis alleen in je account|Hulp & ondersteuning|Gidsen & veelgestelde vragen|Facturatie & abonnementen|Cadeauvoordeel|Alle diensten actief|Privacyverklaring|Gebruiksvoorwaarden|Servicestatus",
     "Instellingen|Apparaatvoorkeuren|App-taal|Weergave|Persoonlijke woordenlijst|Gegevens & privacy|Hulp & ondersteuning",
     "Interface-taal · direct van kracht|App-taal gewijzigd",
@@ -555,7 +673,7 @@ const raw: Record<LangId, string[]> = {
     "Tłumacz|Historia|Ja|Nawigacja główna",
     "Słyszeć · Rozumieć · Łączyć|Każdy głos,|blisko Twojego ucha.|Tłumaczenie AI stworzone dla słuchawek — bez wpatrywania się w telefon.|języków|do prawdziwych momentów|Stworzone dla LingoPods Pro",
     "Twoje LingoPods|Zarządzaj urządzeniami, językiem i członkostwem.",
-    "Profil|Ja|Połączono|Zarządzaj|Lewe|Prawe|Etui|Połącz ponownie|Znajdź słuchawki|Ustawienia urządzenia|Członek LINGO+|Prezent aktywny",
+    "Profil|Ja|Połączono|Zarządzaj|Lewe|Prawe|Etui|Połącz ponownie|Znajdź słuchawki|Ustawienia urządzenia|Członek Lingo+|Prezent aktywny",
     "Wygląd|Zgodnie z systemem|Język aplikacji|Osobisty słownik|Nazwy, miejsca i terminy|Dane i prywatność|Historia tylko na Twoim koncie|Pomoc i wsparcie|Przewodniki i FAQ|Rozliczenia i plany|Prezent urządzenia|Wszystkie usługi działają|Polityka prywatności|Regulamin|Status usługi",
     "Ustawienia|Preferencje urządzenia|Język aplikacji|Wygląd|Osobisty słownik|Dane i prywatność|Pomoc i wsparcie",
     "Język interfejsu · stosowany od razu|Język aplikacji zmieniony",
@@ -591,7 +709,7 @@ const raw: Record<LangId, string[]> = {
     "Översätt|Historik|Jag|Huvudnavigering",
     "Höra · Förstå · Koppla|Varje röst,|nära ditt öra.|AI-översättning gjord för hörlurar — utan att stirra på telefonen.|språk|för riktiga stunder|Gjord för LingoPods Pro",
     "Dina LingoPods|Hantera dina enheter, språk och medlemskap.",
-    "Profil|Jag|Ansluten|Hantera|Vänster|Höger|Fodral|Anslut igen|Hitta hörlurar|Enhetsinställningar|LINGO+ medlem|Presentförmån aktiv",
+    "Profil|Jag|Ansluten|Hantera|Vänster|Höger|Fodral|Anslut igen|Hitta hörlurar|Enhetsinställningar|Lingo+ medlem|Presentförmån aktiv",
     "Utseende|Följ systemet|App-språk|Personligt ordförråd|Namn, platser & termer|Data & integritet|Historik sparas bara i ditt konto|Hjälp & support|Guider & vanliga frågor|Fakturering & abonnemang|Presentförmån|Alla tjänster fungerar|Integritetspolicy|Användarvillkor|Servicestatus",
     "Inställningar|Enhetsinställningar|App-språk|Utseende|Personligt ordförråd|Data & integritet|Hjälp & support",
     "Gränssnittsspråk · gäller direkt|App-språk ändrat",
@@ -627,7 +745,7 @@ const raw: Record<LangId, string[]> = {
     "Çevir|Kayıtlar|Ben|Ana gezinme",
     "Duy · Anla · Bağlan|Her ses,|kulağınızın yanında.|Kulaklıklar için yapılan AI çeviri — telefona bakmanıza gerek yok.|dil|gerçek anlar için|LingoPods Pro için yapıldı",
     "LingoPods'unuz|Cihazlarınızı, dili ve üyeliği yönetin.",
-    "Profil|Ben|Bağlı|Yönet|Sol|Sağ|Kutu|Yeniden bağlan|Kulaklıkları bul|Cihaz ayarları|LINGO+ Üyesi|Cihaz hediye avantajı aktif",
+    "Profil|Ben|Bağlı|Yönet|Sol|Sağ|Kutu|Yeniden bağlan|Kulaklıkları bul|Cihaz ayarları|Lingo+ Üyesi|Cihaz hediye avantajı aktif",
     "Görünüm|Sistemi izle|Uygulama dili|Kişisel kelimeler|İsimler, yerler ve terimler|Veri ve gizlilik|Kayıtlar yalnızca hesabınızda|Yardım ve destek|Kılavuzlar ve SSS|Faturalandırma ve planlar|Cihaz hediye avantajı|Tüm hizmetler çalışıyor|Gizlilik politikası|Kullanım şartları|Servis durumu",
     "Ayarlar|Cihaz tercihleri|Uygulama dili|Görünüm|Kişisel kelimeler|Veri ve gizlilik|Yardım ve destek",
     "Arayüz dili · anında uygulanır|Uygulama dili değişti",
@@ -663,7 +781,7 @@ const raw: Record<LangId, string[]> = {
     "Terjemah|Riwayat|Saya|Navigasi utama",
     "Dengar · Pahami · Hubungkan|Setiap suara,|dekat dengan telinga Anda.|Terjemahan AI untuk earbud — tanpa menatap ponsel.|bahasa|untuk momen nyata|Dibuat untuk LingoPods Pro",
     "LingoPods Anda|Kelola perangkat, bahasa, dan keanggotaan.",
-    "Profil|Saya|Terhubung|Kelola|Kiri|Kanan|Kotak|Hubungkan lagi|Temukan earbud|Pengaturan perangkat|Anggota LINGO+|Hadiah perangkat aktif",
+    "Profil|Saya|Terhubung|Kelola|Kiri|Kanan|Kotak|Hubungkan lagi|Temukan earbud|Pengaturan perangkat|Anggota Lingo+|Hadiah perangkat aktif",
     "Tampilan|Ikuti sistem|Bahasa aplikasi|Kosakata pribadi|Nama, tempat & istilah|Data & privasi|Riwayat hanya disimpan di akun Anda|Bantuan & dukungan|Panduan & FAQ|Penagihan & paket|Hadiah perangkat|Semua layanan berjalan|Kebijakan privasi|Syarat layanan|Status layanan",
     "Pengaturan|Preferensi perangkat|Bahasa aplikasi|Tampilan|Kosakata pribadi|Data & privasi|Bantuan & dukungan",
     "Bahasa antarmuka · langsung berlaku|Bahasa aplikasi diubah",
@@ -699,7 +817,7 @@ const raw: Record<LangId, string[]> = {
     "Terjemah|Rekod|Saya|Navigasi utama",
     "Dengar · Fahami · Sambung|Setiap suara,|dekat dengan telinga anda.|Terjemahan AI untuk earbud — tanpa merenung telefon.|bahasa|untuk detik nyata|Dibuat untuk LingoPods Pro",
     "LingoPods anda|Urus peranti, bahasa dan keahlian.",
-    "Profil|Saya|Disambung|Urus|Kiri|Kanan|Kotak|Sambung semula|Cari earbud|Tetapan peranti|Ahli LINGO+|Faedah hadiah peranti aktif",
+    "Profil|Saya|Disambung|Urus|Kiri|Kanan|Kotak|Sambung semula|Cari earbud|Tetapan peranti|Ahli Lingo+|Faedah hadiah peranti aktif",
     "Rupa|Ikut sistem|Bahasa apl|Bahasa peribadi|Nama, tempat & istilah|Data & privasi|Rekod hanya disimpan dalam akaun anda|Bantuan & sokongan|Panduan & FAQ|Bil & pelan|Faedah hadiah peranti|Semua perkhidmatan berjalan|Dasar privasi|Terma perkhidmatan|Status perkhidmatan",
     "Tetapan|Keutamaan peranti|Bahasa apl|Rupa|Bahasa peribadi|Data & privasi|Bantuan & sokongan",
     "Bahasa antaramuka · berkuat kuasa serta-merta|Bahasa apl ditukar",
@@ -735,7 +853,7 @@ const raw: Record<LangId, string[]> = {
     "แปล|ประวัติ|ฉัน|การนำทางหลัก",
     "ฟัง · เข้าใจ · เชื่อมโยง|ทุกเสียง,|ใกล้หูคุณ.|แปล AI สำหรับหูฟัง — ไม่ต้องจ้องมือถือ.|ภาษา|สำหรับช่วงเวลาจริง|สร้างสำหรับ LingoPods Pro",
     "LingoPods ของคุณ|จัดการอุปกรณ์ ภาษา และสมาชิกภาพ.",
-    "โปรไฟล์|ฉัน|เชื่อมต่อแล้ว|จัดการ|ซ้าย|ขวา|กล่อง|เชื่อมต่อใหม่|ค้นหาหูฟัง|ตั้งค่าอุปกรณ์|สมาชิก LINGO+|สิทธิพิเศษจากอุปกรณ์ใช้งานอยู่",
+    "โปรไฟล์|ฉัน|เชื่อมต่อแล้ว|จัดการ|ซ้าย|ขวา|กล่อง|เชื่อมต่อใหม่|ค้นหาหูฟัง|ตั้งค่าอุปกรณ์|สมาชิก Lingo+|สิทธิพิเศษจากอุปกรณ์ใช้งานอยู่",
     "รูปแบบ|ตามระบบ|ภาษาแอป|คำศัพท์ส่วนตัว|ชื่อ สถานที่ และคำศัพท์|ข้อมูลและความเป็นส่วนตัว|ประวัติบันทึกเฉพาะในบัญชีคุณ|ช่วยเหลือและสนับสนุน|คู่มือและคำถามที่พบบ่อย|การเรียกเก็บเงินและแพ็กเกจ|สิทธิพิเศษจากอุปกรณ์|ทุกบริการทำงานปกติ|นโยบายความเป็นส่วนตัว|ข้อกำหนดการใช้งาน|สถานะบริการ",
     "ตั้งค่า|การตั้งค่าอุปกรณ์|ภาษาแอป|รูปแบบ|คำศัพท์ส่วนตัว|ข้อมูลและความเป็นส่วนตัว|ช่วยเหลือและสนับสนุน",
     "ภาษาอินเทอร์เฟซ · มีผลทันที|เปลี่ยนภาษาแอปแล้ว",
@@ -771,7 +889,7 @@ const raw: Record<LangId, string[]> = {
     "Dịch|Lịch sử|Tôi|Điều hướng chính",
     "Nghe · Hiểu · Kết nối|Mọi giọng nói,|gần bên tai bạn.|Dịch AI làm cho tai nghe — không cần nhìn điện thoại.|ngôn ngữ|cho khoảnh khắc thật|Sáng tạo cho LingoPods Pro",
     "LingoPods của bạn|Quản lý thiết bị, ngôn ngữ và thành viên.",
-    "Hồ sơ|Tôi|Đã kết nối|Quản lý|Trái|Phải|Hộp|Kết nối lại|Tìm tai nghe|Cài đặt thiết bị|Thành viên LINGO+|Ưu đãi tặng thiết bị đang hoạt động",
+    "Hồ sơ|Tôi|Đã kết nối|Quản lý|Trái|Phải|Hộp|Kết nối lại|Tìm tai nghe|Cài đặt thiết bị|Thành viên Lingo+|Ưu đãi tặng thiết bị đang hoạt động",
     "Giao diện|Theo hệ thống|Ngôn ngữ ứng dụng|Từ vựng cá nhân|Tên, địa điểm & thuật ngữ|Dữ liệu & riêng tư|Lịch sử chỉ lưu trong tài khoản của bạn|Trợ giúp & hỗ trợ|Hướng dẫn & câu hỏi thường gặp|Thanh toán & gói|Ưu đãi tặng thiết bị|Mọi dịch vụ hoạt động|Tuyên bố riêng tư|Điều khoản dịch vụ|Trạng thái dịch vụ",
     "Cài đặt|Tùy chọn thiết bị|Ngôn ngữ ứng dụng|Giao diện|Từ vựng cá nhân|Dữ liệu & riêng tư|Trợ giúp & hỗ trợ",
     "Ngôn ngữ giao diện · áp dụng ngay|Đã đổi ngôn ngữ ứng dụng",
@@ -807,7 +925,7 @@ const raw: Record<LangId, string[]> = {
     "ترجمة|السجلات|أنا|التنقل الرئيسي",
     "استمع · افهم · تواصل|كل صوت،|قرب أذنك.|ترجمة ذكاء اصطناعي للسماعات — دون التحديق بالهاتف.|لغة|للحظات الحقيقية|صُممت لـ LingoPods Pro",
     "LingoPods الخاصة بك|إدارة أجهزتك ولغتك وعضويتك.",
-    "الملف الشخصي|أنا|متصل|إدارة|يسار|يمين|علبة|إعادة الاتصال|ابحث عن السماعات|إعدادات الجهاز|عضو LINGO+|ميزة الجهاز مجانية نشطة",
+    "الملف الشخصي|أنا|متصل|إدارة|يسار|يمين|علبة|إعادة الاتصال|ابحث عن السماعات|إعدادات الجهاز|عضو Lingo+|ميزة الجهاز مجانية نشطة",
     "المظهر|متابعة النظام|لغة التطبيق|المفردات الشخصية|الأسماء والأماكن والمصطلحات|البيانات والخصوصية|السجلات محفوظة فقط في حسابك|المساعدة والدعم|الأدلة والأسئلة الشائعة|الفوترة والخطط|ميزة الجهاز المجانية|جميع الخدمات تعمل|سياسة الخصوصية|شروط الاستخدام|حالة الخدمة",
     "الإعدادات|تفضيلات الجهاز|لغة التطبيق|المظهر|المفردات الشخصية|البيانات والخصوصية|المساعدة والدعم",
     "لغة الواجهة · تُطبق فورًا|تم تغيير لغة التطبيق",
@@ -843,7 +961,7 @@ const raw: Record<LangId, string[]> = {
     "अनुवाद|रिकॉर्ड|मैं|मुख्य नेविगेशन",
     "सुनें · समझें · जोड़ें|हर आवाज़,|आपके कान के पास।|इयरबड्स के लिए बनाई गई AI अनुवाद — फोन देखे बिना।|भाषाएँ|असली पलों के लिए|LingoPods Pro के लिए बनाया",
     "आपके LingoPods|अपने डिवाइस, भाषा और सदस्यता प्रबंधित करें।",
-    "प्रोफ़ाइल|मैं|कनेक्टेड|प्रबंधित करें|बायाँ|दायाँ|केस|फिर से कनेक्ट करें|इयरबड्स खोजें|डिवाइस सेटिंग|LINGO+ सदस्य|डिवाइस उपहार लाभ सक्रिय",
+    "प्रोफ़ाइल|मैं|कनेक्टेड|प्रबंधित करें|बायाँ|दायाँ|केस|फिर से कनेक्ट करें|इयरबड्स खोजें|डिवाइस सेटिंग|Lingo+ सदस्य|डिवाइस उपहार लाभ सक्रिय",
     "दिखावट|सिस्टम का पालन करें|ऐप भाषा|व्यक्तिगत शब्दावली|नाम, स्थान और शब्द|डेटा और गोपनीयता|रिकॉर्ड केवल आपके खाते में|सहायता और समर्थन|गाइड और सामान्य प्रश्न|बिलिंग और योजनाएँ|डिवाइस उपहार लाभ|सभी सेवाएँ चल रहीं|गोपनीयता नीति|उपयोग की शर्तें|सेवा स्थिति",
     "सेटिंग|डिवाइस वरीयताएँ|ऐप भाषा|दिखावट|व्यक्तिगत शब्दावली|डेटा और गोपनीयता|सहायता और समर्थन",
     "इंटरफ़ेस भाषा · तुरंत लागू|ऐप भाषा बदली गई",
@@ -901,6 +1019,8 @@ appLanguages.forEach((lang) => {
       if (!table[k]) table[k] = zhTable[k] ?? k
     })
   })
+  // 离线语言包与首页文案独立成表，直接覆盖进该语言的字典
+  Object.assign(table, explicitTable(lang))
   strings[lang] = table
 })
 

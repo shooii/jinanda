@@ -61,6 +61,8 @@ export function DeviceManager({ onClose }: { onClose: () => void }) {
         applyReading(created.id, {
           status: "connected",
           ...(session.device.battery === null ? {} : { battery: session.device.battery }),
+          ...(session.device.firmware ? { firmware: session.device.firmware } : {}),
+          ...(session.device.serial ? { serial: session.device.serial } : {}),
         })
         setLink(session)
         toast(`${session.device.name} 已通过蓝牙连接`)
@@ -160,7 +162,10 @@ export function DeviceManager({ onClose }: { onClose: () => void }) {
         <div className="dm-body">
           {active.id && <section className={`dm-active ${statusClass(active.status)}`}>
             <div className="dm-active-head">
-              <span className="eyebrow">{t("devices.current")}</span>
+              {/* 断开时不能再说「当前设备」——它只是上次使用过的那台 */}
+              <span className="eyebrow">
+                {active.status === "connected" ? t("devices.current") : t("devices.lastConnected")}
+              </span>
               <span className={`dm-badge ${statusClass(active.status)}`}>
                 {statusLabel(active.status)}
               </span>
@@ -174,11 +179,15 @@ export function DeviceManager({ onClose }: { onClose: () => void }) {
                 <small>{active.model}</small>
               </div>
             </div>
-            <div className="dm-battery">
-              <MiniBattery level={active.leftBattery} label="L" />
-              <MiniBattery level={active.rightBattery} label="R" />
-              <MiniBattery level={active.caseBattery} label={t("devices.caseTag")} />
-            </div>
+            {active.status === "connected" ? (
+              <div className="dm-battery">
+                <MiniBattery level={active.leftBattery} label="L" />
+                <MiniBattery level={active.rightBattery} label="R" />
+                <MiniBattery level={active.caseBattery} label={t("devices.caseTag")} />
+              </div>
+            ) : (
+              <p className="device-battery-hint">{t("battery.connectHint")}</p>
+            )}
           </section>}
 
           <div className="section-heading">

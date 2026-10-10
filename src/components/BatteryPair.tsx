@@ -1,4 +1,9 @@
-/** 单只耳塞 / 充电盒的电量：标签 + 电量条 + 百分比 */
+/**
+ * 单只耳塞 / 充电盒的电量：标签 + 电量条 + 百分比。
+ *
+ * 0 当作「还没读到」而不是「电量 0%」：设备断开或刚加载时底层一律写 0，
+ * 直接渲染 0% 会让人以为耳机没电了。
+ */
 export function MiniBattery({
   level,
   label,
@@ -10,17 +15,18 @@ export function MiniBattery({
   /** 无障碍与长按提示，缺省用「标签 + 数值」 */
   title?: string
 }) {
-  const low = level <= 20
+  const known = level > 0
+  const low = known && level <= 20
   return (
     <span
       className={`mini-battery ${low ? "low" : ""}`}
-      title={title ?? `${label} ${level}%`}
+      title={title ?? (known ? `${label} ${level}%` : label)}
     >
       <i>{label}</i>
       <span className="mini-battery-shell" aria-hidden="true">
-        <em style={{ width: `${level}%` }} />
+        <em style={{ width: known ? `${level}%` : "0%" }} />
       </span>
-      <b>{level}%</b>
+      <b>{known ? `${level}%` : "—"}</b>
     </span>
   )
 }
@@ -51,10 +57,10 @@ export function PillBattery({
       {cells.map((cell) => (
         <span
           key={cell.tag}
-          className={`pill-batt-cell ${cell.level <= 20 ? "low" : ""}`}
+          className={`pill-batt-cell ${cell.level > 0 && cell.level <= 20 ? "low" : ""}`}
         >
           <i>{cell.tag}</i>
-          <b>{cell.level}%</b>
+          <b>{cell.level > 0 ? `${cell.level}%` : "—"}</b>
         </span>
       ))}
     </span>

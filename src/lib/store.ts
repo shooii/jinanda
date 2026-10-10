@@ -35,64 +35,6 @@ export type SavedRecord = {
   call?: CallRecordMeta
 }
 
-export const sampleRecords: SavedRecord[] = [
-  {
-    id: "sample-dialogue",
-    title: "咖啡馆对话",
-    meta: "西班牙语 · 8 分钟",
-    time: "今天 09:24",
-    summary: "确认了无麸质早餐选项，并预订了靠窗座位。",
-    type: "对话",
-    lines: [
-      {
-        speaker: "A",
-        original: "Could we get a table by the window?",
-        translated: "我们可以要一张靠窗的桌子吗？",
-      },
-      {
-        speaker: "B",
-        original: "当然，可以。请跟我来。",
-        translated: "Of course. Please follow me.",
-      },
-    ],
-  },
-  {
-    id: "sample-meeting",
-    title: "产品周会",
-    meta: "英语 · 42 分钟",
-    time: "今天 16:30",
-    summary: "3 个待办事项 · 下周二前确认测试范围。",
-    type: "会议",
-    lines: [
-      {
-        speaker: "A",
-        original: "Let's confirm the launch timeline before Friday.",
-        translated: "我们在周五前确认一下发布时间表。",
-      },
-      {
-        speaker: "M",
-        original: "I'll share the updated testing plan.",
-        translated: "我会分享更新后的测试计划。",
-      },
-    ],
-  },
-  {
-    id: "sample-camera",
-    title: "车站指示牌",
-    meta: "日语 · 1 张图片",
-    time: "10 月 6 日",
-    summary: "中央线快速列车，请前往 4 号站台。",
-    type: "拍照",
-    lines: [
-      {
-        speaker: "原文",
-        original: "中央線快速 4番線",
-        translated: "中央线快速列车 · 4 号站台",
-      },
-    ],
-  },
-]
-
 export function nowLabel() {
   const now = new Date()
   const pad = (value: number) => String(value).padStart(2, "0")
@@ -127,15 +69,6 @@ export function useSavedRecords() {
   )
 
   return [records, addRecord, removeRecord] as const
-}
-
-/**
- * 已删除的内置记录 id。
- * 内置记录来自 `sampleRecords` 常量，每次渲染都会重新拼进列表，
- * 删除后必须单独记下来，否则刷新就会「复活」。
- */
-export function useHiddenRecords() {
-  return usePersistentState<string[]>("lingo.records-hidden", [])
 }
 
 /** 生成一组随机的初始 id，用于常用语/收藏条目的键 */
@@ -358,6 +291,10 @@ export type PairedDevice = {
   name: string
   /** 设备型号 / 编号，如 LP-8821 */
   model: string
+  /** 蓝牙 Device Information Service 读到的固件版本；没读到就不显示 */
+  firmware?: string
+  /** 蓝牙 Device Information Service 读到的序列号；没读到就不显示 */
+  serial?: string
   status: DeviceStatus
   leftBattery: number
   rightBattery: number
@@ -476,7 +413,12 @@ export type UseDevicesResult = {
   /** 用真实硬件读数（蓝牙电量 / 连接状态）更新设备条目 */
   applyReading: (
     id: string,
-    reading: { status?: DeviceStatus; battery?: number },
+    reading: {
+      status?: DeviceStatus
+      battery?: number
+      firmware?: string | null
+      serial?: string | null
+    },
   ) => void
 }
 
@@ -617,7 +559,15 @@ export function useDevices(): UseDevicesResult {
 
   /** 真实硬件读数回写：蓝牙电量推来时必须覆盖掉本地占位值 */
   const applyReading = useCallback(
-    (id: string, reading: { status?: DeviceStatus; battery?: number }) => {
+    (
+      id: string,
+      reading: {
+        status?: DeviceStatus
+        battery?: number
+        firmware?: string | null
+        serial?: string | null
+      },
+    ) => {
       setDevicesState((items) =>
         items.map((device) =>
           device.id === id
@@ -626,6 +576,8 @@ export function useDevices(): UseDevicesResult {
                 status: reading.status ?? device.status,
                 leftBattery: reading.battery ?? device.leftBattery,
                 rightBattery: reading.battery ?? device.rightBattery,
+                firmware: reading.firmware ?? device.firmware,
+                serial: reading.serial ?? device.serial,
               }
             : device,
         ),

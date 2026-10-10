@@ -3,7 +3,7 @@ import { AppButton, toast } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
 import type { IconName } from "@/components/Icon"
 import { useEscapeKey } from "@/lib/core"
-import { copyText, nowLabel } from "@/lib/store"
+import { copyText, nowLabel, useDevices } from "@/lib/store"
 
 
 
@@ -40,6 +40,7 @@ const topics: {
 ]
 
 export function SupportCenter({ onClose }: { onClose: () => void }) {
+  const { active } = useDevices()
   const [topic, setTopic] = useState<TopicId>(null)
   const [category, setCategory] = useState("连接问题")
   const [detail, setDetail] = useState("")
@@ -99,7 +100,7 @@ export function SupportCenter({ onClose }: { onClose: () => void }) {
                       `提交时间：${ticketTime}`,
                       `问题类型：${category}`,
                       `详细描述：${detail.trim()}`,
-                      "设备：LingoPods Pro · LP-8821 · 固件 2.4.1",
+                      `设备：${active.name} · ${active.model || "未读取"} · 固件 ${active.firmware ?? "未读取"}`,
                     ].join("\n"),
                   )
                   toast(ok ? "工单信息已复制" : "复制失败，请手动记录")

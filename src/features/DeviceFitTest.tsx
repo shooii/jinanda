@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { AppButton, toast } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
 import { useEscapeKey } from "@/lib/core"
-import { downloadText, nowLabel } from "@/lib/store"
+import { downloadText, nowLabel, useDevices } from "@/lib/store"
 
 
 
@@ -14,6 +14,7 @@ export function DeviceFitTest({ onClose }: { onClose: () => void }) {
   const [phase, setPhase] = useState<Phase>("idle")
   const [progress, setProgress] = useState(0)
   const [archived, setArchived] = useState(false)
+  const { active } = useDevices()
 
   useEscapeKey(() => {
     if (phase !== "testing") onClose()
@@ -187,11 +188,11 @@ export function DeviceFitTest({ onClose }: { onClose: () => void }) {
                 downloadText(
                   "LingoPods_耳塞贴合报告.txt",
                   [
-                    "LingoPods Pro · 耳塞贴合测试报告",
+                    `${active.name} · 耳塞贴合测试报告`,
                     "",
-                    `设备编号：LP-8821`,
+                    `设备编号：${active.model || "未读取"}`,
                     `检测时间：${nowLabel()}`,
-                    `固件版本：2.4.1`,
+                    `固件版本：${active.firmware ?? "未读取"}`,
                     "",
                     "—— 检测结果 ——",
                     "左耳：密封良好",

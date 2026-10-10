@@ -1383,7 +1383,8 @@ button {
 }
 
 .dialogue-language-card small {
-  color: var(--muted);
+  /* 这张卡是深底，用浅底那档 --muted 只有 2.93:1 */
+  color: oklch(0.74 0.012 258);
   font-size: var(--fs-2xs);
 }
 
@@ -1398,8 +1399,9 @@ button {
   z-index: 2;
   right: 0.85rem;
   top: 50%;
-  width: 1.9rem;
-  height: 1.9rem;
+  /* 触控下限 44px（原 1.9rem = 30px） */
+  width: 2.75rem;
+  height: 2.75rem;
   display: grid;
   place-items: center;
   padding: 0;
@@ -2160,8 +2162,9 @@ button {
 .pack-download,
 .pack-downloaded,
 .pack-loading {
-  width: 2rem;
-  height: 2rem;
+  /* 触控下限 44px：原来 2rem（32px）连点两次都容易点空 */
+  width: 2.75rem;
+  height: 2.75rem;
   display: grid;
   place-items: center;
   border: 0;
@@ -2189,6 +2192,12 @@ button {
   border-top-color: var(--teal);
   border-radius: 50%;
   animation: spin 650ms linear infinite;
+}
+
+/* 离线语言包：该语言在当前浏览器没有可用的端侧模型 */
+.pack-downloaded.is-off {
+  color: var(--muted);
+  background: var(--surface-soft);
 }
 
 .travel-tip {
@@ -3215,8 +3224,9 @@ button {
 
 .record-detail header button,
 .profile-panel header button {
-  width: 2.4rem;
-  height: 2.4rem;
+  /* 触控下限 44px（原 2.4rem = 38px） */
+  width: 2.75rem;
+  height: 2.75rem;
   display: grid;
   place-items: center;
   border: 1px solid var(--line);
@@ -5203,7 +5213,8 @@ body {
 .empty-icon,
 .language-person.other,
 .new-tag {
-  color: var(--surface);
+  /* 蓝底白字只有 4.17:1，改用深色字（浅色/暗色主题都够） */
+  color: var(--navy);
   background: var(--lime);
 }
 
@@ -5424,7 +5435,13 @@ button:active {
 :root {
   --ink: oklch(0.17 0.008 258);
   --muted: oklch(0.48 0.008 258);
-  --soft-muted: oklch(0.63 0.008 258);
+  /* 浅色底上的 12–13px 说明文字：0.63 只有 3.25:1，不满足 AA，
+     压到 0.545 后 ≈4.6:1（中性色 OKLab 的 L 就是相对亮度的立方根） */
+  --soft-muted: oklch(0.545 0.008 258);
+  /* 可读的强调色：--lime/--teal 那档亮蓝配白字只有 4.17:1、当正文色只有 3.88:1，
+     所以实心按钮底与浅底上的彩色文字统一用下面这两档 */
+  --accent-solid: oklch(0.5 0.13 250);
+  --accent-ink: oklch(0.5 0.13 250);
   --paper: oklch(0.975 0.003 258);
   --surface-soft: oklch(0.94 0.004 258);
   --line: oklch(0.88 0.006 258);
@@ -6577,6 +6594,13 @@ button:active {
   gap: 0.5rem;
 }
 
+/* 设备断开时提示去连接，代替三条没有读数的空电池 */
+.device-battery-hint {
+  margin: 0.6rem 0 0;
+  color: var(--muted);
+  font-size: var(--fs-2xs);
+}
+
 .device-battery-grid span {
   display: flex;
   align-items: center;
@@ -6728,6 +6752,35 @@ button:active {
 .page-icon-button {
   width: 2.75rem;
   height: 2.75rem;
+}
+
+/* 首页此前漏在这一条之外：设备胶囊 39px、交换 35px、连接 36px、
+   手机免提/选择方式 42px、编辑 29px，都不到 44px 的触控下限 */
+.device-pill,
+.home-connect-btn,
+.home-phone-start,
+.home-mode-link,
+.edit-trigger {
+  min-height: 2.75rem;
+}
+
+.text-button {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+}
+
+/* 页脚三个法务/状态入口原来只有 48×18，点不到 */
+.service-footer button {
+  min-height: 2.75rem;
+}
+
+.records-search input {
+  min-height: 2.75rem;
+}
+
+.home-swap {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
 }
 
 /* 安全区:底部导航与全屏页脚避开 Home 横条 */
@@ -6907,7 +6960,11 @@ button:active {
   color-scheme: dark;
   --ink: oklch(0.92 0.008 258);
   --muted: oklch(0.7 0.01 258);
-  --soft-muted: oklch(0.58 0.01 258);
+  /* 深色底上同样要够 4.5:1，0.58 只有约 4.2:1 */
+  --soft-muted: oklch(0.62 0.01 258);
+  /* 深色底上的彩色文字要更亮；实心按钮底仍用深一档配白字 */
+  --accent-ink: oklch(0.72 0.13 250);
+  --accent-solid: oklch(0.5 0.13 250);
   --paper: oklch(0.19 0.006 258);
   --surface: oklch(0.24 0.008 258);
   --surface-soft: oklch(0.29 0.01 258);
@@ -8522,6 +8579,12 @@ html[data-theme="dark"] {
   box-shadow: 0 0 0 0.25rem var(--lime-soft);
 }
 
+/* 能力不可用：灰点，避免和「正常」同一个绿点混淆 */
+.status-dot.is-off {
+  background: var(--soft-muted);
+  box-shadow: 0 0 0 0.25rem var(--surface-soft);
+}
+
 .status-row span {
   display: grid;
   flex: 1;
@@ -8537,7 +8600,8 @@ html[data-theme="dark"] {
 }
 
 .status-row b {
-  color: var(--teal);
+  /* 列表在浅色底上，原来的亮蓝只有 4.17:1 */
+  color: var(--accent-ink);
   font-size: var(--fs-xs);
 }
 
@@ -10384,7 +10448,8 @@ html[data-theme="dark"] {
   border: 0;
   border-radius: 999rem;
   color: var(--muted);
-  background: oklch(0.95 0.006 258);
+  /* 原来写死浅灰底：暗色下底不变、字变浅，对比度只剩 1.73:1 */
+  background: var(--surface-soft);
   font-size: var(--fs-xs);
   font-weight: 700;
   cursor: pointer;
@@ -10534,6 +10599,11 @@ html[data-theme="dark"] {
 .device-card-head .text-button {
   color: var(--muted);
 }
+/* 设备卡最后改成了浅色底，但 eyebrow 仍留着深色底用的亮蓝（2.07:1），
+   这里跟随浅底改成深蓝 */
+.my-device-card .eyebrow {
+  color: var(--accent-ink);
+}
 .my-device-card .bud {
   background: linear-gradient(
     145deg,
@@ -10628,8 +10698,9 @@ html[data-theme="dark"] {
   margin-bottom: 1rem;
 }
 .dm-close {
-  width: 2.6rem;
-  height: 2.6rem;
+  /* 触控下限 44px（原 2.6rem = 42px） */
+  width: 2.75rem;
+  height: 2.75rem;
   display: grid;
   place-items: center;
   border: 1px solid var(--card-line);
@@ -10849,7 +10920,7 @@ html[data-theme="dark"] {
   border: 1.5px dashed var(--card-line);
   border-radius: var(--radius-lg);
   font-weight: 700;
-  color: var(--teal);
+  color: var(--accent-ink);
   background: transparent;
 }
 .dm-add-hint {
@@ -11093,16 +11164,13 @@ html[data-theme="dark"] {
 }
 
 /* 次要动作：描边胶囊，与卡片同一套圆角/描边体系，不再用裸文字按钮 */
-.enhance-action {
-  flex: none;
-  padding: 0.4rem 0.7rem;
-  border: 1px solid var(--line);
-  border-radius: 999rem;
-  color: var(--ink);
-  background: var(--paper);
+/* 固件一行：浏览器无法刷写固件，这里只给说明，不再放一个假的「检查更新」按钮 */
+.enhance-note {
+  display: block;
+  margin-top: 0.45rem;
+  color: var(--muted);
   font-size: var(--fs-2xs);
-  font-weight: 700;
-  white-space: nowrap;
+  line-height: 1.5;
 }
 
 .enhance-action:disabled {
@@ -12502,8 +12570,9 @@ html[data-theme="dark"] {
 .speak-bar-back,
 .speak-bar-more {
   flex-shrink: 0;
-  width: 2.3rem;
-  height: 2.3rem;
+  /* 触控下限 44px（原 2.3rem = 37px） */
+  width: 2.75rem;
+  height: 2.75rem;
   padding: 0;
   display: grid;
   place-items: center;
@@ -12714,6 +12783,8 @@ html[data-theme="dark"] {
   flex-direction: column;
   gap: 0.1rem;
   width: 72%;
+  /* 整块可点，且不低于 44px 触控高度 */
+  min-height: 2.75rem;
   padding: 0.45rem 0.7rem 0.55rem;
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
@@ -12730,7 +12801,8 @@ html[data-theme="dark"] {
 }
 
 .speak-input.active .speak-input-lang {
-  color: var(--teal);
+  /* 选中态原来用亮蓝，13px 白底上只有 4.17:1 */
+  color: var(--accent-ink);
 }
 
 .speak-input.them {
@@ -12750,6 +12822,8 @@ html[data-theme="dark"] {
   align-items: center;
   gap: 0.18rem;
   align-self: flex-start;
+  /* 触控下限 44px（原来只有 20px 高） */
+  min-height: 2.75rem;
   max-width: 100%;
   padding: 0;
   border: 0;
@@ -12773,6 +12847,7 @@ html[data-theme="dark"] {
 
 .speak-input-field {
   width: 100%;
+  min-height: 2.75rem;
   padding: 0;
   border: 0;
   outline: none;
@@ -12880,7 +12955,9 @@ html[data-theme="dark"] {
 
 .speak-tabs button.active {
   background: color-mix(in oklab, var(--teal) 16%, transparent);
-  color: var(--teal);
+  /* 原亮蓝在白底上只有 4.17:1，且字号只有 10px */
+  color: var(--accent-ink);
+  font-size: var(--fs-xs);
 }
 
 /* ---- 面对面：上下镜像双栏 ---- */
@@ -14248,7 +14325,7 @@ html[data-theme="dark"] {
 }
 
 .home-dialogue-actions button {
-  min-height: 2.65rem;
+  min-height: 2.75rem;
   border-radius: 0.85rem;
   font-size: 0.85rem;
   font-weight: 700;
@@ -14257,8 +14334,10 @@ html[data-theme="dark"] {
 .home-phone-start {
   flex: 1;
   border: 0;
-  background: var(--lime);
-  color: white;
+  /* 首页主按钮统一用墨色（与「连接耳机」「继续对话」一致）；
+     原来的蓝底白字只有 4.17:1，达不到 4.5:1 */
+  background: var(--ink);
+  color: var(--surface);
 }
 
 .home-mode-link {
@@ -14738,7 +14817,8 @@ html[dir="rtl"] .share-bubble.them {
 
 .dm-hw-action.primary {
   border-color: transparent;
-  background: var(--teal);
+  /* 亮蓝底白字只有 4.17:1 */
+  background: var(--accent-solid);
   color: oklch(1 0 0);
 }
 
@@ -14882,5 +14962,30 @@ html[dir="rtl"] .share-bubble.them {
 
 html[dir="rtl"] .call-share-row {
   text-align: right;
+}
+
+/* ============================================================
+   首页 Hero 暗色适配
+   这些底色/文字色过去写死在浅色值上，暗色模式里 Hero 会变成一张白卡，
+   里面的「可直接使用手机免提对话」还保留深色字。这里按主题补齐。
+   ============================================================ */
+[data-theme="dark"] .home-hero {
+  background: linear-gradient(
+    150deg,
+    oklch(0.26 0.014 258),
+    oklch(0.21 0.012 258)
+  );
+  box-shadow:
+    inset 0 0 0 1px oklch(1 0 0 / 0.06),
+    0 1.2rem 2.6rem oklch(0 0 0 / 0.35);
+}
+
+[data-theme="dark"] .home-connect {
+  background: oklch(0.24 0.012 258 / 0.72);
+}
+
+[data-theme="dark"] .home-connect-copy strong,
+[data-theme="dark"] .home-connect-copy small {
+  color: oklch(0.9 0.01 258);
 }
 

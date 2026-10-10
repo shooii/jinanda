@@ -50,15 +50,21 @@ export function Home({
   return (
     <>
       <header className="topbar home-topbar">
-        <h1 className="home-title">{t("nav.translate")}</h1>
+        <h1 className="home-title">{t("nav.home")}</h1>
         <AppButton
-          ariaLabel={connected ? `${t("profile.deviceSettings")} · ${batterySummary}` : "设备未连接，打开设备管理"}
+          ariaLabel={
+            connected
+              ? `${t("home.deviceAria")} · ${batterySummary}`
+              : `${t("home.disconnectedAria")} · ${t("home.deviceAria")}`
+          }
           className="device-pill"
           onClick={onConnect}
         >
           <span className={`connected-dot conn-dot ${active.status}`} />
           <Icon name="headphones" size={18} />
-          <span className="device-pill-name">{connected ? active.name : "未连接耳机"}</span>
+          <span className="device-pill-name">
+            {connected ? active.name : t("home.noDevice")}
+          </span>
           {connected && <PillBattery
             left={active.leftBattery}
             right={active.rightBattery}
@@ -101,8 +107,14 @@ export function Home({
                 <Icon name="mic" size={22} />
               </span>
               <span className="home-start-copy">
-                <strong>继续对话</strong>
-                <small>{dialogueMode === "speaker" ? "手机免提" : dialogueMode === "hybrid" ? "耳机 + 手机" : "一人一只耳机"}</small>
+                <strong>{t("home.continue")}</strong>
+                <small>
+                  {dialogueMode === "speaker"
+                    ? t("dialogue.modeSpeaker")
+                    : dialogueMode === "hybrid"
+                      ? t("dialogue.modeHybrid")
+                      : t("dialogue.modeShare")}
+                </small>
               </span>
               <Icon name="chevron" />
             </AppButton>
@@ -112,19 +124,19 @@ export function Home({
                 <Icon name="bluetooth" size={22} />
               </span>
               <div className="home-connect-copy">
-                <strong>未连接耳机</strong>
-                <small>可直接使用手机免提对话</small>
+                <strong>{t("home.noDevice")}</strong>
+                <small>{t("home.phoneReady")}</small>
               </div>
               <AppButton className="home-connect-btn" onClick={onConnect}>
-                连接耳机
+                {t("home.connect")}
               </AppButton>
             </div>
           )}
           <div className="home-dialogue-actions">
             {!connected && <AppButton className="home-phone-start" onClick={() => {
               onStartPhone()
-            }}>用手机开始对话</AppButton>}
-            <AppButton className="home-mode-link" onClick={onChangeDialogueMode}>选择对话方式</AppButton>
+            }}>{t("home.startPhone")}</AppButton>}
+            <AppButton className="home-mode-link" onClick={onChangeDialogueMode}>{t("home.chooseMode")}</AppButton>
           </div>
         </section>
 

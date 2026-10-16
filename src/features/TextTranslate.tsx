@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { AppButton, toast } from "@/components/AppButton"
 import { Icon } from "@/components/Icon"
-import type { IconName } from "@/components/Icon"
 import { LangPicker } from "@/components/LangPicker"
 import { useEscapeKey, useLangPair } from "@/lib/core"
 import type { FeatureId } from "@/lib/core"
@@ -226,12 +225,6 @@ export function TextTranslate({
     toast(t("text.saved"))
   }
 
-  const tabs: { id: FeatureId; label: string; icon: IconName }[] = [
-    { id: "text", label: t("speak.tabTranslate"), icon: "translate" },
-    { id: "camera", label: t("speak.tabCamera"), icon: "camera" },
-    { id: "dialogue", label: t("speak.tabConversation"), icon: "users" },
-  ]
-
   const langRow = (side: Side, lang: LangId, tag: string) => (
     <div className={`tt-lane ${side}`}>
       <div className="tt-lane-head">
@@ -385,21 +378,6 @@ export function TextTranslate({
         {modeNote && hasInput ? <p className="tt-note">{result.mode === "mixed" ? "仅识别部分词语，请勿将其作为完整译文使用" : "当前文本暂无可靠译文，请换一句试试"}</p> : null}
         {canUseTranslation && <AppButton className="tt-copy-primary" onClick={copyOut}><Icon name="notes" size={16} />复制译文</AppButton>}
       </main>
-
-      <nav className="speak-tabs">
-        {tabs.map((tab) => (
-          <AppButton
-            key={tab.id}
-            className={tab.id === "text" ? "active" : ""}
-            onClick={() => {
-              if (tab.id !== "text") onNavigate?.(tab.id)
-            }}
-          >
-            <Icon name={tab.icon} size={19} />
-            <span>{tab.label}</span>
-          </AppButton>
-        ))}
-      </nav>
 
       <LangPicker
         open={picker !== null}

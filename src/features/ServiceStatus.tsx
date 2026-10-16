@@ -19,7 +19,7 @@ import { nowLabel } from "@/lib/store"
  */
 type ServiceRow = { name: string; status: string; detail: string; ok: boolean }
 
-function capabilityRows(t: (key: string) => string): ServiceRow[] {
+function capabilityRows(t: (key: string) => string, _timestamp?: string): ServiceRow[] {
   const speech = speechSupport()
   const offline = offlineSupport()
   const connected = apiConfigured()
@@ -89,7 +89,7 @@ export function ServiceStatus({ onClose }: { onClose: () => void }) {
   const t = useT()
   const [updatedAt, setUpdatedAt] = useState(() => nowLabel())
   const [subscribed, setSubscribed] = useState(false)
-  const services = useMemo(() => capabilityRows(t), [t, updatedAt])
+  const services = useMemo(() => capabilityRows(t, updatedAt), [t, updatedAt])
   const allOk = services.every((item) => item.ok)
 
   return (

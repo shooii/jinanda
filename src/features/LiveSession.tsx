@@ -15,11 +15,12 @@ import {
   type LangId,
   type ToneId,
 } from "@/lib/translate"
-import { useVocabulary } from "@/lib/store"
+import { useSavedRecords, useVocabulary } from "@/lib/store"
 import { describeRecognitionError, speakText, stopSpeaking } from "@/lib/speech"
 import { useLiveTranslate, type LiveStatus } from "@/lib/useLiveTranslate"
 import { SpeakerTalk } from "@/features/SpeakerTalk"
 import type { DialogueModeId } from "@/features/DialogueMode"
+import { playEarcon } from "@/lib/earcon"
 
 type ShareTurn = {
   id: number
@@ -325,6 +326,32 @@ function TalkFlow({
 
   return (
     <main className="share-stage">
+      {/* 专为耳机设计的声学链路状态指示条 */}
+      <div
+        className="acoustic-route-banner"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "6px 12px",
+          background: "rgba(255,255,255,0.06)",
+          borderRadius: "20px",
+          margin: "0 12px 8px",
+          fontSize: "11px",
+          color: "rgba(255,255,255,0.75)",
+        }}
+      >
+        <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+          <Icon name="headphones" size={13} />
+          <span>收音：耳机降噪麦克风</span>
+        </span>
+        <span style={{ opacity: 0.4 }}>➔</span>
+        <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+          <Icon name={routeDescription.includes("手机") ? "volume" : "headphones"} size={13} />
+          <span>出声：{routeDescription.includes("手机") ? "手机外放给对方" : "耳机双耳私密流"}</span>
+        </span>
+      </div>
+
       <p className="session-status" role="status">{statusText}<br />{shared.offline ? "离线模式已开启 · 使用端侧语言包" : routeDescription} · 点按气泡可朗读译文</p>
       <div className="share-canvas" ref={canvasRef}>
         {turns.length === 0 && !interim ? (
@@ -425,6 +452,7 @@ export function LiveSession({
     null,
   )
   const { entries: vocab } = useVocabulary()
+  const [, addRecord] = useSavedRecords()
 
   /**
    * 真实对话链路。面对面场景不预设谁在说，改用识别出的语种判断发言方：
@@ -436,9 +464,42 @@ export function LiveSession({
     autoSpeak: false,
     mode: "auto",
     offlineOnly: offline,
-    onTurn: (turn) => setShareTurns((prev) => [...prev, turn]),
+    onTurn: (turn) => {
+      setShareTurns((prev) => [...prev, turn])
+      playEarcon("success")
+    },
   })
   const shareLive = liveTalk.status !== "idle"
+
+  const liveTalkRef = useRef(liveTalk)
+  liveTalkRef.current = liveTalk
+
+  // 组件卸载时释放拾音资源
+  useEffect(() => {
+    return () => {
+      liveTalkRef.current.stop()
+      stopSpeaking()
+    }
+  }, [])
+
+  const handleSafeClose = () => {
+    liveTalk.stop()
+    stopSpeaking()
+    if (shareTurns.length > 0 && !noSave) {
+      addRecord({
+        title: `双语对话 · ${langOption(pair.them).label}`,
+        meta: `${langOption(pair.me).label} ⇄ ${langOption(pair.them).label}`,
+        summary: `共 ${shareTurns.length} 轮发言 · ${isHybrid ? "耳机+手机" : "一人一只耳机"}`,
+        type: "对话",
+        lines: shareTurns.map((turn) => ({
+          speaker: turn.who === "me" ? "我" : "对方",
+          original: turn.original,
+          translated: turn.translated,
+        })),
+      })
+    }
+    onClose()
+  }
 
   useEscapeKey(() => {
     if (shareSheet) setShareSheet(null)
@@ -508,7 +569,7 @@ export function LiveSession({
         isListening={isConversation ? shareLive : isListening}
         offline={offline}
         autoDetect={autoDetect}
-        onClose={onClose}
+        onClose={handleSafeClose}
         onOpenSettings={() => setShowSettings(true)}
         center={isConversation ? pairBar : undefined}
       />
@@ -528,7 +589,11 @@ export function LiveSession({
               ? describeRecognitionError(liveTalk.error, liveTalk.errorCode)
               : ""
           }
-          onToggle={() => (shareLive ? liveTalk.stop() : liveTalk.start("auto"))}
+          onToggle={() => {
+            playEarcon("ready")
+            if (shareLive) liveTalk.stop()
+            else liveTalk.start("auto")
+          }}
           onPlay={(id) => {
             const turn = shareTurns.find((item) => item.id === id)
             if (!turn) return

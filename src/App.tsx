@@ -11,6 +11,7 @@ import { useT } from "@/lib/i18n"
 import { allLanguages } from "@/lib/translate"
 import { useOnlineStatus } from "@/lib/pwa"
 import { useDocumentLanguage } from "@/lib/locale"
+import { useThemeMode } from "@/lib/theme"
 
 /**
  * 首包只保留首页、导航与基础设施，其余页面按需加载。
@@ -94,6 +95,8 @@ export default function App() {
   const online = useOnlineStatus()
   // 把界面语言同步到 <html lang / dir>，RTL 语言需要整份布局翻转
   useDocumentLanguage()
+  // 全局响应深色/浅色/跟随系统模式
+  useThemeMode()
 
   useEffect(() => {
     phoneRef.current?.scrollTo({ top: 0 })

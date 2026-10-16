@@ -1,10 +1,20 @@
-import type { ReactNode } from "react"
+import type { CSSProperties, ReactNode } from "react"
 
 
 
-export type IconName = "audio" | "bell" | "bluetooth" | "bolt" | "calendar" | "camera" | "card" | "check" | "chevron" | "clock" | "close" | "drop" | "flip" | "globe" | "grip" | "headphones" | "home" | "image" | "layout" | "map" | "message" | "mic" | "monitor" | "moon" | "more" | "notes" | "navigate" | "pause" | "phone" | "pin" | "plane" | "play" | "plus" | "profile" | "receipt" | "settings" | "share" | "shield" | "skip-next" | "skip-prev" | "sliders" | "sparkles" | "sun" | "swap" | "translate" | "users" | "video" | "volume" | "wallet" | "wind"
+export type IconName = "audio" | "bell" | "bluetooth" | "bolt" | "bookmark" | "calendar" | "camera" | "card" | "check" | "chevron" | "clock" | "close" | "device" | "drop" | "flip" | "globe" | "grip" | "headphones" | "home" | "image" | "layout" | "map" | "message" | "mic" | "monitor" | "moon" | "more" | "notes" | "navigate" | "pause" | "phone" | "pin" | "plane" | "play" | "plus" | "profile" | "receipt" | "settings" | "share" | "shield" | "skip-next" | "skip-prev" | "sliders" | "sparkles" | "sun" | "swap" | "translate" | "users" | "video" | "volume" | "wallet" | "warning" | "wind"
 
-export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
+export function Icon({
+  name,
+  size = 20,
+  className = "",
+  style,
+}: {
+  name: IconName
+  size?: number
+  className?: string
+  style?: CSSProperties
+}) {
   const paths: Record<IconName, ReactNode> = {
     audio: (
       <>
@@ -13,6 +23,7 @@ export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
     ),
     bluetooth: <path d="m7 7 10 10-5 5V2l5 5L7 17" />,
     bolt: <path d="m13 2-8 12h7l-1 8 8-12h-7l1-8Z" />,
+    bookmark: <path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />,
     bell: (
       <>
         <path d="M6 10a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z" />
@@ -46,6 +57,12 @@ export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
       </>
     ),
     close: <path d="m6 6 12 12M18 6 6 18" />,
+    device: (
+      <>
+        <rect x="5" y="2" width="14" height="20" rx="3" />
+        <path d="M12 18h.01" />
+      </>
+    ),
     drop: <path d="M12 3s6.5 7 6.5 11.5a6.5 6.5 0 1 1-13 0C5.5 10 12 3 12 3Z" />,
     flip: (
       <>
@@ -250,6 +267,12 @@ export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
         <path d="M16 6V4.5a1.5 1.5 0 0 1 2.4-1.2" />
       </>
     ),
+    warning: (
+      <>
+        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+        <path d="M12 9v4M12 17h.01" />
+      </>
+    ),
     wind: (
       <>
         <path d="M3 8h9.5a2.5 2.5 0 1 0-2.4-3.2M3 12h14.5a2.5 2.5 0 1 1-2.4 3.2M3 16h7.5a2 2 0 1 1-1.9 2.6" />
@@ -260,9 +283,11 @@ export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
   return (
     <svg
       aria-hidden="true"
+      className={className}
       data-icon={name}
       fill="none"
       height={size}
+      style={style}
       viewBox="0 0 24 24"
       width={size}
     >

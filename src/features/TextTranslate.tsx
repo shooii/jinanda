@@ -16,6 +16,7 @@ import { langOption, sentences, translatePhrase, applyTone, detectLang } from "@
 import type { LangId, ToneId } from "@/lib/translate"
 import { useAppLanguage, useT } from "@/lib/i18n"
 import { prepareTranslation, speakText, speechSupport, translateText } from "@/lib/speech"
+import { playEarcon } from "@/lib/earcon"
 
 type Side = "from" | "to"
 /** 源语言可以是具体语言，也可以是「检测语言」 */
@@ -115,6 +116,7 @@ export function TextTranslate({
   })
 
   const swap = () => {
+    playEarcon("toggle")
     setFrom(effTo)
     setTo(effFrom)
     // 换向后的模型也要在手势内预热

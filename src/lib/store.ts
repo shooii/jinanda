@@ -782,3 +782,114 @@ export function recordToText(record: SavedRecord) {
     "由 LingoPods 导出",
   ].join("\n")
 }
+
+/**
+ * 每日免费翻译配额与订阅拦截管理体系
+ * - Free 用户每日享有 20 次即时翻译配额，次日 0 点自动重置
+ * - Pro 会员或已激活耳机用户享有无限量翻译
+ * - 针对长会议、双向通话、听译、离线包等高级能力进行分级鉴权
+ */
+export type QuotaRecord = {
+  date: string // YYYY-MM-DD
+  used: number
+}
+
+const FREE_DAILY_LIMIT = 20
+
+function getTodayString() {
+  const d = new Date()
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, "0")
+  const day = String(d.getDate()).padStart(2, "0")
+  return `${year}-${month}-${day}`
+}
+
+export function useTranslationQuota() {
+  const [plan] = usePlan()
+  const [quotaRecord, setQuotaRecord] = usePersistentState<QuotaRecord>("lingo.translation_quota", {
+    date: getTodayString(),
+    used: 0,
+  })
+
+  const isUnlimited = plan.source !== "none"
+  const today = getTodayString()
+  const currentUsed = quotaRecord.date === today ? quotaRecord.used : 0
+
+  const remaining = isUnlimited ? Infinity : Math.max(0, FREE_DAILY_LIMIT - currentUsed)
+
+  const consumeQuota = useCallback(
+    (count = 1): { success: boolean; remaining: number; reason?: "quota_exceeded" } => {
+      if (isUnlimited) {
+        return { success: true, remaining: Infinity }
+      }
+
+      const todayStr = getTodayString()
+      const nowUsed = quotaRecord.date === todayStr ? quotaRecord.used : 0
+
+      if (nowUsed + count > FREE_DAILY_LIMIT) {
+        return { success: false, remaining: Math.max(0, FREE_DAILY_LIMIT - nowUsed), reason: "quota_exceeded" }
+      }
+
+      setQuotaRecord({
+        date: todayStr,
+        used: nowUsed + count,
+      })
+
+      return {
+        success: true,
+        remaining: Math.max(0, FREE_DAILY_LIMIT - (nowUsed + count)),
+      }
+    },
+    [isUnlimited, quotaRecord, setQuotaRecord],
+  )
+
+  const canUseFeature = useCallback(
+    (
+      feature: "dialogue" | "text" | "camera" | "meeting" | "call" | "watch" | "offline",
+    ): { allowed: boolean; reason?: "quota_exceeded" | "meeting_limit" | "call_exclusive" | "watch_exclusive" | "offline_limit" } => {
+      if (isUnlimited) {
+        return { allowed: true }
+      }
+
+      // 高级专属功能直接拦截
+      if (feature === "call") {
+        return { allowed: false, reason: "call_exclusive" }
+      }
+      if (feature === "watch") {
+        return { allowed: false, reason: "watch_exclusive" }
+      }
+      if (feature === "meeting") {
+        return { allowed: true } // 允许试用，单次会议内控制时长
+      }
+      if (feature === "offline") {
+        return { allowed: false, reason: "offline_limit" }
+      }
+
+      // 常规即时翻译检查剩余额度
+      if (remaining <= 0) {
+        return { allowed: false, reason: "quota_exceeded" }
+      }
+
+      return { allowed: true }
+    },
+    [isUnlimited, remaining],
+  )
+
+  const resetQuotaForDev = useCallback(() => {
+    setQuotaRecord({
+      date: getTodayString(),
+      used: 0,
+    })
+  }, [setQuotaRecord])
+
+  return {
+    isUnlimited,
+    dailyLimit: FREE_DAILY_LIMIT,
+    usedToday: currentUsed,
+    remainingToday: remaining,
+    consumeQuota,
+    canUseFeature,
+    resetQuotaForDev,
+  }
+}
+

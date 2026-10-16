@@ -801,7 +801,7 @@ button {
   left: 0.75rem;
   height: 4.6rem;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   padding: 0.42rem;
   border: 1px solid oklch(1 0 0 / 0.65);
   border-radius: var(--radius-xl);
@@ -10517,7 +10517,7 @@ html[data-theme="dark"] {
 /* 未连接时的引导式 CTA */
 .home-connect {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.75rem;
   padding: 0.85rem 1rem;
@@ -10537,6 +10537,7 @@ html[data-theme="dark"] {
 .home-connect-copy {
   display: grid;
   gap: 0.1rem;
+  min-width: 0;
 }
 .home-connect-copy strong {
   font-size: var(--fs-sm);
@@ -10545,6 +10546,8 @@ html[data-theme="dark"] {
 .home-connect-copy small {
   color: var(--muted);
   font-size: var(--fs-2xs);
+  line-height: 1.35;
+  text-wrap: pretty;
 }
 .home-connect-btn {
   padding: 0.55rem 0.9rem;
@@ -10554,7 +10557,23 @@ html[data-theme="dark"] {
   background: var(--ink);
   font-size: var(--fs-xs);
   font-weight: 800;
+  white-space: nowrap;
   cursor: pointer;
+}
+
+/* 窄屏下三栏会把「可直接使用手机免提对话」挤成孤字折行（「话」单独一行），
+   改为「图标 + 文案」一行、主按钮独占下一行，文案即可完整落在一行内 */
+@media (max-width: 430px) {
+  .home-connect {
+    grid-template-columns: auto minmax(0, 1fr);
+    row-gap: 0.7rem;
+  }
+
+  .home-connect-btn {
+    grid-column: 1 / -1;
+    padding: 0.7rem 1rem;
+    text-align: center;
+  }
 }
 
 .phrase-editor > header {
@@ -14317,33 +14336,86 @@ html[data-theme="dark"] {
   line-height: 1.45;
 }
 
+/* 首页次级操作行：免提对话 / 选择对话方式
+   上方 .home-start 已是重墨实心主 CTA，这一行必须整体降一级，
+   并且两枚按钮共用一个尺寸网格 —— 否则会出现「并排两个黑块 + 文字换行挤压」的错位观感。
+   （历史 bug：按钮保持浏览器默认 inline-block，图标与文字各自换行、垂直不居中） */
 .home-dialogue-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  margin-top: 0.65rem;
+  display: grid;
+  /* 两枚按钮等宽；窄到放不下时 auto-fit 自动折成上下两行满宽，不会把文字挤断 */
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  align-items: stretch;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+}
+
+/* 已连接设备时整行只剩下「选择对话方式」，让它自己铺满整行并居中 */
+.home-dialogue-actions > button:only-child {
+  grid-column: 1 / -1;
 }
 
 .home-dialogue-actions button {
-  min-height: 2.75rem;
-  border-radius: 0.85rem;
-  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 2.9rem;
+  padding: 0 0.7rem;
+  border-radius: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 
+.home-dialogue-actions button > svg {
+  flex: none;
+}
+
+.home-dialogue-actions button > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 免提对话：沿用首页的柠檬色声学强调，但改用浅底承载，
+   既与上方重墨主 CTA 拉开层级，又比纯描边按钮更「可点」 */
 .home-phone-start {
-  flex: 1;
-  border: 0;
-  /* 首页主按钮统一用墨色（与「连接耳机」「继续对话」一致）；
-     原来的蓝底白字只有 4.17:1，达不到 4.5:1 */
-  background: var(--ink);
-  color: var(--surface);
+  border: 1px solid color-mix(in oklch, var(--lime) 48%, var(--line));
+  background: var(--lime-soft);
+  color: var(--navy);
+  box-shadow: 0 4px 14px oklch(0.2 0.05 258 / 0.07);
 }
 
+.home-phone-start > svg {
+  color: var(--navy);
+}
+
+/* 选择对话方式：最低视觉权重的幽灵按钮 */
 .home-mode-link {
-  padding: 0 0.75rem;
   border: 1px solid var(--line);
   background: var(--surface);
+  color: var(--muted);
+}
+
+.home-mode-link > svg {
+  color: var(--soft-muted);
+}
+
+/* 暗色下 --lime-soft 是深蓝底、--navy 更暗，浅底方案会失去对比，
+   改用与 .home-start-icon 一致的实心柠檬底 + 深字 */
+[data-theme="dark"] .home-phone-start {
+  border-color: transparent;
+  background: var(--lime);
+  color: oklch(0.17 0.01 258);
+  box-shadow: 0 6px 18px oklch(0 0 0 / 0.3);
+}
+
+[data-theme="dark"] .home-phone-start > svg {
+  color: oklch(0.17 0.01 258);
+}
+
+[data-theme="dark"] .home-mode-link {
   color: var(--ink);
 }
 
@@ -14358,6 +14430,7 @@ html[data-theme="dark"] {
   color: var(--muted);
   font-size: 0.72rem;
   font-weight: 500;
+  text-wrap: pretty;
 }
 
 .session-status {
@@ -14988,4 +15061,122 @@ html[dir="rtl"] .call-share-row {
 [data-theme="dark"] .home-connect-copy small {
   color: oklch(0.9 0.01 258);
 }
+
+/* ============================================================
+   全方位现代化声学 UI 视觉增强体系 (LingoPods Acoustic System)
+   ============================================================ */
+
+/* 1. 声学动态呼吸与发光波纹 */
+@keyframes acoustic-pulse {
+  0% { transform: scale(0.98); opacity: 0.6; box-shadow: 0 0 0 0 oklch(0.66 0.18 255 / 0.4); }
+  50% { transform: scale(1.02); opacity: 1; box-shadow: 0 0 24px 6px oklch(0.66 0.18 255 / 0.25); }
+  100% { transform: scale(0.98); opacity: 0.6; box-shadow: 0 0 0 0 oklch(0.66 0.18 255 / 0.4); }
+}
+
+@keyframes sonic-ring {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+@keyframes subtle-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* 2. 交互微动效与触觉反馈 */
+button:not(:disabled),
+.app-button:not(:disabled),
+.home-start,
+.home-tool,
+.dialogue-mode-card {
+  transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+button:not(:disabled):active,
+.app-button:not(:disabled):active,
+.home-start:active,
+.home-tool:active,
+.dialogue-mode-card:active {
+  transform: scale(0.975);
+}
+
+/* 3. 首页 Hero 卡片高品质升级 */
+.home-hero {
+  border: 1px solid var(--line);
+  box-shadow: 0 10px 30px oklch(0 0 0 / 0.04), inset 0 1px 0 oklch(1 0 0 / 0.6);
+  transition: box-shadow 0.2s ease;
+}
+
+.home-start {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 24px oklch(0.2 0.05 258 / 0.22), inset 0 1px 0 oklch(1 0 0 / 0.25);
+}
+
+.home-start::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.12), transparent);
+  transform: skewX(-20deg);
+  pointer-events: none;
+  animation: shine 6s infinite;
+}
+
+@keyframes shine {
+  0%, 75% { left: -100%; }
+  100% { left: 200%; }
+}
+
+/* 4. 底部导航栏高质感模糊与胶囊态 */
+.bottom-nav {
+  border: 1px solid oklch(1 0 0 / 0.55);
+  box-shadow: 0 12px 36px oklch(0 0 0 / 0.12), 0 2px 8px oklch(0 0 0 / 0.04);
+}
+
+.bottom-nav button {
+  transition: all 0.2s ease;
+}
+
+.bottom-nav button.active {
+  font-weight: 800;
+  transform: translateY(-1px);
+}
+
+/* 5. 常用工具九宫格质感 */
+.home-tool {
+  border: 1px solid var(--line);
+  box-shadow: 0 2px 8px oklch(0 0 0 / 0.02);
+}
+
+.home-tool:hover {
+  border-color: var(--teal);
+  box-shadow: 0 4px 16px oklch(0.64 0.13 189 / 0.1);
+}
+
+/* 6. 状态呼吸光效通用类 */
+.pulse-glow {
+  animation: acoustic-pulse 2.2s infinite ease-in-out;
+}
+
+/* 7. 暗色模式全局通透玻璃质感 */
+[data-theme="dark"] .bottom-nav {
+  border-color: oklch(1 0 0 / 0.1);
+  background: oklch(0.18 0.01 258 / 0.88);
+  box-shadow: 0 14px 40px oklch(0 0 0 / 0.55), inset 0 1px 0 oklch(1 0 0 / 0.08);
+}
+
+[data-theme="dark"] .home-tool {
+  background: oklch(0.22 0.008 258);
+  border-color: oklch(1 0 0 / 0.06);
+}
+
+[data-theme="dark"] .home-tool:hover {
+  border-color: oklch(0.66 0.18 255 / 0.4);
+  background: oklch(0.24 0.012 258);
+}
+
 

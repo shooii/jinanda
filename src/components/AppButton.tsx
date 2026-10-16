@@ -43,6 +43,9 @@ export function AppButton({
   ariaChecked,
   role,
   disabled,
+  style,
+  title,
+  ...rest
 }: {
   children: ReactNode
   className?: string
@@ -53,7 +56,9 @@ export function AppButton({
   ariaChecked?: boolean
   role?: AriaRole
   disabled?: boolean
-}) {
+  style?: React.CSSProperties
+  title?: string
+} & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
       aria-label={ariaLabel}
@@ -63,7 +68,10 @@ export function AppButton({
       className={className}
       disabled={disabled}
       onClick={onClick}
+      style={style}
+      title={title}
       type="button"
+      {...rest}
     >
       {children}
     </button>

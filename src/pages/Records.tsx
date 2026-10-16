@@ -8,6 +8,7 @@ import {
   recordToText,
   useFavorites,
   useSavedRecords,
+  usePhrases,
 } from "@/lib/store"
 import type { SavedRecord } from "@/lib/store"
 import { useT } from "@/lib/i18n"
@@ -19,6 +20,8 @@ const typeIcon = (record: SavedRecord): IconName => {
   if (record.type === "拍照") return "camera"
   if (record.type === "文本") return "notes"
   if (record.type === "通话") return record.call?.kind === "voice" ? "phone" : "video"
+  if (record.type === "观影") return "monitor"
+  if (record.type === "对话") return "headphones"
   return "globe"
 }
 
@@ -40,6 +43,7 @@ export function Records() {
   const [selected, setSelected] = useState<SavedRecord | null>(null)
   const [query, setQuery] = useState("")
   const [confirming, setConfirming] = useState(false)
+  const { addPhrase } = usePhrases()
   const { hasFavorite, toggleFavorite } = useFavorites()
   const records: SavedRecord[] = saved
   const t = useT()
@@ -317,6 +321,18 @@ export function Records() {
                 }}
               >
                 <Icon name="notes" /> {t("records.export")}
+              </AppButton>
+              <AppButton
+                onClick={() => {
+                  if (!selected) return
+                  const line = selected.lines[0]
+                  const phraseText = line ? line.original : selected.title
+                  addPhrase(phraseText)
+                  toast(`已将「${phraseText.slice(0, 10)}...」存入常用语手册`)
+                }}
+              >
+                <Icon name="bookmark" />
+                <span>存入常用语</span>
               </AppButton>
               <AppButton
                 className={detailFavorited ? "favorited" : ""}

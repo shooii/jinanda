@@ -101,27 +101,10 @@ export function Home({
             </AppButton>
           </div>
 
-          {connected ? (
-            <AppButton className="home-start" onClick={() => onMode("dialogue")}>
-              <span className="home-start-icon">
-                <Icon name="mic" size={22} />
-              </span>
-              <span className="home-start-copy">
-                <strong>{t("home.continue")}</strong>
-                <small>
-                  {dialogueMode === "speaker"
-                    ? t("dialogue.modeSpeaker")
-                    : dialogueMode === "hybrid"
-                      ? t("dialogue.modeHybrid")
-                      : t("dialogue.modeShare")}
-                </small>
-              </span>
-              <Icon name="chevron" />
-            </AppButton>
-          ) : (
+          {!connected && (
             <div className="home-connect">
               <span className="home-connect-icon">
-                <Icon name="bluetooth" size={22} />
+                <Icon name="bluetooth" size={20} />
               </span>
               <div className="home-connect-copy">
                 <strong>{t("home.noDevice")}</strong>
@@ -132,11 +115,36 @@ export function Home({
               </AppButton>
             </div>
           )}
+
+          <AppButton className="home-start" onClick={() => onMode("dialogue")}>
+            <span className="home-start-icon">
+              <Icon name="mic" size={22} />
+            </span>
+            <span className="home-start-copy">
+              <strong>{connected ? t("home.continue") : "开始对话同传"}</strong>
+              <small>
+                {dialogueMode === "speaker"
+                  ? t("dialogue.modeSpeaker")
+                  : dialogueMode === "hybrid"
+                    ? t("dialogue.modeHybrid")
+                    : t("dialogue.modeShare")}
+                {!connected ? " · 手机免提模式" : ""}
+              </small>
+            </span>
+            <Icon name="chevron" />
+          </AppButton>
+
           <div className="home-dialogue-actions">
-            {!connected && <AppButton className="home-phone-start" onClick={() => {
-              onStartPhone()
-            }}>{t("home.startPhone")}</AppButton>}
-            <AppButton className="home-mode-link" onClick={onChangeDialogueMode}>{t("home.chooseMode")}</AppButton>
+            {!connected && (
+              <AppButton className="home-phone-start" onClick={onStartPhone}>
+                <Icon name="phone" size={16} />
+                <span>{t("home.startPhone")}</span>
+              </AppButton>
+            )}
+            <AppButton className="home-mode-link" onClick={onChangeDialogueMode}>
+              <Icon name="sliders" size={15} />
+              <span>{t("home.chooseMode")}</span>
+            </AppButton>
           </div>
         </section>
 

@@ -1,6 +1,8 @@
 import { useCallback, useSyncExternalStore } from "react"
 import { usePersistentState } from "@/lib/core"
 import type { ChannelId } from "@/lib/payments"
+import { isTier, TRIAL } from "@/lib/monetization"
+import type { Cycle, Tier } from "@/lib/monetization"
 
 
 
@@ -647,10 +649,16 @@ export const defaultDevicePrefs: DevicePrefs = {
   touch: true,
 }
 
-export type PlanState = {  source: "device" | "standalone" | "none"
+export type PlanState = {
+  source: "device" | "standalone" | "none"
+  /** 当前生效档位；判定逻辑统一走 monetization.resolveEntitlement */
+  tier: Tier
   name: string
   autoRenew: boolean
+  /** 展示用的续费日期文案 */
   renewDate: string
+  /** 权益截止时刻（ISO）。到期判定以它为准，renewDate 只负责显示 */
+  expiresAt: string | null
   price: string
   /** 订阅渠道（设备赠送时为 null） */
   channel: ChannelId | null
@@ -660,13 +668,19 @@ export type PlanState = {  source: "device" | "standalone" | "none"
   period: "monthly" | "yearly"
   orderId: string | null
   purchasedAt: string | null
+  /** 试用结束时刻（ISO）；非试用为 null */
+  trialEndsAt: string | null
+  /** 试用是否已发放过——同一账号只给一次 */
+  trialUsed: boolean
 }
 
 export const defaultPlan: PlanState = {
   source: "none",
-  name: "Lingo+ Unlimited",
+  tier: "free",
+  name: "Free",
   autoRenew: false,
   renewDate: "",
+  expiresAt: null,
   price: "¥0",
   channel: null,
   regionId: "CN",
@@ -674,14 +688,18 @@ export const defaultPlan: PlanState = {
   period: "yearly",
   orderId: null,
   purchasedAt: null,
+  trialEndsAt: null,
+  trialUsed: false,
 }
 
-/** 会员订阅状态（设备赠送 / 单独订阅 / 已到期） */
+/** 会员订阅状态（设备赠送 / 单独订阅 / 试用中） */
 export function usePlan() {
   const [plan, setPlan] = usePersistentState<PlanState>("lingo.plan", defaultPlan)
   const current = { ...defaultPlan, ...plan }
   // Legacy data could grant an unverified device subscription on first load.
   if (current.source === "device" && !current.purchasedAt) current.source = "none"
+  // 老数据没有 tier 字段：有付费来源的按 Plus 兜底，避免直接掉到 Free
+  if (current.source !== "none" && !isTier(current.tier)) current.tier = "plus"
   return [current, setPlan] as const
 }
 
@@ -721,7 +739,7 @@ export function makeOrderId(now = new Date()) {
 /** 把订单导出为可下载的发票文本 */
 export function invoiceToText(order: Order) {
   return [
-    "LingoPods · 订阅账单 / 发票",
+    "LingoPods · 本地演示订单（非付款凭证）",
     "",
     `订单号：${order.id}`,
     `方案：${order.planName}`,
@@ -735,8 +753,8 @@ export function invoiceToText(order: Order) {
     `${order.taxLabel}：${order.tax}`,
     `实付：${order.total}`,
     "",
-    "本发票由 LingoPods 自动生成，可用于报销与税务申报。",
-    "如需增值税专用发票，请在「帮助与支持」中提交开票信息。",
+    "此文本来自本地数据，不代表已付款，不能用于报销或税务申报。",
+    "正式账单与税务凭证须由实际支付渠道或服务端确认后提供。",
   ].join("\n")
 }
 
@@ -783,113 +801,105 @@ export function recordToText(record: SavedRecord) {
   ].join("\n")
 }
 
+const DAY_MS = 24 * 60 * 60 * 1000
+
 /**
- * 每日免费翻译配额与订阅拦截管理体系
- * - Free 用户每日享有 20 次即时翻译配额，次日 0 点自动重置
- * - Pro 会员或已激活耳机用户享有无限量翻译
- * - 针对长会议、双向通话、听译、离线包等高级能力进行分级鉴权
+ * 开启 7 天 Pro 试用。
+ *
+ * 只写 trialEndsAt，不碰 source——试用期没有订单，权益判定由
+ * monetization.resolveEntitlement 优先看试用，再看订阅。
+ * 同一账号只发放一次（trialUsed 置真后不再给）。
  */
-export type QuotaRecord = {
-  date: string // YYYY-MM-DD
-  used: number
-}
-
-const FREE_DAILY_LIMIT = 20
-
-function getTodayString() {
-  const d = new Date()
-  const year = d.getFullYear()
-  const month = String(d.getMonth() + 1).padStart(2, "0")
-  const day = String(d.getDate()).padStart(2, "0")
-  return `${year}-${month}-${day}`
-}
-
-export function useTranslationQuota() {
-  const [plan] = usePlan()
-  const [quotaRecord, setQuotaRecord] = usePersistentState<QuotaRecord>("lingo.translation_quota", {
-    date: getTodayString(),
-    used: 0,
-  })
-
-  const isUnlimited = plan.source !== "none"
-  const today = getTodayString()
-  const currentUsed = quotaRecord.date === today ? quotaRecord.used : 0
-
-  const remaining = isUnlimited ? Infinity : Math.max(0, FREE_DAILY_LIMIT - currentUsed)
-
-  const consumeQuota = useCallback(
-    (count = 1): { success: boolean; remaining: number; reason?: "quota_exceeded" } => {
-      if (isUnlimited) {
-        return { success: true, remaining: Infinity }
-      }
-
-      const todayStr = getTodayString()
-      const nowUsed = quotaRecord.date === todayStr ? quotaRecord.used : 0
-
-      if (nowUsed + count > FREE_DAILY_LIMIT) {
-        return { success: false, remaining: Math.max(0, FREE_DAILY_LIMIT - nowUsed), reason: "quota_exceeded" }
-      }
-
-      setQuotaRecord({
-        date: todayStr,
-        used: nowUsed + count,
-      })
-
-      return {
-        success: true,
-        remaining: Math.max(0, FREE_DAILY_LIMIT - (nowUsed + count)),
-      }
-    },
-    [isUnlimited, quotaRecord, setQuotaRecord],
-  )
-
-  const canUseFeature = useCallback(
-    (
-      feature: "dialogue" | "text" | "camera" | "meeting" | "call" | "watch" | "offline",
-    ): { allowed: boolean; reason?: "quota_exceeded" | "meeting_limit" | "call_exclusive" | "watch_exclusive" | "offline_limit" } => {
-      if (isUnlimited) {
-        return { allowed: true }
-      }
-
-      // 高级专属功能直接拦截
-      if (feature === "call") {
-        return { allowed: false, reason: "call_exclusive" }
-      }
-      if (feature === "watch") {
-        return { allowed: false, reason: "watch_exclusive" }
-      }
-      if (feature === "meeting") {
-        return { allowed: true } // 允许试用，单次会议内控制时长
-      }
-      if (feature === "offline") {
-        return { allowed: false, reason: "offline_limit" }
-      }
-
-      // 常规即时翻译检查剩余额度
-      if (remaining <= 0) {
-        return { allowed: false, reason: "quota_exceeded" }
-      }
-
-      return { allowed: true }
-    },
-    [isUnlimited, remaining],
-  )
-
-  const resetQuotaForDev = useCallback(() => {
-    setQuotaRecord({
-      date: getTodayString(),
-      used: 0,
-    })
-  }, [setQuotaRecord])
-
+export function startTrial(plan: PlanState, now = new Date()): PlanState {
+  if (plan.trialUsed) return plan
+  const ends = new Date(now.getTime() + TRIAL.days * DAY_MS)
   return {
-    isUnlimited,
-    dailyLimit: FREE_DAILY_LIMIT,
-    usedToday: currentUsed,
-    remainingToday: remaining,
-    consumeQuota,
-    canUseFeature,
-    resetQuotaForDev,
+    ...plan,
+    tier: TRIAL.tier,
+    trialEndsAt: ends.toISOString(),
+    trialUsed: true,
   }
 }
 
+/** 试用到期：清掉试用字段并降级到 Free，不删除任何本地数据 */
+export function endTrial(plan: PlanState): PlanState {
+  return {
+    ...plan,
+    tier: "free",
+    trialEndsAt: null,
+    autoRenew: false,
+    renewDate: "",
+    expiresAt: null,
+    price: "¥0",
+    channel: null,
+    orderId: null,
+    purchasedAt: null,
+    source: "none",
+  }
+}
+
+/** 计算某周期的权益截止时刻，用于 expiresAt（到期判定以它为准） */
+export function expiryOf(cycle: Cycle, from = new Date()) {
+  const next = new Date(from.getTime())
+  if (cycle === "yearly") next.setFullYear(next.getFullYear() + 1)
+  else next.setMonth(next.getMonth() + 1)
+  return next.toISOString()
+}
+
+/** 开通付费档位（试用到期的自动转付费、或直接购买，都走它） */
+export function activatePaid(
+  plan: PlanState,
+  input: {
+    tier: Tier
+    cycle: Cycle
+    price: string
+    channel: ChannelId
+    regionId: string
+    currency: string
+    orderId: string
+    autoRenew?: boolean
+  },
+  now = new Date(),
+): PlanState {
+  return {
+    ...plan,
+    source: "standalone",
+    tier: input.tier,
+    name: `Lingo+ ${tierLabel(input.tier)}`,
+    autoRenew: input.autoRenew ?? true,
+    renewDate: renewDateLabel(input.cycle, now),
+    expiresAt: expiryOf(input.cycle, now),
+    price: input.price,
+    channel: input.channel,
+    regionId: input.regionId,
+    currency: input.currency,
+    period: input.cycle,
+    orderId: input.orderId,
+    purchasedAt: now.toISOString(),
+    trialEndsAt: null,
+  }
+}
+
+const tierLabel = (tier: Tier) =>
+  tier === "pro" ? "Pro" : tier === "plus" ? "Plus" : "Free"
+
+const monthNames = [
+  "1 月", "2 月", "3 月", "4 月", "5 月", "6 月",
+  "7 月", "8 月", "9 月", "10 月", "11 月", "12 月",
+]
+
+function renewDateLabel(cycle: Cycle, from: Date) {
+  const next = new Date(from.getTime())
+  if (cycle === "yearly") next.setFullYear(next.getFullYear() + 1)
+  else next.setMonth(next.getMonth() + 1)
+  return `${next.getFullYear()} 年 ${monthNames[next.getMonth()]} ${next.getDate()} 日`
+}
+
+/** 到期日的中文短语，用于会员页与付费墙文案 */
+export function formatDate(iso: string | null | undefined) {
+  if (!iso) return ""
+  const time = Date.parse(iso)
+  if (Number.isNaN(time)) return iso
+  const d = new Date(time)
+  return `${d.getFullYear()} 年 ${monthNames[d.getMonth()]} ${d.getDate()} 日`
+}

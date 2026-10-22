@@ -47,9 +47,20 @@ export const getToken = () => token
 
 export function setToken(next: string | null) {
   token = next
-  if (typeof localStorage === "undefined") return
-  if (next) localStorage.setItem(TOKEN_KEY, next)
-  else localStorage.removeItem(TOKEN_KEY)
+  if (typeof localStorage !== "undefined") {
+    if (next) localStorage.setItem(TOKEN_KEY, next)
+    else localStorage.removeItem(TOKEN_KEY)
+  }
+  if (typeof window !== "undefined") window.dispatchEvent(new Event("lingo:auth-changed"))
+}
+
+// Sign-out/account switches in another tab must invalidate this tab's projection too.
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", (event) => {
+    if (event.key !== TOKEN_KEY && event.key !== null) return
+    token = localStorage.getItem(TOKEN_KEY)
+    window.dispatchEvent(new Event("lingo:auth-changed"))
+  })
 }
 
 /* ------------------------------------------------------------------ 请求 */

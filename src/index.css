@@ -15180,3 +15180,252 @@ button:not(:disabled):active,
 }
 
 
+
+/* ---- 商业模型：付费墙与额度展示 ---- */
+
+.quota-block {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0.9rem 0;
+  padding: 0.85rem 0.95rem;
+  border-radius: 0.9rem;
+  background: var(--surface-soft);
+}
+
+.quota-title {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.quota-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.15rem 0.6rem;
+}
+
+.quota-label {
+  font-size: 0.8rem;
+  color: var(--ink);
+}
+
+.quota-value {
+  font-size: 0.76rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.quota-meter {
+  grid-column: 1 / -1;
+  height: 0.3rem;
+  overflow: hidden;
+  border-radius: 999rem;
+  background: oklch(0.5 0 0 / 0.14);
+}
+
+.quota-meter > i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--teal);
+  transition: width 160ms linear;
+}
+
+.trial-progress {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.6rem 0 0;
+}
+
+.trial-progress small {
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.paywall-evidence {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.55rem 0 0;
+  padding: 0.5rem 0.7rem;
+  border-radius: 0.7rem;
+  background: var(--surface-soft);
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.paywall-cycle {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0.85rem 0 0.55rem;
+}
+
+.cycle-chip {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  height: 2.3rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 0.82rem;
+  color: var(--ink);
+}
+
+.cycle-chip.active {
+  border-color: var(--teal);
+  background: var(--lime-soft);
+  font-weight: 600;
+}
+
+.cycle-chip em {
+  font-style: normal;
+  font-size: 0.68rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 999rem;
+  background: var(--teal);
+  color: var(--surface);
+}
+
+.plan-sub {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.paywall-allowance {
+  margin: 0.85rem 0 0;
+}
+
+.allowance-title {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.allowance-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.allowance-grid > div {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 0.7rem;
+  background: var(--surface-soft);
+}
+
+.allowance-grid small {
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+.allowance-grid b {
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.paywall-trial {
+  margin: 0.9rem 0 0;
+  padding: 0.75rem 0.85rem;
+  border-radius: 0.9rem;
+  background: var(--lime-soft);
+}
+
+.trial-head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+}
+
+.trial-list {
+  margin: 0.45rem 0 0;
+  padding-left: 1.05rem;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.trial-list li,
+.trial-note {
+  font-size: 0.75rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.trial-note {
+  margin: 0.45rem 0 0;
+}
+
+.paywall-downgrade {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin: 0.9rem 0 0;
+}
+
+.paywall-downgrade > div {
+  padding: 0.65rem 0.7rem;
+  border-radius: 0.8rem;
+  background: var(--surface-soft);
+}
+
+.paywall-downgrade strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.76rem;
+}
+
+.paywall-downgrade ul {
+  margin: 0;
+  padding-left: 0.95rem;
+  display: grid;
+  gap: 0.22rem;
+}
+
+.paywall-downgrade li {
+  font-size: 0.7rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.quota-inline {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Subscription preview: explicit cards, never a purchasable state. */
+.paywall-sheet { max-height: 92dvh; overflow-y: auto; overscroll-behavior: contain; }
+.paywall-header, .paywall-eyebrow, .plan-header, .plan-cost { display: flex; align-items: center; gap: 0.6rem; }
+.paywall-header { justify-content: space-between; }
+.paywall-eyebrow { font-size: 0.72rem; color: var(--muted); }
+.paywall-close { flex: 0 0 2.4rem; height: 2.4rem; border-radius: 50%; background: var(--surface); }
+.paywall-desc { font-size: 0.82rem; line-height: 1.6; color: var(--muted); }
+.paywall-plans { display: grid; gap: 0.7rem; margin: 0.9rem 0; }
+.paywall-plan-card { display: grid; gap: 0.6rem; width: 100%; padding: 1rem; border: 1px solid var(--line); border-radius: 1rem; background: var(--surface); color: var(--ink); text-align: left; }
+.paywall-plan-card.active { border-color: var(--teal); box-shadow: inset 0 0 0 1px var(--teal); }
+.plan-radio { display: grid; place-items: center; flex: 0 0 1rem; height: 1rem; border: 1px solid var(--muted); border-radius: 50%; }
+.plan-radio i { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--teal); }
+.plan-name-box { display: grid; gap: 0.2rem; }
+.plan-name-box small, .plan-cost small, .plan-sub { color: var(--muted); font-size: 0.72rem; }
+.plan-cost { padding-left: 1.6rem; justify-content: space-between; flex-wrap: wrap; }
+.plan-cost b { font-size: 1.25rem; }
+.plan-sub { padding-left: 1.6rem; }
+.paywall-cta-group { display: grid; gap: 0.7rem; margin-top: 1rem; }
+.paywall-cta-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.paywall-legal { margin-top: 1rem; }
+.paywall-legal-links { display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.75rem; font-size: 0.72rem; color: var(--muted); }

@@ -1,8 +1,8 @@
 /**
- * 全球支付体系：渠道、地区、多币种定价与税务计算。
+ * 支付与地区演示数据。
  *
- * 所有价格、税率、渠道规则与订阅管理路径均按各平台公开规则建模，
- * 可直接对接各平台 SDK / 服务端接口。
+ * 渠道、价格、税率、退款规则与流程均未完成生产核验，不能用于实际结账、
+ * 税务申报或向用户承诺可用支付能力。
  */
 
 export type PlatformId = "ios" | "android" | "web"
@@ -37,14 +37,14 @@ export type Channel = {
   vendor: string
   summary: string
   coverage: string
-  /** 平台分成 / 费率 */
+  /** 待商户报价与协议核实 */
   fee: string
-  /** 支持的付款方式 */
+  /** 演示数据，待地区可用性核实 */
   methods: string[]
-  /** 分渠道订阅管理步骤 */
+  /** 演示指引，待商店版本与地区核实 */
   manage: string[]
   refund: RefundRule
-  /** 支付校验方式 */
+  /** 目标服务端校验方式，尚未接入 */
   verify: string
 }
 
@@ -54,222 +54,36 @@ export const platforms: { id: PlatformId; label: string; hint: string }[] = [
   { id: "web", label: "网页端", hint: "Stripe / PayPal / 银行卡" },
 ]
 
+// 仅保留渠道标识供架构预览；商户配置与生产能力均未接入。
 export const channels: Channel[] = [
-  {
-    id: "apple",
-    name: "Apple 应用内购买",
-    monogram: "A",
-    platform: "ios",
-    vendor: "App Store · StoreKit 2",
-    summary:
-      "在系统弹窗内用 Face ID 确认，付款方式沿用 Apple ID 已绑定的卡或余额，收据由 App Store 签发。",
-    coverage: "全球 175 个国家和地区",
-    fee: "平台分成 15%（小型企业计划）/ 30%（标准）",
-    methods: ["App Store 余额", "信用卡 / 借记卡", "PayPal（部分地区）", "运营商代扣（部分地区）"],
-    manage: [
-      "打开 iOS「设置」→ 顶部你的姓名（Apple ID）",
-      "进入「订阅」→ 在「活跃」中选择 LingoPods",
-      "可更换方案、关闭自动续费或查看下次扣费日期",
-    ],
-    refund: {
-      window: "购买后 48 小时内可自助申请；部分地区支持延长至 14 天",
-      steps: [
-        "访问 reportaproblem.apple.com 并用 Apple ID 登录",
-        "在「购买记录」中找到 Lingo+ → 选择「请求退款」",
-        "选择退款原因并提交，结果通常在 24–48 小时内邮件通知",
-      ],
-      url: "https://reportaproblem.apple.com",
-    },
-    verify: "App Store Server API 校验 JWS 签名收据（服务端）",
+  { id: "apple", name: "Apple 应用内购买", platform: "ios" },
+  { id: "google", name: "Google Play 结算", platform: "android" },
+  { id: "samsung", name: "三星 Galaxy Store 支付", platform: "android" },
+  { id: "xiaomi", name: "小米应用商店支付", platform: "android" },
+  { id: "oppo", name: "OPPO 软件商店支付", platform: "android" },
+  { id: "stripe", name: "Stripe 结算", platform: "web" },
+  { id: "paypal", name: "PayPal", platform: "web" },
+  { id: "card", name: "银行卡收单", platform: "web" },
+].map((item) => ({
+  id: item.id as ChannelId,
+  name: item.name,
+  platform: item.platform as PlatformId,
+  monogram: item.name.slice(0, 1),
+  vendor: item.name,
+  summary: "候选渠道，尚未接入真实支付。",
+  coverage: "待商户资质、分发商店与地区政策核实",
+  fee: "待商户合同与平台规则核实",
+  methods: [],
+  manage: ["通过实际购买渠道管理订阅；当前未接入管理接口。"],
+  refund: {
+    window: "待购买渠道与当地消费者规则核实",
+    steps: ["向实际购买渠道查询退款资格与申请入口。"],
+    url: "",
   },
-  {
-    id: "google",
-    name: "Google Play 结算",
-    monogram: "G",
-    platform: "android",
-    vendor: "Google Play Billing 6",
-    summary:
-      "通过 Play 商店账号付款，订阅状态由 Google Play Developer API 回传，支持跨设备恢复购买。",
-    coverage: "全球 190+ 个国家（中国大陆除外）",
-    fee: "平台分成 15%（连续订阅满 12 个月）/ 30%（标准）",
-    methods: ["信用卡 / 借记卡", "PayPal", "Google Play 余额", "运营商代扣"],
-    manage: [
-      "打开 Play 商店 → 右上角头像",
-      "进入「付款与订阅」→「订阅」→ 选择 LingoPods",
-      "可取消、更换方案或调整付款方式",
-    ],
-    refund: {
-      window: "购买后 48 小时内可在 Play 商店自助退款；超时需联系开发者处理",
-      steps: [
-        "打开 Play 商店 →「付款与订阅」→「预算与历史记录」",
-        "找到对应订单 →「申请退款」并说明原因",
-        "超时订单请在 App 内「帮助与支持」提交订单号，由我们人工处理",
-      ],
-      url: "https://play.google.com/store/account/subscriptions",
-    },
-    verify: "Google Play Developer API 校验 Purchase Token 与 acknowledgement",
-  },
-  {
-    id: "samsung",
-    name: "三星 Galaxy Store 支付",
-    monogram: "S",
-    platform: "android",
-    vendor: "Samsung In-App Purchase",
-    summary:
-      "Galaxy 设备预装商店，支持三星支付与运营商代扣，订阅与 Samsung Account 绑定。",
-    coverage: "三星 Galaxy 设备 · 60+ 个国家",
-    fee: "平台分成 15%（首年）/ 30%（标准）",
-    methods: ["三星支付", "信用卡 / 借记卡", "运营商代扣", "Galaxy Store 礼品卡"],
-    manage: [
-      "打开 Galaxy Store → 右上角菜单",
-      "进入「我的订阅」→ 选择 LingoPods",
-      "可取消续费或更换三星支付绑定的卡片",
-    ],
-    refund: {
-      window: "购买后 48 小时内通过 Galaxy Store 自助申请",
-      steps: [
-        "Galaxy Store →「菜单」→「付款与订阅」→「购买历史」",
-        "选择订单 →「请求退款」",
-        "审核通过后按原付款方式退回，一般 3–5 个工作日",
-      ],
-      url: "https://www.samsung.com/apps/galaxy-store/",
-    },
-    verify: "Samsung IAP Server API 校验 purchaseId",
-  },
-  {
-    id: "xiaomi",
-    name: "小米应用商店支付",
-    monogram: "米",
-    platform: "android",
-    vendor: "小米支付 · Mi Pay",
-    summary:
-      "小米设备默认商店，支持微信支付、支付宝与银行卡，中国大陆渠道无需 Google 服务框架。",
-    coverage: "小米 / Redmi 设备 · 中国大陆及海外市场",
-    fee: "平台分成 30%（中国大陆渠道）",
-    methods: ["小米支付", "微信支付", "支付宝", "国内银行卡"],
-    manage: [
-      "打开「应用商店」→「我的」→「我的订阅」",
-      "选择 LingoPods → 管理自动续费",
-      "关闭续费后当前周期结束前权益仍然有效",
-    ],
-    refund: {
-      window: "购买后 7 天内可申请，需提供小米订单号",
-      steps: [
-        "应用商店 →「我的」→「订单记录」获取订单号",
-        "在 App 内「帮助与支持」提交退款申请并附上订单号",
-        "审核通过后 3–7 个工作日原路退回",
-      ],
-      url: "https://app.mi.com/",
-    },
-    verify: "小米开放平台订单查询接口校验 orderId",
-  },
-  {
-    id: "oppo",
-    name: "OPPO 软件商店支付",
-    monogram: "O",
-    platform: "android",
-    vendor: "OPPO 支付 · HeyTap",
-    summary: "OPPO / realme 设备内置商店，支持 OPPO 钱包、微信与支付宝，覆盖东南亚市场。",
-    coverage: "OPPO / realme 设备 · 中国大陆及东南亚",
-    fee: "平台分成 30%",
-    methods: ["OPPO 支付", "微信支付", "支付宝", "银行卡"],
-    manage: [
-      "打开「软件商店」→「我的」→「我的订阅」",
-      "选择 LingoPods → 关闭自动续费",
-      "付款方式需前往 OPPO 钱包调整",
-    ],
-    refund: {
-      window: "购买后 7 天内可申请",
-      steps: [
-        "软件商店 →「我的」→「订单」找到对应订单",
-        "点击「申请退款」并说明原因",
-        "审核通过后 3–7 个工作日退回原支付账户",
-      ],
-      url: "https://store.oppomobile.com/",
-    },
-    verify: "HeyTap 服务端订单校验接口",
-  },
-  {
-    id: "stripe",
-    name: "Stripe 结算",
-    monogram: "St",
-    platform: "web",
-    vendor: "Stripe Checkout + Stripe Tax",
-    summary:
-      "网页端托管收银台，自动计算各州销售税与欧盟 VAT，支持 135 种币种与本地化支付方式。",
-    coverage: "全球 46 个国家 · 135 种币种",
-    fee: "2.9% + ¥2（国际卡 3.9%）",
-    methods: ["Visa / Mastercard / Amex", "Apple Pay", "Google Pay", "SEPA 借记", "iDEAL", "Klarna 先买后付"],
-    manage: [
-      "登录 LingoPods 网页版 →「账户」→「订阅」",
-      "可更换卡片、下载发票或关闭自动续费",
-      "Stripe 客户门户支持自助更新账单地址与税号",
-    ],
-    refund: {
-      window: "14 天无理由退款（未大量使用会员权益）",
-      steps: [
-        "网页版「账单」页选择订单 →「申请退款」",
-        "或在 App 内「帮助与支持」提交订单号",
-        "退款 5–10 个工作日退至原卡，汇率按退款当日计算",
-      ],
-      url: "https://billing.stripe.com/",
-    },
-    verify: "Stripe Webhook（payment_intent.succeeded）服务端确认",
-  },
-  {
-    id: "paypal",
-    name: "PayPal",
-    monogram: "P",
-    platform: "web",
-    vendor: "PayPal Subscriptions",
-    summary: "使用 PayPal 余额或绑定卡付款，买家保护覆盖 200+ 国家，支持 25 种币种结算。",
-    coverage: "200+ 国家 · 25 种币种",
-    fee: "2.99% + 固定手续费",
-    methods: ["PayPal 余额", "绑定银行卡", "信用卡", "PayPal Credit"],
-    manage: [
-      "登录 PayPal →「设置」→「付款」→「管理自动付款」",
-      "选择 LingoPods → 取消或更改支付方式",
-      "取消后当前计费周期结束前仍可使用",
-    ],
-    refund: {
-      window: "订阅扣款后 30 天内可申请；争议可在 180 天内发起",
-      steps: [
-        "PayPal「活动记录」中找到该笔扣款",
-        "点击「报告问题」→ 选择「我未授权 / 我要退款」",
-        "我们会在 3 个工作日内响应，退款退回 PayPal 余额",
-      ],
-      url: "https://www.paypal.com/myaccount/autopay/",
-    },
-    verify: "PayPal Webhook（BILLING.SUBSCRIPTION.ACTIVATED）",
-  },
-  {
-    id: "card",
-    name: "信用卡 / 借记卡直付",
-    monogram: "卡",
-    platform: "web",
-    vendor: "收单机构直连（Adyen 备用通道）",
-    summary:
-      "直连收单通道，支持 3-D Secure 2 强客户认证，无平台分成，适合官网页端与企业采购。",
-    coverage: "全球 · 支持 3-D Secure 2 与银联",
-    fee: "1.8% + ¥1.5（境内卡）/ 2.8%（境外卡）",
-    methods: ["Visa", "Mastercard", "JCB", "银联 UnionPay", "Amex"],
-    manage: [
-      "网页版「账户」→「账单」→「支付方式」",
-      "可新增、设为默认或删除已保存的卡片",
-      "卡片信息由收单机构托管，App 不存储卡号",
-    ],
-    refund: {
-      window: "扣款后 30 天内可申请退款",
-      steps: [
-        "网页版「账单」选择订单 →「申请退款」",
-        "或联系在线支持并提供卡号后四位",
-        "5–7 个工作日原路退回，跨行以银行到账时间为准",
-      ],
-      url: "https://app.lingopods.com/billing",
-    },
-    verify: "3-D Secure 2 认证 + 收单机构异步通知",
-  },
-]
+  verify: "待实现服务端交易校验与通知对账",
+}))
+
+
 
 export type TaxKind = "vat" | "sales" | "gst" | "consumption" | "none"
 
@@ -526,13 +340,20 @@ export function regionById(id: string | null): Region {
 export const basePlan = (id: PlanId) =>
   basePlans.find((item) => item.id === id) ?? basePlans[1]
 
-/** 多币种自动定价：美元基准价 × 汇率 × 购买力系数，再按当地习惯取整 */
-export function localPrice(planId: PlanId, region: Region) {
-  const raw = basePlan(planId).baseUsd * region.fx * region.ppp
+/**
+ * 多币种自动定价：美元基准价 × 汇率 × 购买力系数，再按当地习惯取整。
+ * 商业模型的档位价格统一经由 priceFor 换算，保证取整规则只有一处。
+ */
+export function priceFor(baseUsd: number, region: Region) {
+  const raw = baseUsd * region.fx * region.ppp
   const value = region.charm
     ? Math.ceil(raw / region.unit) * region.unit - 0.01
     : Math.round(raw / region.unit) * region.unit
   return Math.max(value, region.unit)
+}
+
+export function localPrice(planId: PlanId, region: Region) {
+  return priceFor(basePlan(planId).baseUsd, region)
 }
 
 export function formatMoney(value: number, region: Region) {
@@ -561,7 +382,15 @@ export type Quote = {
 
 /** 税务计算：含税地区反推税额，美国按账单州销售税在结算时加计 */
 export function priceQuote(planId: PlanId, region: Region, stateId?: string): Quote {
-  const gross = localPrice(planId, region)
+  return priceQuoteOf(localPrice(planId, region), region, stateId)
+}
+
+/**
+ * 按已定好的税前标价算税。
+ * 商业模型的档位价（monetization.tierPrice）换算完直接进这里，
+ * 保证含税地区反推与州销售税加计的逻辑只有一份。
+ */
+export function priceQuoteOf(gross: number, region: Region, stateId?: string): Quote {
   const state = stateId ? region.states?.find((item) => item.id === stateId) : undefined
   const rate = state ? state.rate : region.taxRate
   const label = state ? `${state.name} 销售税 ${(rate * 100).toFixed(2)}%` : region.taxLabel
@@ -569,15 +398,9 @@ export function priceQuote(planId: PlanId, region: Region, stateId?: string): Qu
   const tax = region.priceInclusive ? gross - gross / (1 + rate) : gross * rate
   const total = region.priceInclusive ? gross : gross + tax
 
-  const notes: Record<TaxKind, string> = {
-    vat: "标价含税。欧盟数字服务税通过 OSS 一站式申报（VAT ID：EU372018049），发票可下载。",
-    sales: "标价不含税。销售税按账单地址所在州税率在结算时计算并代收，跨州搬家请在网页端更新地址。",
-    gst: "标价含 GST / 消费税，按当地税率征收并体现在发票上。",
-    consumption: "标价含消费税，按日本国税厅税率（10%）征收，合规发票可下载。",
-    none: "该地区对数字服务不征收增值税或销售税，实付金额即为标价。",
-  }
+  const note = "仅按静态演示参数估算，不代表实际应税性、税率或含税总价。正式价格与税务凭证须由商店或服务端确认。"
 
-  return { gross, tax, total, rate, inclusive: region.priceInclusive, label, note: notes[region.taxKind] }
+  return { gross, tax, total, rate, inclusive: region.priceInclusive, label: `演示参数 · ${label}`, note }
 }
 
 /** 年付相对月付的节省比例 */
@@ -587,15 +410,22 @@ export function yearlySaving(region: Region) {
   return Math.max(0, Math.round((1 - yearly / (monthly * 12)) * 100))
 }
 
-export function availableChannels(region: Region, platform: PlatformId) {
+/** 仅供设计预览：不能由操作系统推断实际分发商店。 */
+export function candidateChannels(region: Region, platform: PlatformId) {
   return channels.filter(
     (item) => item.platform === platform && !(region.excluded ?? []).includes(item.id),
   )
 }
 
-export function firstChannel(region: Region, platform: PlatformId): ChannelId {
-  const list = availableChannels(region, platform)
-  return list[0]?.id ?? "stripe"
+/** 未完成任何生产渠道接入，默认失败关闭。 */
+export function availableChannels(region: Region, platform: PlatformId): Channel[] {
+  void region
+  void platform
+  return []
+}
+
+export function firstChannel(region: Region, platform: PlatformId): ChannelId | null {
+  return availableChannels(region, platform)[0]?.id ?? null
 }
 
 export function detectPlatform(): PlatformId {

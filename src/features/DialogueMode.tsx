@@ -1,12 +1,14 @@
 import { useState } from "react"
-import { AppButton } from "@/components/AppButton"
+import { AppButton, toast } from "@/components/AppButton"
 import { FeatureHeader } from "@/components/FeatureHeader"
 import { Icon } from "@/components/Icon"
 import type { IconName } from "@/components/Icon"
 import { LangPicker } from "@/components/LangPicker"
+import { UpgradePaywallModal } from "@/components/UpgradePaywallModal"
 import { useLangPair } from "@/lib/core"
 import { useT } from "@/lib/i18n"
 import { useDevices } from "@/lib/store"
+import { useUsage } from "@/lib/usage"
 import { langOption } from "@/lib/translate"
 export type DialogueModeId = "share" | "hybrid" | "speaker"
 
@@ -24,6 +26,9 @@ export function DialogueMode({
   const t = useT()
   const { active } = useDevices()
   const connected = active.status === "connected"
+  const { gate, quotaOf } = useUsage()
+  const [paywall, setPaywall] = useState(false)
+  const dialogueQuota = quotaOf("dialogue")
   const {
     me: myLang,
     them: themLang,
@@ -123,12 +128,35 @@ export function DialogueMode({
         <div>
           <p>
             <strong>{!connected && mode !== "speaker" ? "耳机未连接 · 将使用手机麦克风与扬声器" : mode === "speaker" ? "声音由手机播放" : "双耳已就绪 · 可开始对话"}</strong>
+            {dialogueQuota.kind === "daily" ? (
+              <small className="quota-inline">
+                今日剩余 {Math.round(dialogueQuota.remaining)} 分钟
+              </small>
+            ) : null}
           </p>
         </div>
-        <AppButton onClick={onStart}>
+        <AppButton
+          onClick={() => {
+            // 门禁放在动作发生的那一刻，而不是进页面就拦
+            const result = gate("dialogue")
+            if (!result.allowed) {
+              toast("今日免费同传额度已用完")
+              setPaywall(true)
+              return
+            }
+            onStart()
+          }}
+        >
           <Icon name="mic" size={20} /> {t("dialogue.start")}
         </AppButton>
       </footer>
+
+      {paywall ? (
+        <UpgradePaywallModal
+          reason="quota_exceeded"
+          onClose={() => setPaywall(false)}
+                 />
+      ) : null}
 
       <LangPicker
         onClose={() => setPicker(null)}

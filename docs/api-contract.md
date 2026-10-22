@@ -31,12 +31,31 @@
 
 ```json
 {
-  "source": "device | standalone | none",
-  "planId": "monthly | yearly | null",
-  "expiresAt": "2026-10-18T00:00:00Z",
+  "source": "apple",
+  "status": "active",
+  "tier": "plus",
+  "planId": "yearly",
+  "skuId": "lingoplus.yearly",
+  "subscriptionId": "sub_example",
+  "transactionId": "txn_example",
+  "currency": "USD",
+  "expiresAt": "2027-10-18T00:00:00Z",
+  "cancelAt": null,
+  "trialStartsAt": null,
+  "trialEndsAt": null,
+  "graceEndsAt": null,
+  "autoRenew": true,
   "verified": true
 }
 ```
+
+状态可取 `none / trialing / active / canceled_at_period_end / past_due / grace / account_hold / paused / expired / refunded / revoked / chargeback`；来源可取 `device / standalone / apple / google / stripe / none`。无权益字段返回 null，而不是伪造订单或默认续费日期。
+
+客户端仅在 verified 严格为 true、来源有效且不是 none、服务端显式 tier 为 plus/pro 时投影付费档位；不得从 SKU、verified 布尔值或本地 PlanState 推断档位。旧响应缺少 tier 时降为 Free。active 与 canceled_at_period_end 要求 expiresAt 为合法未来时间；trialing 另外要求 trialEndsAt 尚未到期。grace 使用独立的 graceEndsAt 窗口，可延续至原 expiresAt 之后。past_due、account_hold、paused、退款、撤销及争议状态均不授予付费权益。所有付费能力仍必须由服务端鉴权，客户端判断不构成安全边界。
+
+查询必须带登录令牌；客户端共享账号级查询，在登录/退出、跨标签页账号变更、窗口回到前台及可见页面每30秒刷新。账号变化立即清空旧投影，旧请求不得覆盖新账号；查询失败或响应格式无效时撤回客户端付费投影，不回退本地套餐。收据提交后重新查询账号投影，不以本地提交成功直接授权。刷新状态不是渠道恢复购买。
+
+服务端必须将交易绑定到已认证账户，校验应用、环境、SKU、币种及交易归属，并处理重复绑定冲突。商店通知须验签、幂等、处理乱序和撤销；Webhook 单一事件不等同完整订阅权益确认。恢复购买、取消、升级降级、退款与对账尚未实现，本契约不代表这些能力已上线。
 
 ### POST /v1/entitlements/verify
 请求 `{ "channelId": "apple", "planId": "yearly", "receipt": "…", "transactionId": "…" }`

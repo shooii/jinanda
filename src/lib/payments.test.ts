@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import {
   availableChannels,
+  candidateChannels,
   channels,
   firstChannel,
   formatMoney,
@@ -96,17 +97,17 @@ describe("税费计算", () => {
 describe("渠道可用性", () => {
   it("被地区排除的渠道不会出现在可选列表里", () => {
     for (const region of regions) {
-      for (const channel of availableChannels(region, "android")) {
+      for (const channel of candidateChannels(region, "android")) {
         expect(region.excluded ?? []).not.toContain(channel.id)
       }
     }
   })
 
-  it("每个地区的每个平台都至少有一个可用渠道", () => {
+  it("未接入生产渠道时所有地区平台均不可购买，且无默认回退渠道", () => {
     for (const region of regions) {
       for (const platform of ["ios", "android", "web"] as const) {
-        expect(availableChannels(region, platform).length).toBeGreaterThan(0)
-        expect(firstChannel(region, platform)).toBeTruthy()
+        expect(availableChannels(region, platform)).toEqual([])
+        expect(firstChannel(region, platform)).toBeNull()
       }
     }
   })

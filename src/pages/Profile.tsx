@@ -24,14 +24,13 @@ import { ServiceStatus } from "@/features/ServiceStatus"
 import { SubscriptionManage } from "@/features/SubscriptionManage"
 import { SupportCenter } from "@/features/SupportCenter"
 import { WarrantyInfo } from "@/features/WarrantyInfo"
-import { channelById, regionById } from "@/lib/payments"
+import { subscriptionSnapshot, useEntitlement } from "@/lib/services/entitlements"
 import { APP_VERSION } from "@/lib/app-meta"
 import { offlineSupport } from "@/lib/offline-packs"
 import { speechSupport } from "@/lib/speech"
 import {
   defaultPrivacy,
   defaultDevicePrefs,
-  usePlan,
   useVocabulary,
   vocabularyCategories,
   useDevices,
@@ -89,11 +88,10 @@ export function Profile({
   const [legalDoc, setLegalDoc] = useState<LegalDocId>("privacy")
   const [theme, setTheme] = useThemeMode()
   const [eq, setEq] = usePersistentState<EqState>("lingo.eq", defaultEq)
-  const [plan] = usePlan()
+  const subscription = useEntitlement()
+  const membership = subscriptionSnapshot(subscription.entitlement, subscription.now)
   const [appLang, setAppLang] = useAppLanguage()
   const t = useT()
-  const channel = channelById(plan.channel)
-  const region = regionById(plan.regionId)
   const vocabulary = useVocabulary()
   const { active } = useDevices()
   /** 端侧翻译能力：有端侧模型或本地词典时才算「可用」，不再无条件写「服务正常」 */
@@ -206,7 +204,7 @@ export function Profile({
         </span>
         <div>
           <small>{t("profile.memberLabel")}</small>
-          <strong>{plan.source === "none" ? "尚未开通 · 查看方案" : t("profile.memberDetail")}</strong>
+          <strong>{membership.paid ? `Lingo+ ${membership.tier} · 已验证` : "付费权益未确认 · 查看方案"}</strong>
         </div>
         <Icon name="chevron" />
       </AppButton>
@@ -276,14 +274,14 @@ export function Profile({
           </div>
           <Icon name="chevron" />
         </AppButton>
-        <AppButton onClick={plan.source === "none" ? onMembership : () => setOverlay("billing")}>
+        <AppButton onClick={() => setOverlay("billing")}>
           <span>
             <Icon name="card" />
           </span>
           <div>
             <strong>{t("profile.billing")}</strong>
             <small>
-              {plan.source === "none" ? "暂无账单" : `${channel ? channel.name : t("profile.billingGift")} · ${region.currency}`}
+              {subscription.entitlement.verified ? "查看服务端订阅状态" : "账单状态未验证"}
             </small>
           </div>
           <Icon name="chevron" />
@@ -312,7 +310,7 @@ export function Profile({
         <span>
           <i className={sync.serverConfigured ? "" : "local"} />
           {sync.serverConfigured
-            ? `账户服务已连接 · 待同步 ${sync.pending} 条`
+            ? `已配置服务地址 · 待同步 ${sync.pending} 条`
             : "本地模式 · 未连接账户服务"}
         </span>
         <div>

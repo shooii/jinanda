@@ -1,12 +1,16 @@
 import { useState } from "react"
-import { AppButton } from "@/components/AppButton"
+import { AppButton, toast } from "@/components/AppButton"
 import { FeatureHeader } from "@/components/FeatureHeader"
 import { Icon } from "@/components/Icon"
+import { UpgradePaywallModal } from "@/components/UpgradePaywallModal"
 import { useT } from "@/lib/i18n"
+import { useUsage } from "@/lib/usage"
 
 /** 拍照翻译：展示菜单原图与译文覆盖的对照视图。 */
 export function CameraMode({ onClose }: { onClose: () => void }) {
   const t = useT()
+  const { translationAllowed, deviceMinutes, gate } = useUsage()
+  const [paywall, setPaywall] = useState(false)
   const [showResult, setShowResult] = useState(false)
   const [showOriginal, setShowOriginal] = useState(false)
   const translated = showResult && !showOriginal
@@ -36,13 +40,33 @@ export function CameraMode({ onClose }: { onClose: () => void }) {
           <div className="camera-guide">{translated ? "译文已覆盖在菜单上" : "菜单原图"}</div>
         </section>
         {showResult && <p className="hint-note">你可以切换原文与译文，对照查看版式。</p>}
+        <p className="hint-note">
+          {translationAllowed
+            ? `本机体验剩余 ${Math.floor(deviceMinutes)} 分钟`
+            : "体验额度已用完 · 订阅后继续使用取词翻译"}
+        </p>
       </main>
       <footer className="camera-controls camera-action-bar">
-        <AppButton className="camera-action" onClick={() => { setShowResult((value) => !value); setShowOriginal(false) }}>
+        <AppButton
+          className="camera-action"
+          onClick={() => {
+            if (!showResult) {
+              const result = gate("camera")
+              if (!result.allowed || !translationAllowed) {
+                toast("体验翻译额度已用完，请订阅后继续使用")
+                setPaywall(true)
+                return
+              }
+            }
+            setShowResult((value) => !value)
+            setShowOriginal(false)
+          }}
+        >
           <Icon name={showResult ? "notes" : "camera"} size={19} />
           {showResult ? "返回原图" : "查看译文"}
         </AppButton>
       </footer>
+      {paywall ? <UpgradePaywallModal reason="device_minutes" onClose={() => setPaywall(false)} /> : null}
     </div>
   )
 }

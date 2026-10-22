@@ -8,6 +8,8 @@ import { useSavedRecords, usePrivacyPrefs, copyText } from "@/lib/store"
 import { createInviteLink } from "@/lib/room"
 import { useLiveTranslate } from "@/lib/useLiveTranslate"
 import { playEarcon } from "@/lib/earcon"
+import { useUsage } from "@/lib/usage"
+import { UpgradePaywallModal } from "@/components/UpgradePaywallModal"
 
 type CallKind = "video" | "voice"
 
@@ -147,6 +149,8 @@ export const CALL_SCENARIOS: CallScenario[] = [
 ]
 
 export function CallTranslate({ onClose }: { onClose: () => void }) {
+  const { translationAllowed, deviceMinutes, consumeMinutes } = useUsage()
+  const [paywall, setPaywall] = useState(false)
   const [view, setView] = useState<"home" | "call" | "ended">("home")
   const [kind, setKind] = useState<CallKind>("video")
   const { me: meLang, them: themLang, setMe: setMeLang, setThem: setThemLang } = useLangPair()
@@ -181,6 +185,8 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
     themLang,
     autoSpeak: false,
     mode: "auto",
+    canTranslate: () => translationAllowed,
+    consumeMinutes,
     onTurn: (turn) => {
       setTurns((prev) => [
         ...prev,
@@ -279,6 +285,11 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
 
   // 开始 App 内通话（支持选择是否开启实际演示）
   const startCall = (nextKind: CallKind, withDemo = true) => {
+    if (!translationAllowed) {
+      setPaywall(true)
+      toast("体验翻译额度已用完，请订阅后继续使用")
+      return
+    }
     playEarcon("ready")
     setSeconds(0)
     setTurns([])
@@ -299,6 +310,11 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
 
   // 开始屏幕悬浮同传窗（配合微信/电话等外部应用）
   const startFloatingMode = (withDemo = false) => {
+    if (!translationAllowed) {
+      setPaywall(true)
+      toast("体验翻译额度已用完，请订阅后继续使用")
+      return
+    }
     playEarcon("ready")
     setSeconds(0)
     setTurns([])
@@ -763,6 +779,8 @@ export function CallTranslate({ onClose }: { onClose: () => void }) {
           </div>
         )}
 
+        <p style={{ margin: "0 1.15rem", textAlign: "center", color: "var(--muted)", fontSize: "0.72rem" }}>本机体验剩余 {Math.floor(deviceMinutes)} 分钟</p>
+        {paywall ? <UpgradePaywallModal reason="device_minutes" onClose={() => setPaywall(false)} /> : null}
         {langPicker}
       </main>
     )

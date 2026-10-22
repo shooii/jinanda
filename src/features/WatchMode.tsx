@@ -8,6 +8,8 @@ import { langOption } from "@/lib/translate"
 import type { LangId } from "@/lib/translate"
 import { useLiveTranslate } from "@/lib/useLiveTranslate"
 import { playEarcon } from "@/lib/earcon"
+import { useUsage } from "@/lib/usage"
+import { UpgradePaywallModal } from "@/components/UpgradePaywallModal"
 
 type Caption = { src: string; dst: string; at: number }
 type SourceType = "demo" | "mic" | "internal"
@@ -154,6 +156,8 @@ export const MEDIA_SCENARIOS: MediaScenario[] = [
 ]
 
 export function WatchMode({ onClose }: { onClose: () => void }) {
+  const { translationAllowed, deviceMinutes, consumeMinutes } = useUsage()
+  const [paywall, setPaywall] = useState(false)
   const { me, them, setMe, setThem } = useLangPair()
   const [running, setRunning] = useState(false)
   const [sourceType, setSourceType] = useState<SourceType>("demo") // demo: 实际演示片源 | mic: 外部设备 | internal: 本机播放
@@ -182,6 +186,8 @@ export function WatchMode({ onClose }: { onClose: () => void }) {
     themLang: srcLang,
     autoSpeak,
     mode: "auto",
+    canTranslate: () => translationAllowed,
+    consumeMinutes,
     onTurn: (turn) => {
       setCaps((prev) => [
         ...prev,
@@ -269,6 +275,11 @@ export function WatchMode({ onClose }: { onClose: () => void }) {
   }
 
   const toggleRunning = () => {
+    if (!running && sourceType !== "demo" && !translationAllowed) {
+      setPaywall(true)
+      toast("体验翻译额度已用完，请订阅后继续使用")
+      return
+    }
     if (running) {
       playEarcon("toggle")
       live.stop()
@@ -974,6 +985,8 @@ export function WatchMode({ onClose }: { onClose: () => void }) {
         }}
         onClose={() => setPicker(null)}
       />
+      {!running ? <p style={{ margin: "0 1.15rem", textAlign: "center", color: "var(--muted)", fontSize: "0.72rem" }}>本机体验剩余 {Math.floor(deviceMinutes)} 分钟 · 演示片源不扣分钟</p> : null}
+      {paywall ? <UpgradePaywallModal reason="device_minutes" onClose={() => setPaywall(false)} /> : null}
     </main>
   )
 }

@@ -11,6 +11,7 @@ import type { LegalDocId } from "@/features/LegalDocument"
 
 export type PaywallReason =
   | "quota_exceeded"
+  | "device_minutes"
   | "meeting_limit"
   | "call_exclusive"
   | "watch_exclusive"
@@ -21,6 +22,8 @@ export type PaywallReason =
 
 const reasonDesc: Record<PaywallReason, string> = {
   quota_exceeded: "你从额度提示进入此页。此处只展示方案规划，不代表服务器已确认额度，也不会通过本地升级重置用量。",
+  device_minutes:
+    "随设备赠送的 300 分钟体验翻译额度已经用完，未订阅时翻译功能停止使用（历史记录、账户与订阅管理仍可访问）。正式订阅的支付与开通渠道尚未接入，因此现在还不能在此完成订阅。",
   meeting_limit: "会议相关能力与额度仍需服务接入和验收，以下是规划对比，不代表购买后即可使用。",
   call_exclusive: "通话同传仍需服务接入和验收，以下方案不代表已提供可用的实时通话能力。",
   watch_exclusive: "观影与直播同传属于规划能力，尚待服务接入与验收。",

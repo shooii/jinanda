@@ -21,6 +21,8 @@ import { useLiveTranslate, type LiveStatus } from "@/lib/useLiveTranslate"
 import { SpeakerTalk } from "@/features/SpeakerTalk"
 import type { DialogueModeId } from "@/features/DialogueMode"
 import { playEarcon } from "@/lib/earcon"
+import { useUsage } from "@/lib/usage"
+import { UpgradePaywallModal } from "@/components/UpgradePaywallModal"
 
 type ShareTurn = {
   id: number
@@ -424,6 +426,8 @@ export function LiveSession({
   mode: DialogueModeId
 }) {
   const t = useT()
+  const { translationAllowed, deviceMinutes, consumeMinutes } = useUsage()
+  const [paywall, setPaywall] = useState(false)
   const [uiLang] = useAppLanguage()
   const [isListening, setIsListening] = useState(true)
   const [showSettings, setShowSettings] = useState(false)
@@ -464,6 +468,8 @@ export function LiveSession({
     autoSpeak: false,
     mode: "auto",
     offlineOnly: offline,
+    canTranslate: () => translationAllowed,
+    consumeMinutes,
     onTurn: (turn) => {
       setShareTurns((prev) => [...prev, turn])
       playEarcon("success")
@@ -592,6 +598,7 @@ export function LiveSession({
           onToggle={() => {
             playEarcon("ready")
             if (shareLive) liveTalk.stop()
+            else if (!translationAllowed) { setPaywall(true); return }
             else liveTalk.start("auto")
           }}
           onPlay={(id) => {
@@ -739,6 +746,8 @@ export function LiveSession({
           </div>
         </div>
       )}
+      <p style={{ textAlign: "center", color: "var(--muted)", fontSize: "0.72rem" }}>本机体验剩余 {Math.floor(deviceMinutes)} 分钟</p>
+      {paywall ? <UpgradePaywallModal reason="device_minutes" onClose={() => setPaywall(false)} /> : null}
     </div>
   )
 }

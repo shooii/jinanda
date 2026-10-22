@@ -7,11 +7,15 @@ import type { LangId } from "@/lib/translate"
 import { downloadText, useSavedRecords, type TranscriptLine } from "@/lib/store"
 import { useLiveTranslate } from "@/lib/useLiveTranslate"
 import { playEarcon } from "@/lib/earcon"
+import { useUsage } from "@/lib/usage"
+import { UpgradePaywallModal } from "@/components/UpgradePaywallModal"
 
 type Participant = { id: string; name: string; lang: LangId }
 
 export function MeetingMode({ onClose }: { onClose: () => void }) {
   const [, addRecord] = useSavedRecords()
+  const { deviceMinutes, translationAllowed, consumeMinutes } = useUsage()
+  const [paywall, setPaywall] = useState(false)
   const [recording, setRecording] = useState(false)
   const [paused, setPaused] = useState(false)
   const [confirming, setConfirming] = useState(false)
@@ -53,6 +57,8 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
     themLang: currentSpeaker.lang === "zh" ? "en" : "zh",
     autoSpeak: false,
     mode: "auto",
+    canTranslate: () => translationAllowed,
+    consumeMinutes,
     onTurn: (turn) => {
       if (!recording || paused) return
       setTranscripts((prev) => [
@@ -90,6 +96,11 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
   }, [])
 
   const startRecording = () => {
+    if (!translationAllowed) {
+      setPaywall(true)
+      toast("体验翻译额度已用完，请订阅后继续使用")
+      return
+    }
     playEarcon("ready")
     setRecording(true)
     setPaused(false)
@@ -210,6 +221,7 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
           </span>
           {(finished || recording) && <h1>{finished ? "会议纪要" : time}</h1>}
           <p>
+            {!finished && !recording ? `本机体验剩余 ${Math.floor(deviceMinutes)} 分钟。历史记录仍可查看。` : null}
             {finished
               ? "查看提炼出的核心决定、待办事项和双语发言全文"
               : recording
@@ -403,6 +415,7 @@ export function MeetingMode({ onClose }: { onClose: () => void }) {
           </>
         )}
       </footer>
+      {paywall ? <UpgradePaywallModal reason="device_minutes" onClose={() => setPaywall(false)} /> : null}
     </div>
   )
 }

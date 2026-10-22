@@ -16,6 +16,9 @@ import type { LangId, ToneId } from "@/lib/translate"
 import { useAppLanguage, useT } from "@/lib/i18n"
 import { prepareTranslation, speakText, speechSupport, translateText } from "@/lib/speech"
 import { playEarcon } from "@/lib/earcon"
+import { useUsage } from "@/lib/usage"
+import { estimateTextMinutes } from "@/lib/device-minutes"
+import { UpgradePaywallModal } from "@/components/UpgradePaywallModal"
 
 type Side = "from" | "to"
 /** 源语言可以是具体语言，也可以是「检测语言」 */
@@ -44,6 +47,8 @@ export function TextTranslate({
   const [menu, setMenu] = useState(false)
   const [, addRecord] = useSavedRecords()
   const { hasFavorite, toggleFavorite } = useFavorites()
+  const { translationAllowed, deviceMinutes, consumeMinutes, entitlement } = useUsage()
+  const [paywall, setPaywall] = useState(false)
 
   /** 源语言选「检测语言」时，按输入内容实时推断语种 */
   const [appLang] = useAppLanguage()
@@ -76,19 +81,30 @@ export function TextTranslate({
 
   useEffect(() => {
     const text = input.trim()
-    if (!text || effFrom === effTo || !speechSupport().translation) {
+    if (!text || effFrom === effTo || !speechSupport().translation || !translationAllowed) {
       setNeural(null)
       setPending(false)
       return
     }
     let cancelled = false
+    let denied = false
     setPending(true)
     const timer = window.setTimeout(() => {
       // 在用户输入后的手势窗口内发起，模型未下载时会开始下载
       void prepareTranslation(effFrom, effTo)
       void (async () => {
-        const out = await translateText(text, effFrom, effTo)
+        // 授权与扣量在同一次真实翻译请求内完成，避免先扣一次、请求时再扣一次
+        const out = await translateText(text, effFrom, effTo, (value) => {
+          const ok = entitlement.paid || consumeMinutes(estimateTextMinutes(value))
+          if (!ok) denied = true
+          return ok
+        })
         if (cancelled) return
+        if (denied) {
+          setPending(false)
+          setPaywall(true)
+          return
+        }
         setNeural(
           out.engine === "neural"
             ? { key: `${effFrom}->${effTo}:${text}`, text: out.text }
@@ -101,11 +117,11 @@ export function TextTranslate({
       cancelled = true
       window.clearTimeout(timer)
     }
-  }, [input, effFrom, effTo])
+  }, [input, effFrom, effTo, translationAllowed, consumeMinutes, entitlement.paid])
 
-  const toneText = neuralText || applyTone(result.text, effTo, tone)
+  const toneText = translationAllowed ? neuralText || applyTone(result.text, effTo, tone) : ""
   const hasInput = input.trim().length > 0
-  const canUseTranslation = hasInput && (!!neuralText || result.mode === "exact")
+  const canUseTranslation = translationAllowed && hasInput && (!!neuralText || result.mode === "exact")
   const modeNote = hasInput && !neuralText && result.mode !== "exact" && !pending
 
   useEscapeKey(() => {
@@ -375,6 +391,16 @@ export function TextTranslate({
           </AppButton>
         </div>
         {langRow("to", effTo, t("dialogue.otherLang"))}
+        {translationAllowed ? (
+          <p className="tt-note">本机体验剩余 {Math.floor(deviceMinutes)} 分钟</p>
+        ) : (
+          <div className="tt-quota-block">
+            <p className="tt-note">体验额度已用完 · 未订阅时不能继续翻译（历史记录与账户设置仍可查看）</p>
+            <AppButton className="tt-copy-primary" onClick={() => setPaywall(true)}>
+              <Icon name="wallet" size={16} />查看订阅方案
+            </AppButton>
+          </div>
+        )}
         {modeNote && hasInput ? <p className="tt-note">{result.mode === "mixed" ? "仅识别部分词语，请勿将其作为完整译文使用" : "当前文本暂无可靠译文，请换一句试试"}</p> : null}
         {canUseTranslation && <AppButton className="tt-copy-primary" onClick={copyOut}><Icon name="notes" size={16} />复制译文</AppButton>}
       </main>
@@ -396,6 +422,7 @@ export function TextTranslate({
             : undefined
         }
       />
+      {paywall ? <UpgradePaywallModal reason="device_minutes" onClose={() => setPaywall(false)} /> : null}
     </div>
   )
 }

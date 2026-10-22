@@ -26,9 +26,8 @@ export function DialogueMode({
   const t = useT()
   const { active } = useDevices()
   const connected = active.status === "connected"
-  const { gate, quotaOf } = useUsage()
+  const { gate, deviceMinutes, translationAllowed } = useUsage()
   const [paywall, setPaywall] = useState(false)
-  const dialogueQuota = quotaOf("dialogue")
   const {
     me: myLang,
     them: themLang,
@@ -128,19 +127,19 @@ export function DialogueMode({
         <div>
           <p>
             <strong>{!connected && mode !== "speaker" ? "耳机未连接 · 将使用手机麦克风与扬声器" : mode === "speaker" ? "声音由手机播放" : "双耳已就绪 · 可开始对话"}</strong>
-            {dialogueQuota.kind === "daily" ? (
-              <small className="quota-inline">
-                今日剩余 {Math.round(dialogueQuota.remaining)} 分钟
-              </small>
-            ) : null}
+            {!translationAllowed ? (
+              <small className="quota-inline">体验额度已用完 · 订阅后继续翻译</small>
+            ) : (
+              <small className="quota-inline">本机体验剩余 {Math.floor(deviceMinutes)} 分钟</small>
+            )}
           </p>
         </div>
         <AppButton
           onClick={() => {
             // 门禁放在动作发生的那一刻，而不是进页面就拦
             const result = gate("dialogue")
-            if (!result.allowed) {
-              toast("今日免费同传额度已用完")
+            if (!result.allowed || !translationAllowed) {
+              toast("体验翻译额度已用完，请订阅后继续使用")
               setPaywall(true)
               return
             }
@@ -153,7 +152,7 @@ export function DialogueMode({
 
       {paywall ? (
         <UpgradePaywallModal
-          reason="quota_exceeded"
+          reason="device_minutes"
           onClose={() => setPaywall(false)}
                  />
       ) : null}

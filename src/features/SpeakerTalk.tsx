@@ -14,6 +14,9 @@ import {
   translateText,
 } from "@/lib/speech"
 import { useLiveTranslate } from "@/lib/useLiveTranslate"
+import { useUsage } from "@/lib/usage"
+import { estimateTextMinutes } from "@/lib/device-minutes"
+import { UpgradePaywallModal } from "@/components/UpgradePaywallModal"
 
 type Side = "me" | "them"
 type ViewMode = "side" | "facing"
@@ -140,6 +143,8 @@ export function SpeakerTalk({
   onNavigate?: (feature: FeatureId) => void
 }) {
   const t = useT()
+  const { translationAllowed, deviceMinutes, consumeMinutes } = useUsage()
+  const [paywall, setPaywall] = useState(false)
   const [uiLang] = useAppLanguage()
   const [view, setView] = usePersistentState<ViewMode>("lingo.speak-view", "side")
   const { me: meLang, them: themLang, setMe: setMeLang, setThem: setThemLang } =
@@ -166,6 +171,8 @@ export function SpeakerTalk({
     themLang,
     autoSpeak: prefs.play,
     mode: "pick",
+    canTranslate: () => translationAllowed,
+    consumeMinutes,
     onTurn: (turn) => {
       setLastEngine(turn.engine)
       setTurns((prev) => [...prev, turn])
@@ -206,6 +213,10 @@ export function SpeakerTalk({
   }
 
   const pushText = (side: Side, text: string) => {
+    if (!translationAllowed || !consumeMinutes(estimateTextMinutes(text))) {
+      setPaywall(true)
+      return
+    }
     const from = langOf(side)
     const to = side === "me" ? themLang : meLang
     setActiveSide(side)
@@ -264,6 +275,10 @@ export function SpeakerTalk({
       return
     }
     if (live.status !== "idle") live.stop()
+    if (!translationAllowed) {
+      setPaywall(true)
+      return
+    }
     live.start(side)
   }
 
@@ -518,6 +533,8 @@ const canvasFor = (side: Side | null) => {
         </div>
       ) : null}
 
+      <p style={{ textAlign: "center", color: "var(--muted)", fontSize: "0.72rem" }}>本机体验剩余 {Math.floor(deviceMinutes)} 分钟</p>
+      {paywall ? <UpgradePaywallModal reason="device_minutes" onClose={() => setPaywall(false)} /> : null}
       {sheet === "me" || sheet === "them" ? (
         <div className="call-picker-backdrop" onClick={() => setSheet(null)}>
           <div

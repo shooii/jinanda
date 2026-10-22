@@ -20,6 +20,8 @@ import {
   type TranslateEngine,
 } from "@/lib/speech"
 import type { LangId } from "@/lib/translate"
+import { estimateTextMinutes } from "@/lib/device-minutes"
+import { toast } from "@/components/AppButton"
 
 export type LiveSide = "me" | "them"
 
@@ -46,6 +48,8 @@ type Options = {
   /** 仅使用离线语言包：端侧模型没装好时不退回联网识别 */
   offlineOnly?: boolean
   onTurn: (turn: LiveTurn) => void
+  canTranslate?: () => boolean
+  consumeMinutes?: (amount: number) => boolean
 }
 
 export type LiveTranslate = {
@@ -71,6 +75,8 @@ export function useLiveTranslate({
   mode,
   offlineOnly = false,
   onTurn,
+  canTranslate,
+  consumeMinutes,
 }: Options): LiveTranslate {
   const [status, setStatus] = useState<LiveStatus>("idle")
   const [activeSide, setActiveSide] = useState<LiveSide | null>(null)
@@ -100,6 +106,10 @@ export function useLiveTranslate({
   offlineOnlyRef.current = offlineOnly
   const turnRef = useRef(onTurn)
   turnRef.current = onTurn
+  const canTranslateRef = useRef(canTranslate)
+  canTranslateRef.current = canTranslate
+  const consumeMinutesRef = useRef(consumeMinutes)
+  consumeMinutesRef.current = consumeMinutes
 
   const applyStatus = useCallback((next: LiveStatus) => {
     statusRef.current = next
@@ -140,6 +150,11 @@ export function useLiveTranslate({
         return
       }
 
+      if (canTranslateRef.current && !canTranslateRef.current()) {
+        setErrorCode("quota-exceeded")
+        toast("体验翻译额度已用完，请订阅后继续使用")
+        return
+      }
       const { meLang: me, themLang: them } = langRef.current
       const wanted: LiveSide = requested === "auto" ? lastSideRef.current : requested
 
@@ -215,6 +230,13 @@ export function useLiveTranslate({
               lastSideRef.current = side
               setActiveSide(side)
 
+              if (consumeMinutesRef.current && !consumeMinutesRef.current(estimateTextMinutes(text))) {
+                setErrorCode("quota-exceeded")
+                toast("体验翻译额度已用完，请订阅后继续使用")
+                translatingRef.current = false
+                stop()
+                return
+              }
               const result =
                 from === to
                   ? { text, engine: "dictionary" as TranslateEngine }

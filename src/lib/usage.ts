@@ -25,6 +25,7 @@ import type {
   Tier,
 } from "@/lib/monetization"
 import { subscriptionSnapshot, useEntitlement } from "@/lib/services/entitlements"
+import { useDeviceMinutes } from "@/lib/device-minutes"
 
 export type MeterLedger = {
   /** YYYY-MM-DD，跨日重置日额度 */
@@ -221,6 +222,38 @@ export function gateFeature(
   return { allowed: true }
 }
 
+/** 受设备赠送分钟池约束的翻译功能。额度耗尽后一次都不放行。 */
+export const translationFeatures: FeatureKey[] = [
+  "instant",
+  "dialogue",
+  "camera",
+  "meeting",
+  "call",
+  "watch",
+]
+
+/**
+ * 未订阅时的统一门禁：
+ * 有设备赠送分钟就放行所有翻译功能（不再叠加免费档每日额度），
+ * 分钟用尽则全部拦截；已验证订阅按自己的权益走，不受这笔赠送额度限制。
+ *
+ * 注意：分钟数保存在本机，可被清除或篡改，这只是本机体验门禁，
+ * 不是服务端订单核验或防作弊。
+ */
+export function gateTranslation(
+  tier: Tier,
+  paid: boolean,
+  feature: FeatureKey,
+  deviceMinutes: number,
+  ledger: MeterLedger,
+  now = new Date(),
+): GateResult {
+  if (!translationFeatures.includes(feature)) return gateFeature(tier, feature, ledger, now)
+  if (paid) return gateFeature(tier, feature, ledger, now)
+  if (deviceMinutes > 0) return { allowed: true }
+  return { allowed: false, reason: "quota_exceeded", remaining: 0 }
+}
+
 /**
  * 记一笔发生额。超出额度时**不写入**并返回 false，
  * 保证 used 永远不会大于 limit，UI 进度条不会溢出。
@@ -274,7 +307,7 @@ export function consumeMeter(
 }
 
 export const USAGE_KEY = "lingo.usage"
-
+export { consumeDeviceMinutes } from "@/lib/device-minutes"
 export type UsageApi = {
   entitlement: EntitlementSnapshot
   tier: Tier
@@ -283,6 +316,9 @@ export type UsageApi = {
   gate: (feature: FeatureKey) => GateResult
   consume: (meter: MeterId, amount?: number) => { ok: boolean; view: QuotaView }
   reset: () => void
+  deviceMinutes: number
+  consumeMinutes: (amount: number) => boolean
+  translationAllowed: boolean
 }
 
 /**
@@ -294,10 +330,13 @@ export function useUsage(): UsageApi {
     USAGE_KEY,
     emptyLedger,
   )
-
   const entitlement = useMemo(() => subscriptionSnapshot(verifiedEntitlement, now), [verifiedEntitlement, now])
   const tier = entitlement.tier
   const ledger = useMemo(() => rollForward(rawLedger), [rawLedger])
+  const deviceUsage = useDeviceMinutes(entitlement.paid)
+  const deviceMinutes = deviceUsage.remaining
+  const translationAllowed = deviceUsage.allowed
+  const consumeMinutes = deviceUsage.consume
 
   const quotaOf = useCallback(
     (meter: MeterId) => quotaView(tier, meter, ledger),
@@ -305,8 +344,8 @@ export function useUsage(): UsageApi {
   )
 
   const gate = useCallback(
-    (feature: FeatureKey) => gateFeature(tier, feature, ledger),
-    [tier, ledger],
+    (feature: FeatureKey) => gateTranslation(tier, entitlement.paid, feature, deviceMinutes, ledger),
+    [tier, entitlement.paid, deviceMinutes, ledger],
   )
 
   const consume = useCallback(
@@ -326,7 +365,7 @@ export function useUsage(): UsageApi {
     [tier, ledger],
   )
 
-  return { entitlement, tier, quotas, quotaOf, gate, consume, reset }
+  return { entitlement, tier, quotas, quotaOf, gate, consume, reset, deviceMinutes, consumeMinutes, translationAllowed }
 }
 
 /**

@@ -4,11 +4,14 @@ import {
   dayKey,
   emptyLedger,
   gateFeature,
+  gateTranslation,
   monthKey,
   quotaView,
   rollForward,
+  translationFeatures,
 } from "@/lib/usage"
 import type { MeterLedger } from "@/lib/usage"
+import { consumeDeviceMinutes } from "@/lib/device-minutes"
 
 const NOW = new Date("2026-10-20T12:00:00")
 
@@ -133,6 +136,16 @@ describe("记账", () => {
     expect(second.ok).toBe(false)
   })
 
+  it("一次性设备体验分钟最多扣到零，余额不足时拒绝", () => {
+    const start = { remaining: 1 }
+    const last = consumeDeviceMinutes(start, 1)
+    expect(last.ok).toBe(true)
+    expect(last.ledger.remaining).toBe(0)
+    const denied = consumeDeviceMinutes(last.ledger, 1 / 60)
+    expect(denied.ok).toBe(false)
+    expect(denied.ledger.remaining).toBe(0)
+  })
+
   it("不限量档位仍然记账，用于统计", () => {
     const result = consumeMeter("pro", "meeting", 45, ledgerFor(), NOW)
     expect(result.ok).toBe(true)
@@ -153,6 +166,33 @@ describe("记账", () => {
 })
 
 describe("功能门禁", () => {
+  it("设备赠送分钟未用尽时，未订阅也能用所有翻译功能", () => {
+    // 免费档原本 forbidden 的通话/观影，也因设备赠送额度放行
+    expect(gateTranslation("free", false, "call", 300, ledgerFor(), NOW).allowed).toBe(true)
+    expect(gateTranslation("free", false, "watch", 300, ledgerFor(), NOW).allowed).toBe(true)
+    // 免费档每日同传额度已满也不拦，只要设备分钟还有
+    const used = ledgerFor({ daily: { dialogue: 10 } })
+    expect(gateTranslation("free", false, "dialogue", 12, used, NOW).allowed).toBe(true)
+  })
+
+  it("设备分钟用尽后，未订阅的翻译功能全部拦截", () => {
+    for (const feature of translationFeatures) {
+      const gate = gateTranslation("free", false, feature, 0, ledgerFor(), NOW)
+      expect(gate.allowed).toBe(false)
+      if (!gate.allowed) expect(gate.reason).toBe("quota_exceeded")
+    }
+  })
+
+  it("已验证订阅不受设备分钟耗尽限制", () => {
+    expect(gateTranslation("pro", true, "watch", 0, ledgerFor(), NOW).allowed).toBe(true)
+    expect(gateTranslation("plus", true, "call", 0, ledgerFor({ monthly: { call: 10 } }), NOW).allowed).toBe(true)
+  })
+
+  it("非翻译功能照旧按档位判定，不被设备分钟拦截", () => {
+    expect(gateTranslation("free", false, "speakerDiarization", 0, ledgerFor(), NOW).allowed).toBe(false)
+    expect(gateTranslation("pro", false, "speakerDiarization", 0, ledgerFor(), NOW).allowed).toBe(true)
+  })
+
   it("未开放的档位直接拦截", () => {
     const gate = gateFeature("plus", "watch", ledgerFor(), NOW)
     expect(gate.allowed).toBe(false)

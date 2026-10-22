@@ -384,10 +384,12 @@ export async function translateText(
   text: string,
   from: LangId,
   to: LangId,
+  authorize?: (text: string) => boolean,
 ): Promise<TranslateResult> {
   const source = text.trim()
   if (!source) return { text: "", engine: "dictionary" }
   if (from === to) return { text: source, engine: "dictionary" }
+  if (authorize && !authorize(source)) return { text: "", engine: "dictionary" }
 
   if (TranslatorApi) {
     try {
